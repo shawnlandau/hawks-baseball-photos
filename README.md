@@ -1,32 +1,62 @@
-# Hawks Baseball Photos
+# 🏟️ Hawks Baseball Photo Gallery
 
-A React.js web application for sharing photos from 12U baseball tournaments. Built with Firebase for authentication, storage, and real-time updates.
+A modern, responsive photo-sharing platform designed specifically for the Hawks 12U Baseball team's Cooperstown Dreams Park 2025 tournament experience. This platform embodies the traditions and values of Dreams Park while providing a seamless way for players, families, and coaches to capture and share memories.
 
-## Features
+## ✨ Features
 
-- **User Authentication**: Email/password signup and login
-- **Photo Upload**: Upload images with optional captions
-- **Real-time Gallery**: View all photos in a responsive masonry layout with real-time updates
-- **Multi-Photo Selection**: Click photos to select multiple items for batch operations
-- **Photo Deletion**: Delete selected photos with confirmation modal
-- **Lightbox View**: Click photos to view in full-screen lightbox with navigation
-- **Like System**: Like and unlike photos with real-time like count updates
-- **Comment System**: Add comments to photos with real-time updates
-- **Photo Download**: Download photos directly from the lightbox
-- **Modern UI**: Clean, responsive design using Tailwind CSS and Inter font
-- **Error Handling**: Modal-based error messages and user feedback
+### 🎨 **Design & Branding**
+- **Hawks Team Branding**: Prominent use of the Hawks logo with navy, red, and white color scheme
+- **Cooperstown Dreams Park Theme**: Patriotic design reflecting tournament values of faith, tradition, and country
+- **Modern UI/UX**: Clean, accessible design with consistent typography and responsive layout
+- **Mobile-First**: Optimized for phones, tablets, and desktops
 
-## Technology Stack
+### 🔐 **Enhanced Authentication**
+- **Email/Password Sign Up/Sign In**: Secure authentication with validation
+- **Google Authentication**: One-click sign-in for convenience
+- **Password Strength Indicators**: Real-time password validation
+- **Show/Hide Password**: Enhanced security with user control
+- **Form Validation**: Comprehensive client-side validation
 
-- **Frontend**: React.js 18
-- **Styling**: Tailwind CSS
-- **Backend**: Firebase (Authentication, Cloud Firestore, Cloud Storage)
-- **Font**: Inter (Google Fonts)
+### 📸 **Photo Gallery**
+- **Responsive Grid Layout**: Beautiful photo display with hover effects
+- **Advanced Filtering**: Filter by player tags, date, and search terms
+- **Sorting Options**: Sort by date, likes, or comments
+- **Lightbox View**: Full-screen photo viewing with navigation
+- **Like & Comment System**: Social features for engagement
+- **Bulk Selection**: Select multiple photos for management
 
-## Setup Instructions
+### ⬆️ **Photo Upload**
+- **Drag & Drop Interface**: Intuitive file upload experience
+- **Multiple File Support**: Upload multiple photos at once
+- **Progress Indicators**: Real-time upload progress
+- **Image Resizing**: Automatic client-side image optimization
+- **Player Tagging**: Tag Hawks team members in photos
+- **Album Organization**: Organize photos by game or event
+- **File Validation**: Secure file type and size checking
+
+### 📅 **Tournament Schedule**
+- **Complete Itinerary**: Day-by-day tournament schedule
+- **Game Information**: Times, locations, and opponents
+- **Event Categories**: Games, ceremonies, practices, meals
+- **Dreams Park Values**: Information about tournament traditions
+- **Interactive Filtering**: Filter by day or event type
+
+### 🗺️ **Dreams Park Map**
+- **Interactive Layout**: Visual map of Dreams Park facilities
+- **Location Categories**: Fields, amenities, parking, shopping
+- **Detailed Information**: Descriptions and directions for each location
+- **Quick Links**: Direct access to Google Maps and official website
+- **Park Information**: Hours, services, and important notes
+
+### 📱 **Mobile Responsiveness**
+- **Touch-Friendly**: Optimized for mobile devices
+- **Responsive Navigation**: Collapsible mobile menu
+- **Touch Gestures**: Swipe and tap interactions
+- **Fast Loading**: Optimized performance for mobile networks
+
+## 🚀 **Getting Started**
 
 ### Prerequisites
-
 - Node.js (v14 or higher)
 - npm or yarn
 - Firebase project with Authentication, Firestore, and Storage enabled
@@ -35,7 +65,7 @@ A React.js web application for sharing photos from 12U baseball tournaments. Bui
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/shawnlandau/hawks-baseball-photos.git
    cd hawks-baseball-photos
    ```
 
@@ -44,140 +74,211 @@ A React.js web application for sharing photos from 12U baseball tournaments. Bui
    npm install
    ```
 
-3. **Create environment variables**
-   
-   Create a `.env` file in the root directory with your Firebase configuration:
-   ```
-   REACT_APP_FIREBASE_CONFIG={"apiKey":"your-api-key","authDomain":"your-project.firebaseapp.com","projectId":"your-project-id","storageBucket":"your-project.appspot.com","messagingSenderId":"123456789","appId":"your-app-id"}
-   REACT_APP_APP_ID=your-app-id
-   ```
+3. **Configure Firebase**
+   - Create a Firebase project at [Firebase Console](https://console.firebase.google.com)
+   - Enable Authentication (Email/Password and Google)
+   - Enable Firestore Database
+   - Enable Storage
+   - Copy your Firebase config
 
-   **Note**: Replace the placeholder values with your actual Firebase project configuration.
-
-4. **Configure Firebase Security Rules**
-
-   **Firestore Rules** (for the `artifacts/{appId}/public/data/photos` collection and subcollections):
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /artifacts/{appId}/public/data/photos/{photoId} {
-      allow read: if true;  // Anyone can read photos
-      allow write: if request.auth != null;  // Only authenticated users can upload
-
-      // Rules for likes subcollection
-      match /likes/{userId} {
-        allow read: if request.auth != null;
-        allow create: if request.auth != null && request.auth.uid == userId;
-        allow delete: if request.auth != null && request.auth.uid == userId;
-      }
-
-      // Rules for comments subcollection
-      match /comments/{commentId} {
-        allow read: if request.auth != null;
-        allow create: if request.auth != null;
-        allow update: if request.auth != null && request.auth.uid == resource.data.commentedBy;
-        allow delete: if request.auth != null && request.auth.uid == resource.data.commentedBy;
-      }
-    }
-  }
-}
-```
-
-   **Storage Rules** (for the `artifacts/{appId}/public/data/photos` path):
-   ```javascript
-   rules_version = '2';
-   service firebase.storage {
-     match /b/{bucket}/o {
-       match /artifacts/{appId}/public/data/photos/{allPaths=**} {
-         allow read: if true;  // Anyone can read photos
-         allow write: if request.auth != null;  // Only authenticated users can upload
-       }
-     }
-   }
+4. **Set up environment variables**
+   Create a `.env` file in the root directory:
+   ```env
+   REACT_APP_FIREBASE_CONFIG={"apiKey":"your-api-key","authDomain":"your-project.firebaseapp.com","projectId":"your-project-id","storageBucket":"your-project.appspot.com","messagingSenderId":"your-sender-id","appId":"your-app-id"}
    ```
 
-5. **Start the development server**
+5. **Deploy Firebase Security Rules**
+   ```bash
+   firebase deploy --only firestore:rules,storage
+   ```
+
+6. **Start the development server**
    ```bash
    npm start
    ```
 
-   The application will open at `http://localhost:3000`
+The application will be available at `http://localhost:3000`
 
-## Usage
-
-1. **Sign Up/Login**: Create an account or log in with your email and password
-2. **Upload Photos**: Click the "Upload" tab to select and upload images with optional captions
-3. **View Gallery**: Browse all uploaded photos in the responsive masonry layout
-4. **Select Photos**: Click on photos to select them (selected photos show a blue border and checkmark)
-5. **Delete Photos**: Select multiple photos and click "Delete Selected" to remove them
-6. **Lightbox View**: Click on any photo to open it in full-screen lightbox
-7. **Like Photos**: Click the heart icon in the lightbox to like/unlike photos
-8. **Add Comments**: Type comments in the lightbox and click "Post" to add them
-9. **Download Photos**: Click the download button in the lightbox to save photos
-10. **Navigate Photos**: Use arrow buttons in the lightbox to browse through photos
-11. **Real-time Updates**: New photos, likes, and comments appear automatically
-
-## Project Structure
+## 🏗️ **Project Structure**
 
 ```
-hawks-baseball-photos/
-├── public/
-│   ├── index.html          # Main HTML entry point
-│   └── manifest.json       # PWA manifest
-├── src/
-│   ├── App.js             # Main React application component
-│   ├── index.js           # React entry point
-│   └── index.css          # Tailwind CSS and global styles
-├── package.json           # Dependencies and scripts
-├── tailwind.config.js     # Tailwind CSS configuration
-├── postcss.config.js      # PostCSS configuration
-└── README.md             # This file
+src/
+├── components/          # Reusable UI components
+│   ├── Navbar.js       # Navigation component
+│   ├── AuthForm.js     # Authentication forms
+│   ├── PhotoGallery.js # Photo display and management
+│   └── PhotoUpload.js  # Photo upload functionality
+├── pages/              # Page components
+│   ├── HomePage.js     # Landing page
+│   ├── SchedulePage.js # Tournament schedule
+│   ├── MapPage.js      # Dreams Park map
+│   └── AboutPage.js    # Team and platform information
+├── contexts/           # React contexts
+│   └── FirebaseContext.js # Firebase service provider
+├── hooks/              # Custom React hooks
+│   └── useFirebase.js  # Firebase hook
+├── utils/              # Utility functions
+└── assets/             # Static assets
 ```
 
-## Firebase Configuration
+## 🎨 **Design System**
 
-The app supports multiple Firebase configuration sources:
+### Color Palette
+- **Hawks Navy**: `#1e3a8a` - Primary brand color
+- **Hawks Red**: `#dc2626` - Accent color
+- **Hawks Gold**: `#fbbf24` - Highlight color
+- **White**: `#ffffff` - Background and text
+- **Gray Scale**: Various shades for UI elements
 
-1. **Environment Variables**: `REACT_APP_FIREBASE_CONFIG` (JSON string)
-2. **Canvas Environment**: `__firebase_config` global variable
-3. **App ID**: `REACT_APP_APP_ID` or `__app_id` for storage paths
+### Typography
+- **Primary Font**: Inter (Google Fonts)
+- **Font Weights**: 300, 400, 500, 600, 700, 800
+- **Responsive Sizing**: Scales appropriately across devices
 
-## Deployment
+### Components
+- **Consistent Spacing**: 8px base unit system
+- **Border Radius**: 8px for cards, 4px for buttons
+- **Shadows**: Subtle elevation system
+- **Transitions**: 200ms ease-in-out for interactions
 
-### Netlify
-1. Connect your repository to Netlify
-2. Set environment variables in Netlify dashboard
-3. Deploy automatically on push to main branch
+## 🔧 **Configuration**
 
-### Vercel
-1. Import your repository to Vercel
-2. Configure environment variables
-3. Deploy with automatic builds
+### Firebase Setup
+1. **Authentication**
+   - Enable Email/Password authentication
+   - Enable Google authentication
+   - Configure authorized domains
 
-## Security Considerations
+2. **Firestore Database**
+   - Create collections for photos and user data
+   - Set up security rules for data protection
+   - Configure indexes for optimal queries
 
-- All photo uploads require authentication
-- Firebase security rules restrict access appropriately
-- User IDs are truncated in the UI for privacy
-- Error messages are user-friendly without exposing sensitive information
+3. **Storage**
+   - Set up storage buckets for photo uploads
+   - Configure security rules for file access
+   - Set up CORS for cross-origin requests
 
-## Contributing
+### Environment Variables
+```env
+REACT_APP_FIREBASE_CONFIG={"apiKey":"...","authDomain":"...","projectId":"...","storageBucket":"...","messagingSenderId":"...","appId":"..."}
+```
 
+## 🚀 **Deployment**
+
+### Netlify Deployment
+1. **Connect Repository**
+   - Link your GitHub repository to Netlify
+   - Configure build settings:
+     - Build command: `npm run build`
+     - Publish directory: `build`
+     - Node version: `18`
+
+2. **Environment Variables**
+   - Add Firebase configuration to Netlify environment variables
+   - Set up domain and SSL certificate
+
+3. **Deploy**
+   - Netlify will automatically deploy on git push
+   - Preview deployments for pull requests
+
+### Manual Deployment
+```bash
+npm run build
+# Upload the build folder to your hosting provider
+```
+
+## 🧪 **Testing**
+
+### Running Tests
+```bash
+npm test
+```
+
+### Test Coverage
+```bash
+npm test -- --coverage
+```
+
+### Manual Testing Checklist
+- [ ] Authentication (sign up, sign in, sign out)
+- [ ] Photo upload (single and multiple files)
+- [ ] Photo gallery (viewing, filtering, sorting)
+- [ ] Photo management (likes, comments, deletion)
+- [ ] Navigation (all pages and routes)
+- [ ] Mobile responsiveness
+- [ ] Accessibility features
+
+## 🔒 **Security**
+
+### Authentication
+- Secure user authentication with Firebase Auth
+- Password strength requirements
+- Session management
+- Protected routes
+
+### Data Protection
+- Firestore security rules
+- Storage access controls
+- Input validation and sanitization
+- XSS protection
+
+### File Upload Security
+- File type validation
+- File size limits (10MB max)
+- Image resizing and optimization
+- Secure storage paths
+
+## 📱 **Accessibility**
+
+### Features
+- **Keyboard Navigation**: Full keyboard accessibility
+- **Screen Reader Support**: ARIA labels and semantic HTML
+- **Color Contrast**: WCAG AA compliant color combinations
+- **Focus Management**: Proper focus indicators and order
+- **Alt Text**: Descriptive alt text for all images
+
+### Testing
+- Test with screen readers (NVDA, JAWS, VoiceOver)
+- Verify keyboard navigation
+- Check color contrast ratios
+- Validate semantic HTML structure
+
+## 🤝 **Contributing**
+
+### Development Guidelines
+1. **Code Style**: Follow ESLint configuration
+2. **Component Structure**: Use functional components with hooks
+3. **State Management**: Use React Context for global state
+4. **Error Handling**: Implement comprehensive error boundaries
+5. **Performance**: Optimize for mobile and slow connections
+
+### Pull Request Process
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+4. Add tests if applicable
+5. Update documentation
+6. Submit a pull request
 
-## License
+## 📄 **License**
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Support
+## 🙏 **Acknowledgments**
 
-For issues or questions, please create an issue in the repository or contact the development team.
+- **Cooperstown Dreams Park**: For the inspiration and values
+- **Hawks Baseball Team**: For the opportunity to create this platform
+- **Firebase**: For the robust backend services
+- **React Community**: For the excellent tools and libraries
+
+## 📞 **Support**
+
+For questions or support:
+- **Technical Issues**: Create an issue on GitHub
+- **Feature Requests**: Submit through GitHub issues
+- **Team Questions**: Contact the Hawks coaching staff
 
 ---
 
-**Hawks Baseball Photos** - Built for the 12U baseball community 
+**Built with ❤️ for the Hawks Baseball team and the Cooperstown Dreams Park experience.** 

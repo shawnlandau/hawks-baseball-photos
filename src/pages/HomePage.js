@@ -1,0 +1,221 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { FaBaseballBall, FaImages, FaUpload, FaCalendar, FaMap, FaTrophy, FaHeart, FaStar } from 'react-icons/fa';
+
+const HomePage = () => {
+  const features = [
+    {
+      icon: FaImages,
+      title: 'Photo Gallery',
+      description: 'Browse and relive every moment from our Cooperstown journey',
+      color: 'bg-hawks-red',
+      link: '/gallery'
+    },
+    {
+      icon: FaUpload,
+      title: 'Share Memories',
+      description: 'Upload and share your favorite photos with the team',
+      color: 'bg-hawks-navy',
+      link: '/upload'
+    },
+    {
+      icon: FaCalendar,
+      title: 'Tournament Schedule',
+      description: 'Stay updated with game times and team events',
+      color: 'bg-hawks-red',
+      link: '/schedule'
+    },
+    {
+      icon: FaMap,
+      title: 'Dreams Park Map',
+      description: 'Navigate the historic grounds and find your way around',
+      color: 'bg-hawks-navy',
+      link: '/map'
+    }
+  ];
+
+  const values = [
+    {
+      icon: FaTrophy,
+      title: 'Excellence',
+      description: 'Striving for greatness on and off the field'
+    },
+    {
+      icon: FaHeart,
+      title: 'Sportsmanship',
+      description: 'Playing with respect, integrity, and honor'
+    },
+    {
+      icon: FaStar,
+      title: 'Tradition',
+      description: 'Honoring the legacy of America\'s pastime'
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-hawks-navy via-hawks-navy-dark to-hawks-red">
+      {/* Background pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.1\'%3E%3Cpath d=\'M30 0L60 30L30 60L0 30Z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}></div>
+      </div>
+
+      <div className="relative z-10">
+        {/* Hero Section */}
+        <section className="relative py-20 px-4">
+          <div className="container mx-auto text-center">
+            <div className="max-w-4xl mx-auto">
+              {/* Logo */}
+              <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-2xl border-4 border-hawks-red mx-auto mb-8">
+                <FaBaseballBall className="text-6xl text-hawks-navy" />
+              </div>
+              
+              <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+                Hawks Baseball
+                <span className="block text-hawks-gold text-2xl md:text-3xl mt-2">
+                  Cooperstown Dreams Park 2025
+                </span>
+              </h1>
+              
+              <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
+                Capture the magic of our journey to the birthplace of baseball. 
+                Share memories, celebrate victories, and honor the traditions that make 
+                Cooperstown Dreams Park a life-enriching experience.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Link
+                  to="/gallery"
+                  className="bg-hawks-red text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-hawks-red-dark transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center space-x-2"
+                >
+                  <FaImages className="w-5 h-5" />
+                  <span>View Gallery</span>
+                </Link>
+                <Link
+                  to="/upload"
+                  className="bg-white text-hawks-navy px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center space-x-2"
+                >
+                  <FaUpload className="w-5 h-5" />
+                  <span>Share Photos</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="py-16 px-4 bg-white/95">
+          <div className="container mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-hawks-navy mb-4">
+                Everything You Need
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                From photo sharing to tournament updates, we've got everything covered 
+                for the ultimate Cooperstown experience.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {features.map((feature, index) => {
+                const Icon = feature.icon;
+                return (
+                  <Link
+                    key={index}
+                    to={feature.link}
+                    className="group bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-2 border border-gray-200"
+                  >
+                    <div className={`w-16 h-16 ${feature.color} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
+                      <Icon className="text-white text-2xl" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-hawks-navy mb-2">
+                      {feature.title}
+                    </h3>
+                    <p className="text-gray-600">
+                      {feature.description}
+                    </p>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* Values Section */}
+        <section className="py-16 px-4 bg-gradient-to-r from-hawks-navy to-hawks-navy-dark">
+          <div className="container mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                Dreams Park Values
+              </h2>
+              <p className="text-xl text-white/80 max-w-3xl mx-auto">
+                Embracing the traditions and values that make Cooperstown Dreams Park 
+                a life-enriching experience for every player.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {values.map((value, index) => {
+                const Icon = value.icon;
+                return (
+                  <div key={index} className="text-center">
+                    <div className="w-20 h-20 bg-hawks-red rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                      <Icon className="text-white text-3xl" />
+                    </div>
+                    <h3 className="text-2xl font-semibold text-white mb-3">
+                      {value.title}
+                    </h3>
+                    <p className="text-white/80 text-lg">
+                      {value.description}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* Call to Action */}
+        <section className="py-16 px-4 bg-hawks-red">
+          <div className="container mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+              Ready to Share Your Memories?
+            </h2>
+            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+              Join the Hawks family and start capturing the moments that will last a lifetime.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link
+                to="/upload"
+                className="bg-white text-hawks-red px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center space-x-2"
+              >
+                <FaUpload className="w-5 h-5" />
+                <span>Upload Photos</span>
+              </Link>
+              <Link
+                to="/schedule"
+                className="bg-hawks-navy text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-hawks-navy-dark transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center space-x-2"
+              >
+                <FaCalendar className="w-5 h-5" />
+                <span>View Schedule</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="bg-hawks-navy text-white py-8 px-4">
+          <div className="container mx-auto text-center">
+            <p className="text-lg font-semibold mb-2">
+              Hawks Baseball - Cooperstown Dreams Park 2025
+            </p>
+            <p className="text-white/70">
+              Capturing memories, building character, and honoring the traditions of America's pastime.
+            </p>
+          </div>
+        </footer>
+      </div>
+    </div>
+  );
+};
+
+export default HomePage; 
