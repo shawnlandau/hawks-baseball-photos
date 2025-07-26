@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getFirestore, addDoc, onSnapshot, collection, serverTimestamp, deleteDoc, doc, setDoc, updateDoc, increment } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
@@ -95,32 +95,7 @@ const FirebaseProvider = ({ children }) => {
         const firebaseStorage = getStorage(initializedApp);
         setStorage(firebaseStorage);
 
-        // Authenticate user anonymously
-        const signIn = async () => {
-          try {
-            if (firebaseAuth) {
-              // Add timeout for authentication
-              const authPromise = signInAnonymously(firebaseAuth);
-              const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Authentication timeout')), 10000)
-              );
-              
-              await Promise.race([authPromise, timeoutPromise]);
-              console.log('DEBUG: Signed in anonymously');
-            }
-          } catch (authError) {
-            console.error('AUTH SIGN-IN ERROR:', authError);
-            // If anonymous auth fails, we'll continue without authentication
-            // This allows the app to work for viewing photos even without auth
-            console.log('DEBUG: Continuing without authentication');
-            setFirebaseInitError(`Authentication disabled: ${authError.message}. You can still view photos.`);
-            setIsAuthReady(true); // Mark as ready even on auth error
-          }
-        };
-
-        signIn();
-
-        // Set up auth state listener
+        // Set up auth state listener (no automatic anonymous sign-in)
         const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
           if (user) {
             setUserId(user.uid);
@@ -225,9 +200,32 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 p-4">
       <Modal message={message} onClose={() => setMessage('')} />
       <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md">
-        <h2 className="text-3xl font-extrabold text-center text-gray-800 mb-6">
-          {isLogin ? 'Login' : 'Sign Up'} for Hawks Baseball
-        </h2>
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 mx-auto mb-4 bg-white rounded-lg flex items-center justify-center shadow-lg border border-gray-200">
+            <div className="text-center text-xs font-bold text-blue-900 w-full px-1">
+              <div className="text-xs font-bold leading-tight mb-1">HAWKS</div>
+              <div className="text-red-600 font-bold leading-tight mb-1">BASEBALL</div>
+              <div className="relative mb-1">
+                <div className="flex justify-center">
+                  <div className="w-full h-1 bg-red-600"></div>
+                </div>
+                <div className="flex justify-center relative">
+                  <div className="w-full h-1 bg-white border border-gray-300"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-3 h-3 bg-blue-900 rounded-full flex items-center justify-center text-white font-bold text-xs">H</div>
+                  </div>
+                </div>
+                <div className="flex justify-center">
+                  <div className="w-full h-1 bg-red-600"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <h2 className="text-3xl font-extrabold text-center text-gray-800 mb-2">
+            Hawks Baseball Photo Gallery
+          </h2>
+          <p className="text-gray-600 text-sm">Sign in to upload and manage photos</p>
+        </div>
         <form onSubmit={handleAuth} className="space-y-5">
           <div>
             <label className="block text-gray-700 text-sm font-medium mb-1" htmlFor="email">Email</label>
@@ -257,7 +255,7 @@ const Auth = () => {
             type="submit"
             className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-blue-700 transition duration-300 shadow-md"
           >
-            {isLogin ? 'Login' : 'Sign Up'}
+            {isLogin ? 'Sign In' : 'Create Account'}
           </button>
         </form>
         <p className="text-center text-gray-600 mt-6">
@@ -266,7 +264,7 @@ const Auth = () => {
             onClick={() => setIsLogin(!isLogin)}
             className="text-blue-600 hover:underline font-medium"
           >
-            {isLogin ? 'Sign Up' : 'Login'}
+            {isLogin ? 'Create Account' : 'Sign In'}
           </button>
         </p>
         {userId && (
@@ -294,19 +292,71 @@ const PhotoUpload = ({ onUploadSuccess }) => {
   const [message, setMessage] = useState('');
   const [selectedPlayers, setSelectedPlayers] = useState([]);
   const [showPlayerSelector, setShowPlayerSelector] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [dragCounter, setDragCounter] = useState(0);
 
-  // Sample player list - you can replace this with your actual player list
+  // Hawks Baseball Team Roster
   const players = [
-    "Alex Johnson", "Ben Smith", "Carter Davis", "Dylan Wilson", "Ethan Brown",
-    "Finn Miller", "Gavin Taylor", "Hunter Anderson", "Isaac Martinez", "Jake Thompson",
-    "Kaden White", "Liam Garcia", "Mason Rodriguez", "Noah Lee", "Owen Clark",
-    "Parker Lewis", "Quinn Hall", "Ryan Young", "Sam Wright", "Tyler Green"
+    "Asher Joslin-White",
+    "Ashton McCarthy", 
+    "Brian Aguliar",
+    "Cole Thomas",
+    "Dylan Johnson",
+    "Ethan Heiss",
+    "Hudson Brunton",
+    "Jared Landau",
+    "Matthew Covington",
+    "Maxwell Millay",
+    "Michael Woodruff",
+    "Reed Kleamovich",
+    "Thad Clark"
   ];
 
   const handleFileChange = (e) => {
     if (e.target.files[0]) {
       setFile(e.target.files[0]);
       setMessage('');
+    }
+  };
+
+  // Drag and drop handlers
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragCounter(prev => prev + 1);
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragCounter(prev => prev - 1);
+    if (dragCounter <= 1) {
+      setIsDragOver(false);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    setDragCounter(0);
+    
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const droppedFile = files[0];
+      // Check if it's an image file
+      if (droppedFile.type.startsWith('image/')) {
+        setFile(droppedFile);
+        setMessage('');
+      } else {
+        setMessage('Please drop an image file (JPG, PNG, GIF, etc.)');
+      }
     }
   };
 
@@ -326,6 +376,11 @@ const PhotoUpload = ({ onUploadSuccess }) => {
     
     if (!isAuthReady) {
       setMessage("Please wait for authentication to initialize.");
+      return;
+    }
+
+    if (!userId) {
+      setMessage("Please sign in to upload photos.");
       return;
     }
 
@@ -350,7 +405,7 @@ const PhotoUpload = ({ onUploadSuccess }) => {
         fileName: fileName,
         caption: caption,
         taggedPlayers: selectedPlayers,
-        uploadedBy: userId || 'anonymous',
+        uploadedBy: userId,
         timestamp: serverTimestamp(),
         likesCount: 0,
       });
@@ -365,7 +420,7 @@ const PhotoUpload = ({ onUploadSuccess }) => {
     } catch (error) {
       console.error("Error uploading photo:", error);
       if (error.message.includes('auth') || error.message.includes('permission')) {
-        setMessage('Upload requires authentication. Please enable anonymous authentication in Firebase Console.');
+        setMessage('Upload requires authentication. Please sign in to upload photos.');
       } else {
         setMessage(`Error uploading photo: ${error.message}`);
       }
@@ -384,19 +439,51 @@ const PhotoUpload = ({ onUploadSuccess }) => {
       </div>
 
       <div className="space-y-6">
-        {/* File Upload */}
+        {/* File Upload with Drag and Drop */}
         <div className="space-y-2">
           <label className="block text-gray-700 text-sm font-semibold mb-2">📁 Select Photo</label>
-          <div className="relative">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="w-full text-gray-700 border-2 border-dashed border-orange-300 rounded-xl p-4 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-500 file:text-white hover:file:bg-orange-600 transition-all duration-200"
-            />
+          <div 
+            className={`relative border-2 border-dashed rounded-xl p-8 transition-all duration-200 ${
+              isDragOver 
+                ? 'border-blue-500 bg-blue-50 scale-105' 
+                : 'border-orange-300 bg-gray-50'
+            }`}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          >
+            <div className="text-center">
+              {isDragOver ? (
+                <div className="space-y-2">
+                  <div className="text-4xl">📸</div>
+                  <p className="text-blue-600 font-semibold">Drop your photo here!</p>
+                  <p className="text-blue-500 text-sm">Release to upload</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="text-4xl">📁</div>
+                  <div>
+                    <p className="text-gray-600 font-medium">Drag & drop your photo here</p>
+                    <p className="text-gray-500 text-sm mt-1">or click to browse</p>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                </div>
+              )}
+            </div>
+            
             {file && (
-              <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-green-700 text-sm font-medium">✅ {file.name} selected</p>
+              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <span className="text-green-600">✅</span>
+                  <p className="text-green-700 text-sm font-medium">{file.name}</p>
+                  <span className="text-green-500 text-xs">({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                </div>
               </div>
             )}
           </div>
@@ -483,7 +570,7 @@ const PhotoUpload = ({ onUploadSuccess }) => {
 
 // Photo Gallery Component
 const PhotoGallery = () => {
-  const { db, storage, isAuthReady } = useFirebase();
+  const { db, storage, userId, isAuthReady } = useFirebase();
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(''); // Local message for PhotoGallery component
@@ -537,6 +624,11 @@ const PhotoGallery = () => {
   const handleDeleteSelected = async () => {
     if (selectedPhotos.length === 0) return;
 
+    if (!userId) {
+      setMessage("Please sign in to delete photos.");
+      return;
+    }
+
     const confirmMessage = `Are you sure you want to delete ${selectedPhotos.length} photo${selectedPhotos.length > 1 ? 's' : ''}? This action cannot be undone.`;
     setMessage(confirmMessage);
     
@@ -571,7 +663,11 @@ const PhotoGallery = () => {
       setMessage(`Successfully deleted ${photosToDelete.length} photo${photosToDelete.length > 1 ? 's' : ''}!`);
     } catch (error) {
       console.error("Error deleting photos:", error);
-      setMessage(`Error deleting photos: ${error.message}`);
+      if (error.message.includes('auth') || error.message.includes('permission')) {
+        setMessage('Delete requires authentication. Please sign in to delete photos.');
+      } else {
+        setMessage(`Error deleting photos: ${error.message}`);
+      }
     } finally {
       setIsDeleting(false);
     }
@@ -625,7 +721,7 @@ const PhotoGallery = () => {
       </div>
       
       {/* Selection Controls */}
-      {selectedPhotos.length > 0 && (
+      {selectedPhotos.length > 0 && userId && (
         <div className="bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200 rounded-xl p-4 mb-6">
           <div className="flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
             <div className="flex items-center space-x-4">
@@ -654,6 +750,19 @@ const PhotoGallery = () => {
         </div>
       )}
       
+      {/* Authentication Notice */}
+      {!userId && photos.length > 0 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+          <div className="flex items-center space-x-3">
+            <span className="text-blue-600 text-xl">🔒</span>
+            <div>
+              <p className="text-blue-800 font-medium">Sign in to manage photos</p>
+              <p className="text-blue-600 text-sm">You can view photos, but need to sign in to upload or delete.</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {photos.length === 0 ? (
         <div className="text-center py-12">
           <div className="text-6xl mb-4">📸</div>
@@ -672,25 +781,27 @@ const PhotoGallery = () => {
                 }`}
               >
                 {/* Selection Checkbox */}
-                <div className="absolute top-3 left-3 z-10">
-                  <div 
-                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 transform hover:scale-110 ${
-                      isSelected 
-                        ? 'bg-orange-500 border-orange-500 shadow-lg' 
-                        : 'bg-white border-gray-300 hover:border-orange-400'
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handlePhotoSelect(photo.id);
-                    }}
-                  >
-                    {isSelected && (
-                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    )}
+                {userId && (
+                  <div className="absolute top-3 left-3 z-10">
+                    <div 
+                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 transform hover:scale-110 ${
+                        isSelected 
+                          ? 'bg-orange-500 border-orange-500 shadow-lg' 
+                          : 'bg-white border-gray-300 hover:border-orange-400'
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePhotoSelect(photo.id);
+                      }}
+                    >
+                      {isSelected && (
+                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
                 
                 <img
                   src={photo.url}
