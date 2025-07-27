@@ -28,8 +28,22 @@ const Navbar = ({ user, onSignOut }) => {
         <div className="flex items-center justify-between">
           {/* Logo and Brand */}
           <Link to="/" className="flex items-center space-x-3 group">
-            <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center shadow-lg border-2 border-hawks-red transform group-hover:scale-105 transition-transform duration-200">
-              <div className="text-center text-xs font-bold text-hawks-navy w-full px-1">
+            <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center shadow-lg border-2 border-hawks-red transform group-hover:scale-105 transition-transform duration-200 overflow-hidden">
+              <img 
+                src="/hawks-logo.jpg?v=1" 
+                alt="Hawks Baseball Logo" 
+                className="w-full h-full object-contain p-1"
+                onError={(e) => {
+                  console.log('Logo image failed to load:', e.target.src);
+                  // Fallback to text if image fails to load
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'block';
+                }}
+                onLoad={(e) => {
+                  console.log('Logo image loaded successfully:', e.target.src);
+                }}
+              />
+              <div className="text-center text-xs font-bold text-hawks-navy w-full px-1 hidden">
                 <div className="text-xs font-bold leading-tight mb-1">HAWKS</div>
                 <div className="text-hawks-red font-bold leading-tight mb-1">BASEBALL</div>
                 <div className="relative mb-1">

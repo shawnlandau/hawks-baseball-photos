@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FaSearch, FaFilter, FaTimes, FaHeart, FaComment, FaDownload, FaShare, FaCalendar, FaUser, FaTag, FaImages } from 'react-icons/fa';
 import { useFirebase } from '../hooks/useFirebase';
+import { collection, orderBy, onSnapshot, doc, deleteDoc, updateDoc, query } from 'firebase/firestore';
+import { ref, deleteObject } from 'firebase/storage';
 
 const formatDate = (timestamp) => {
   if (!timestamp) return '';
@@ -33,16 +35,22 @@ const PhotoGallery = () => {
   ];
 
   useEffect(() => {
-    const unsubscribe = db.collection('photos')
-      .orderBy('timestamp', 'desc')
-      .onSnapshot((snapshot) => {
-        const photoData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setPhotos(photoData);
-        setLoading(false);
-      });
+    if (!db) return;
+    
+    const photosRef = collection(db, 'photos');
+    const q = query(photosRef, orderBy('timestamp', 'desc'));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const photoData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setPhotos(photoData);
+      setLoading(false);
+    }, (error) => {
+      console.error('Error fetching photos:', error);
+      setLoading(false);
+    });
 
     return () => unsubscribe();
   }, [db]);
@@ -83,13 +91,18 @@ const PhotoGallery = () => {
     try {
       const deletePromises = Array.from(selectedPhotos).map(async (photoId) => {
         const photo = photos.find(p => p.id === photoId);
-        if (photo) {
-          // Delete from Storage
-          const storageRef = storage.refFromURL(photo.url);
-          await storageRef.delete();
+        if (photo && db && storage) {
+          try {
+            // Delete from Storage
+            const storageRef = ref(storage, photo.url);
+            await deleteObject(storageRef);
+          } catch (storageError) {
+            console.error('Error deleting from storage:', storageError);
+          }
           
           // Delete from Firestore
-          await db.collection('photos').doc(photoId).delete();
+          const photoRef = doc(db, 'photos', photoId);
+          await deleteDoc(photoRef);
         }
       });
 
@@ -102,19 +115,21 @@ const PhotoGallery = () => {
   };
 
   const handleLike = async (photoId) => {
+    if (!db) return;
+    
     try {
-      const photoRef = db.collection('photos').doc(photoId);
+      const photoRef = doc(db, 'photos', photoId);
       const photo = photos.find(p => p.id === photoId);
       
       if (photo.likedBy?.includes(userId)) {
         // Unlike
-        await photoRef.update({
+        await updateDoc(photoRef, {
           likes: (photo.likes || 1) - 1,
           likedBy: photo.likedBy.filter(id => id !== userId)
         });
       } else {
         // Like
-        await photoRef.update({
+        await updateDoc(photoRef, {
           likes: (photo.likes || 0) + 1,
           likedBy: [...(photo.likedBy || []), userId]
         });
@@ -125,8 +140,10 @@ const PhotoGallery = () => {
   };
 
   const handleComment = async (photoId, comment) => {
+    if (!db) return;
+    
     try {
-      const photoRef = db.collection('photos').doc(photoId);
+      const photoRef = doc(db, 'photos', photoId);
       const photo = photos.find(p => p.id === photoId);
       const newComment = {
         id: Date.now().toString(),
@@ -135,7 +152,7 @@ const PhotoGallery = () => {
         timestamp: new Date()
       };
       
-      await photoRef.update({
+      await updateDoc(photoRef, {
         comments: [...(photo.comments || []), newComment]
       });
     } catch (error) {

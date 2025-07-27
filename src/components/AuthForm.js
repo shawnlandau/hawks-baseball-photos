@@ -180,15 +180,15 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
                       <div
                         key={level}
                         className={`h-1 flex-1 rounded ${
-                          level <= passwordStrength.strength
+                          passwordStrength && passwordStrength.color && level <= passwordStrength.strength
                             ? passwordStrength.color.replace('text-', 'bg-')
                             : 'bg-gray-200'
                         }`}
                       />
                     ))}
                   </div>
-                  <p className={`text-xs mt-1 ${passwordStrength.color}`}>
-                    {passwordStrength.label}
+                  <p className={`text-xs mt-1 ${passwordStrength && passwordStrength.color ? passwordStrength.color : ''}`}>
+                    {passwordStrength && passwordStrength.label ? passwordStrength.label : ''}
                   </p>
                 </div>
               )}

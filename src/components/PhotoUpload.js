@@ -2,6 +2,8 @@ import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { FaCloudUploadAlt, FaTimes, FaCheck, FaExclamationTriangle, FaTag, FaSpinner } from 'react-icons/fa';
 import { useFirebase } from '../hooks/useFirebase';
+import { collection, addDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const PhotoUpload = ({ onUploadSuccess }) => {
   const { db, storage, userId, auth } = useFirebase();
@@ -109,6 +111,10 @@ const PhotoUpload = ({ onUploadSuccess }) => {
   };
 
   const uploadFile = async (file, index) => {
+    if (!db || !storage || !userId) {
+      throw new Error('Firebase not initialized');
+    }
+    
     try {
       // Resize image if needed
       const resizedBlob = await resizeImage(file);
@@ -117,46 +123,35 @@ const PhotoUpload = ({ onUploadSuccess }) => {
       // Create storage reference
       const timestamp = Date.now();
       const fileName = `${userId}_${timestamp}_${index}_${file.name}`;
-      const storageRef = storage.ref(`photos/${fileName}`);
+      const storageRef = ref(storage, `photos/${fileName}`);
       
       // Upload to Firebase Storage
-      const uploadTask = storageRef.put(resizedFile);
+      const uploadResult = await uploadBytes(storageRef, resizedFile);
       
-      uploadTask.on('state_changed',
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setUploadProgress(progress);
-        },
-        (error) => {
-          console.error('Upload error:', error);
-          throw error;
-        },
-        async () => {
-          // Get download URL
-          const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
-          
-          // Save to Firestore
-          const photoData = {
-            url: downloadURL,
-            caption: formData.caption,
-            tags: formData.tags,
-            album: formData.album,
-            fileName: fileName,
-            originalName: file.name,
-            fileSize: resizedFile.size,
-            uploadedBy: userId,
-            userEmail: auth.currentUser?.email || 'Unknown',
-            timestamp: new Date(),
-            likes: 0,
-            likedBy: [],
-            comments: []
-          };
-          
-          await db.collection('photos').add(photoData);
-          
-          return downloadURL;
-        }
-      );
+      // Get download URL
+      const downloadURL = await getDownloadURL(uploadResult.ref);
+      
+      // Save to Firestore
+      const photoData = {
+        url: downloadURL,
+        caption: formData.caption,
+        tags: formData.tags,
+        album: formData.album,
+        fileName: fileName,
+        originalName: file.name,
+        fileSize: resizedFile.size,
+        uploadedBy: userId,
+        userEmail: auth?.currentUser?.email || 'Unknown',
+        timestamp: new Date(),
+        likes: 0,
+        likedBy: [],
+        comments: []
+      };
+      
+      const photosRef = collection(db, 'photos');
+      await addDoc(photosRef, photoData);
+      
+      return downloadURL;
     } catch (error) {
       console.error('Error uploading file:', error);
       throw error;

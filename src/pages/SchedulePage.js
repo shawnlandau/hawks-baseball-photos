@@ -45,19 +45,17 @@ const SchedulePage = () => {
     'Day 2 - Pool Play': [
       {
         time: '8:30 AM',
-        event: 'Hawks vs. Thunder',
+        event: 'Pool Play Game 1',
         location: 'Field 2',
-        description: 'Pool play game 1',
-        type: 'game',
-        opponent: 'Thunder'
+        description: 'First pool play game of the tournament',
+        type: 'game'
       },
       {
         time: '11:00 AM',
-        event: 'Hawks vs. Eagles',
+        event: 'Pool Play Game 2',
         location: 'Field 4',
-        description: 'Pool play game 2',
-        type: 'game',
-        opponent: 'Eagles'
+        description: 'Second pool play game of the tournament',
+        type: 'game'
       },
       {
         time: '2:30 PM',
@@ -77,27 +75,24 @@ const SchedulePage = () => {
     'Day 3 - Tournament Games': [
       {
         time: '9:00 AM',
-        event: 'Hawks vs. Lions',
+        event: 'Tournament Quarterfinal',
         location: 'Field 1',
-        description: 'Tournament quarterfinal',
-        type: 'game',
-        opponent: 'Lions'
+        description: 'Quarterfinal round game',
+        type: 'game'
       },
       {
         time: '12:30 PM',
-        event: 'Hawks vs. Bears',
+        event: 'Tournament Semifinal',
         location: 'Field 3',
-        description: 'Tournament semifinal',
-        type: 'game',
-        opponent: 'Bears'
+        description: 'Semifinal round game',
+        type: 'game'
       },
       {
         time: '4:00 PM',
         event: 'Championship Game',
         location: 'Main Stadium',
-        description: 'Tournament championship',
-        type: 'game',
-        opponent: 'TBD'
+        description: 'Tournament championship game',
+        type: 'game'
       },
       {
         time: '6:30 PM',
@@ -264,10 +259,10 @@ const SchedulePage = () => {
                                       <FaMapMarkerAlt className="w-4 h-4" />
                                       <span>{event.location}</span>
                                     </div>
-                                    {event.opponent && (
+                                    {event.type === 'game' && (
                                       <div className="flex items-center space-x-1">
                                         <FaBaseballBall className="w-4 h-4" />
-                                        <span>vs. {event.opponent}</span>
+                                        <span>Game</span>
                                       </div>
                                     )}
                                   </div>
