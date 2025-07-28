@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaBaseballBall, FaImages, FaUpload, FaCalendar, FaMap, FaTrophy, FaHeart, FaStar } from 'react-icons/fa';
+import { FaImages, FaUpload, FaCalendar, FaMap, FaTrophy, FaHeart, FaStar } from 'react-icons/fa';
 
 const HomePage = () => {
   const features = [
@@ -65,8 +65,21 @@ const HomePage = () => {
           <div className="container mx-auto text-center">
             <div className="max-w-4xl mx-auto">
               {/* Logo */}
-              <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-2xl border-4 border-hawks-red mx-auto mb-8">
-                <FaBaseballBall className="text-6xl text-hawks-navy" />
+              <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-2xl border-4 border-hawks-red mx-auto mb-8 overflow-hidden">
+                <img 
+                  src="/hawks-logo.jpg" 
+                  alt="Hawks Baseball Team Logo" 
+                  className="w-full h-full object-contain p-3"
+                  onError={(e) => {
+                    console.log('Hawks logo failed to load, using fallback');
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+                <div className="text-center text-sm font-bold text-hawks-navy w-full px-2 hidden">
+                  <div className="text-sm font-bold leading-tight mb-1">HAWKS</div>
+                  <div className="text-hawks-red font-bold leading-tight mb-1">BASEBALL</div>
+                </div>
               </div>
               
               <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
