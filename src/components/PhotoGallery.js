@@ -27,10 +27,24 @@ const PhotoGallery = () => {
   const [sortBy, setSortBy] = useState('date');
   const [showFilters, setShowFilters] = useState(false);
   const [imageDisplayMode, setImageDisplayMode] = useState('contain'); // 'contain' or 'cover'
+  const [selectedAlbum, setSelectedAlbum] = useState('all');
+  const [viewMode, setViewMode] = useState('gallery'); // 'gallery' or 'folders'
 
   // Admin user configuration
   const ADMIN_EMAIL = 'shawnjl@outlook.com';
   const isAdmin = auth?.currentUser?.email === ADMIN_EMAIL;
+
+  // Available albums (matching PhotoUpload component)
+  const albums = [
+    'Day 1 - Opening Ceremonies',
+    'Day 2 - Pool Play',
+    'Day 3 - Tournament Games',
+    'Day 4 - Championship',
+    'Team Photos',
+    'Action Shots',
+    'Celebration Moments',
+    'Dreams Park Tour'
+  ];
 
   // Helper function to get storage path from photo
   const getStoragePath = (photo) => {
@@ -95,7 +109,8 @@ const PhotoGallery = () => {
     const matchesSearch = photo.caption?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          photo.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesFilter = filter === 'all' || photo.tags?.includes(filter);
-    return matchesSearch && matchesFilter;
+    const matchesAlbum = selectedAlbum === 'all' || photo.album === selectedAlbum;
+    return matchesSearch && matchesFilter && matchesAlbum;
   });
 
   const sortedPhotos = [...filteredPhotos].sort((a, b) => {
@@ -110,6 +125,21 @@ const PhotoGallery = () => {
         return 0;
     }
   });
+
+  // Get album statistics
+  const getAlbumStats = () => {
+    const stats = {};
+    albums.forEach(album => {
+      const albumPhotos = photos.filter(photo => photo.album === album);
+      stats[album] = {
+        count: albumPhotos.length,
+        latestPhoto: albumPhotos.length > 0 ? albumPhotos[0] : null
+      };
+    });
+    return stats;
+  };
+
+  const albumStats = getAlbumStats();
 
   const handlePhotoSelect = (photoId) => {
     const newSelected = new Set(selectedPhotos);
@@ -293,6 +323,30 @@ const PhotoGallery = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
+            {/* View Mode Toggle */}
+            <div className="flex bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setViewMode('gallery')}
+                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                  viewMode === 'gallery'
+                    ? 'bg-white text-hawks-navy shadow-sm'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                Gallery
+              </button>
+              <button
+                onClick={() => setViewMode('folders')}
+                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                  viewMode === 'folders'
+                    ? 'bg-white text-hawks-navy shadow-sm'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                Folders
+              </button>
+            </div>
+
             {/* Search */}
             <div className="relative">
               <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -364,6 +418,23 @@ const PhotoGallery = () => {
                 </select>
               </div>
 
+              {/* Filter by Album */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Filter by Album
+                </label>
+                <select
+                  value={selectedAlbum}
+                  onChange={(e) => setSelectedAlbum(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hawks-red focus:border-transparent"
+                >
+                  <option value="all">All Albums</option>
+                  {albums.map(album => (
+                    <option key={album} value={album}>{album}</option>
+                  ))}
+                </select>
+              </div>
+
               {/* Image Display Mode */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -397,145 +468,196 @@ const PhotoGallery = () => {
         )}
       </div>
 
-      {/* Photo Grid */}
-      {sortedPhotos.length === 0 ? (
-        <div className="text-center py-12">
-          <FaImages className="text-6xl text-gray-300 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-600 mb-2">No photos found</h3>
-          <p className="text-gray-500">
-            {searchTerm || filter !== 'all' 
-              ? 'Try adjusting your search or filters'
-              : 'Be the first to share a photo!'
-            }
-          </p>
-        </div>
-      ) : (
+      {/* Content Display */}
+      {viewMode === 'folders' ? (
+        // Folder View
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {sortedPhotos.map((photo) => (
-            <div
-              key={photo.id}
-              className={`bg-white rounded-lg shadow-lg overflow-hidden border-2 transition-all duration-200 hover:shadow-xl ${
-                selectedPhotos.has(photo.id) ? 'border-hawks-red' : 'border-transparent'
-              }`}
-            >
-              {/* Photo */}
-              <div className="relative group">
-                <img
-                  src={photo.url}
-                  alt={photo.caption || 'Hawks Baseball photo'}
-                  className={`w-full h-48 sm:h-56 lg:h-64 cursor-pointer ${
-                    imageDisplayMode === 'contain' 
-                      ? 'object-contain bg-gray-100' 
-                      : 'object-cover'
-                  }`}
-                  onClick={() => setLightboxPhoto(photo)}
-                />
-                
-                {/* Selection Overlay */}
-                {selectedPhotos.has(photo.id) && (
-                  <div className="absolute inset-0 bg-hawks-red/20 flex items-center justify-center">
-                    <div className="bg-hawks-red text-white rounded-full p-2">
-                      <FaTimes className="w-4 h-4" />
+          {albums.map((album) => {
+            const stats = albumStats[album];
+            return (
+              <div
+                key={album}
+                onClick={() => {
+                  setSelectedAlbum(album);
+                  setViewMode('gallery');
+                }}
+                className="bg-white rounded-lg shadow-lg overflow-hidden border-2 border-gray-200 hover:border-hawks-red transition-all duration-200 hover:shadow-xl cursor-pointer group"
+              >
+                {/* Album Cover */}
+                <div className="relative h-48 bg-gradient-to-br from-hawks-navy to-hawks-red">
+                  {stats.latestPhoto ? (
+                    <img
+                      src={stats.latestPhoto.url}
+                      alt={`${album} cover`}
+                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <FaImages className="text-4xl text-white/60" />
+                    </div>
+                  )}
+                  
+                  {/* Album Info Overlay */}
+                  <div className="absolute inset-0 bg-black/40 flex items-end">
+                    <div className="p-4 w-full">
+                      <h3 className="text-white font-semibold text-lg mb-1">{album}</h3>
+                      <p className="text-white/80 text-sm">{stats.count} photo{stats.count !== 1 ? 's' : ''}</p>
                     </div>
                   </div>
-                )}
-
-                {/* Action Buttons */}
-                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-2">
-                  <button
-                    onClick={() => handlePhotoSelect(photo.id)}
-                    className="bg-white/90 text-gray-700 p-2 rounded-full hover:bg-white transition-colors"
-                  >
-                    <FaTimes className="w-4 h-4" />
-                  </button>
+                </div>
+                
+                {/* Album Details */}
+                <div className="p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600 text-sm">{stats.count} photos</span>
+                    <span className="text-hawks-red text-sm font-medium">Click to view</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        // Gallery View
+        sortedPhotos.length === 0 ? (
+          <div className="text-center py-12">
+            <FaImages className="text-6xl text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-600 mb-2">No photos found</h3>
+            <p className="text-gray-500">
+              {searchTerm || filter !== 'all' || selectedAlbum !== 'all'
+                ? 'Try adjusting your search or filters'
+                : 'Be the first to share a photo!'
+              }
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {sortedPhotos.map((photo) => (
+              <div
+                key={photo.id}
+                className={`bg-white rounded-lg shadow-lg overflow-hidden border-2 transition-all duration-200 hover:shadow-xl ${
+                  selectedPhotos.has(photo.id) ? 'border-hawks-red' : 'border-transparent'
+                }`}
+              >
+                {/* Photo */}
+                <div className="relative group">
+                  <img
+                    src={photo.url}
+                    alt={photo.caption || 'Hawks Baseball photo'}
+                    className={`w-full h-48 sm:h-56 lg:h-64 cursor-pointer ${
+                      imageDisplayMode === 'contain' 
+                        ? 'object-contain bg-gray-100' 
+                        : 'object-cover'
+                    }`}
+                    onClick={() => setLightboxPhoto(photo)}
+                  />
                   
-                  {/* Delete button - show for photos uploaded by current user or for admin */}
-                  {(photo.uploadedBy === userId || isAdmin) && (
+                  {/* Selection Overlay */}
+                  {selectedPhotos.has(photo.id) && (
+                    <div className="absolute inset-0 bg-hawks-red/20 flex items-center justify-center">
+                      <div className="bg-hawks-red text-white rounded-full p-2">
+                        <FaTimes className="w-4 h-4" />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-2">
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeletePhoto(photo.id);
-                      }}
-                      className={`p-2 rounded-full transition-colors ${
-                        isAdmin 
-                          ? 'bg-orange-500/90 text-white hover:bg-orange-600' 
-                          : 'bg-red-500/90 text-white hover:bg-red-600'
-                      }`}
-                      title={isAdmin ? "Delete photo (Admin)" : "Delete photo"}
+                      onClick={() => handlePhotoSelect(photo.id)}
+                      className="bg-white/90 text-gray-700 p-2 rounded-full hover:bg-white transition-colors"
                     >
-                      <FaTrash className="w-4 h-4" />
+                      <FaTimes className="w-4 h-4" />
                     </button>
+                    
+                    {/* Delete button - show for photos uploaded by current user or for admin */}
+                    {(photo.uploadedBy === userId || isAdmin) && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeletePhoto(photo.id);
+                        }}
+                        className={`p-2 rounded-full transition-colors ${
+                          isAdmin 
+                            ? 'bg-orange-500/90 text-white hover:bg-orange-600' 
+                            : 'bg-red-500/90 text-white hover:bg-red-600'
+                        }`}
+                        title={isAdmin ? "Delete photo (Admin)" : "Delete photo"}
+                      >
+                        <FaTrash className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Tags Overlay */}
+                  {photo.tags && photo.tags.length > 0 && (
+                    <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
+                      {photo.tags.slice(0, 3).map((tag, index) => (
+                        <span
+                          key={index}
+                          className="bg-hawks-red/90 text-white text-xs px-2 py-1 rounded-full"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                      {photo.tags.length > 3 && (
+                        <span className="bg-gray-800/90 text-white text-xs px-2 py-1 rounded-full">
+                          +{photo.tags.length - 3}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
 
-                {/* Tags Overlay */}
-                {photo.tags && photo.tags.length > 0 && (
-                  <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
-                    {photo.tags.slice(0, 3).map((tag, index) => (
-                      <span
-                        key={index}
-                        className="bg-hawks-red/90 text-white text-xs px-2 py-1 rounded-full"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                    {photo.tags.length > 3 && (
-                      <span className="bg-gray-800/90 text-white text-xs px-2 py-1 rounded-full">
-                        +{photo.tags.length - 3}
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Photo Info */}
-              <div className="p-4">
-                {photo.caption && (
-                  <p className="text-gray-800 font-medium mb-2 line-clamp-2">
-                    {photo.caption}
-                  </p>
-                )}
-                
-                <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
-                  <div className="flex items-center space-x-2">
-                    <FaCalendar className="w-3 h-3" />
-                    <span>{formatDate(photo.timestamp)}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <FaUser className="w-3 h-3" />
-                    <span>{photo.userEmail}</span>
-                  </div>
-                </div>
-
-                {/* Interaction Stats */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <button
-                      onClick={() => handleLike(photo.id)}
-                      className={`flex items-center space-x-1 ${
-                        photo.likedBy?.includes(userId) ? 'text-hawks-red' : 'text-gray-400'
-                      } hover:text-hawks-red transition-colors`}
-                    >
-                      <FaHeart className="w-4 h-4" />
-                      <span className="text-sm">{photo.likes || 0}</span>
-                    </button>
-                    <div className="flex items-center space-x-1 text-gray-400">
-                      <FaComment className="w-4 h-4" />
-                      <span className="text-sm">{photo.comments?.length || 0}</span>
+                {/* Photo Info */}
+                <div className="p-4">
+                  {photo.caption && (
+                    <p className="text-gray-800 font-medium mb-2 line-clamp-2">
+                      {photo.caption}
+                    </p>
+                  )}
+                  
+                  <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
+                    <div className="flex items-center space-x-2">
+                      <FaCalendar className="w-3 h-3" />
+                      <span>{formatDate(photo.timestamp)}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <FaUser className="w-3 h-3" />
+                      <span>{photo.userEmail}</span>
                     </div>
                   </div>
-                  
-                  <button
-                    onClick={() => setLightboxPhoto(photo)}
-                    className="text-hawks-navy hover:text-hawks-red transition-colors"
-                  >
-                    <FaShare className="w-4 h-4" />
-                  </button>
+
+                  {/* Interaction Stats */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <button
+                        onClick={() => handleLike(photo.id)}
+                        className={`flex items-center space-x-1 ${
+                          photo.likedBy?.includes(userId) ? 'text-hawks-red' : 'text-gray-400'
+                        } hover:text-hawks-red transition-colors`}
+                      >
+                        <FaHeart className="w-4 h-4" />
+                        <span className="text-sm">{photo.likes || 0}</span>
+                      </button>
+                      <div className="flex items-center space-x-1 text-gray-400">
+                        <FaComment className="w-4 h-4" />
+                        <span className="text-sm">{photo.comments?.length || 0}</span>
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={() => setLightboxPhoto(photo)}
+                      className="text-hawks-navy hover:text-hawks-red transition-colors"
+                    >
+                      <FaShare className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )
       )}
 
       {/* Lightbox */}
