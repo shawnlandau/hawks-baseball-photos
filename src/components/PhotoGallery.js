@@ -26,6 +26,7 @@ const PhotoGallery = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('date');
   const [showFilters, setShowFilters] = useState(false);
+  const [imageDisplayMode, setImageDisplayMode] = useState('contain'); // 'contain' or 'cover'
 
   // Admin user configuration
   const ADMIN_EMAIL = 'shawnjl@outlook.com';
@@ -363,6 +364,21 @@ const PhotoGallery = () => {
                 </select>
               </div>
 
+              {/* Image Display Mode */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Image Display
+                </label>
+                <select
+                  value={imageDisplayMode}
+                  onChange={(e) => setImageDisplayMode(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hawks-red focus:border-transparent"
+                >
+                  <option value="contain">Show Full Image</option>
+                  <option value="cover">Fill Space</option>
+                </select>
+              </div>
+
               {/* Clear Filters */}
               <div className="flex items-end">
                 <button
@@ -407,7 +423,11 @@ const PhotoGallery = () => {
                 <img
                   src={photo.url}
                   alt={photo.caption || 'Hawks Baseball photo'}
-                  className="w-full h-48 object-cover cursor-pointer"
+                  className={`w-full h-48 sm:h-56 lg:h-64 cursor-pointer ${
+                    imageDisplayMode === 'contain' 
+                      ? 'object-contain bg-gray-100' 
+                      : 'object-cover'
+                  }`}
                   onClick={() => setLightboxPhoto(photo)}
                 />
                 
