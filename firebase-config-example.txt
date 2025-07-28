@@ -1,40 +1,26 @@
-# Firebase Configuration Setup
-# ===========================
+# Firebase Configuration for hawks2025dev Project
+# Replace the placeholder values with your actual Firebase project configuration
 
-# To fix the "Firebase configuration is missing" error, you need to create a .env file
-# in the root directory of this project with your Firebase configuration.
+# Option 1: Environment Variable (Recommended)
+# Add this to your .env file:
+REACT_APP_FIREBASE_CONFIG={"apiKey":"YOUR_API_KEY","authDomain":"hawks2025dev.firebaseapp.com","projectId":"hawks2025dev","storageBucket":"hawks2025dev.appspot.com","messagingSenderId":"YOUR_SENDER_ID","appId":"YOUR_APP_ID"}
 
-# Step 1: Create a .env file in the project root
-# Step 2: Add the following content to your .env file:
+# Option 2: Global Variable
+# Add this to your public/index.html in a <script> tag:
+# <script>
+# window.__firebase_config = '{"apiKey":"YOUR_API_KEY","authDomain":"hawks2025dev.firebaseapp.com","projectId":"hawks2025dev","storageBucket":"hawks2025dev.appspot.com","messagingSenderId":"YOUR_SENDER_ID","appId":"YOUR_APP_ID"}';
+# </script>
 
-REACT_APP_FIREBASE_CONFIG={"apiKey":"your-api-key-here","authDomain":"your-project-id.firebaseapp.com","projectId":"your-project-id","storageBucket":"your-project-id.appspot.com","messagingSenderId":"123456789","appId":"your-app-id"}
-
-REACT_APP_APP_ID=your-app-id-here
-
-# Step 3: Get your Firebase configuration:
-# 1. Go to Firebase Console: https://console.firebase.google.com/
-# 2. Select your project or create a new one
-# 3. Go to Project Settings > General
+# To get your Firebase configuration:
+# 1. Go to https://console.firebase.google.com/
+# 2. Select your hawks2025dev project
+# 3. Click on the gear icon (Project Settings)
 # 4. Scroll down to "Your apps" section
-# 5. Click on the web app (</>) or create one if none exists
-# 6. Copy the config object and replace the REACT_APP_FIREBASE_CONFIG value
-# 7. Replace REACT_APP_APP_ID with your Firebase project ID
+# 5. Click "Add app" if you haven't already
+# 6. Choose "Web" and register your app
+# 7. Copy the config object and replace the values above
 
-# Step 4: Restart the development server after creating the .env file:
-# npm start
-
-# Example of what your .env file should look like:
-# REACT_APP_FIREBASE_CONFIG={"apiKey":"AIzaSyC...","authDomain":"my-project.firebaseapp.com","projectId":"my-project","storageBucket":"my-project.appspot.com","messagingSenderId":"123456789","appId":"my-project"}
-# REACT_APP_APP_ID=my-project 
-
-
-
-REACT_APP_FIREBASE_CONFIG=apiKey: "AIzaSyCouuChPSVEKmaxkw3f4r4-Xx-4vADiBWc",
-  authDomain: "hawksbaseballphotos-5bb61.firebaseapp.com",
-  projectId: "hawksbaseballphotos-5bb61",
-  storageBucket: "hawksbaseballphotos-5bb61.firebasestorage.app",
-  messagingSenderId: "1090003594150",
-  appId: "1:1090003594150:web:92ff02eb4fe204a67f7d67",
-  measurementId: "G-RS15QL2HJ0"
-};
-REACT_APP_APP_ID=1:1090003594150:web:92ff02eb4fe204a67f7d67
+# Security Rules Summary:
+# - Firestore: Users can read all photos, create photos when authenticated, update/delete only their own photos
+# - Storage: Users can read all photos, upload images up to 10MB, delete only when authenticated
+# - Authentication: Email/password and Google sign-in enabled

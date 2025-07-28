@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaHome, FaImages, FaUpload, FaCalendar, FaMap, FaInfoCircle, FaBars, FaTimes } from 'react-icons/fa';
+import { FaHome, FaImages, FaUpload, FaCalendar, FaMap, FaBars, FaTimes } from 'react-icons/fa';
 
-const Navbar = ({ user, onSignOut }) => {
+const Navbar = ({ user, auth, onSignOut }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
 
@@ -12,7 +12,6 @@ const Navbar = ({ user, onSignOut }) => {
     { path: '/upload', label: 'Upload', icon: FaUpload },
     { path: '/schedule', label: 'Schedule', icon: FaCalendar },
     { path: '/map', label: 'Map', icon: FaMap },
-    { path: '/about', label: 'About', icon: FaInfoCircle },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -93,13 +92,22 @@ const Navbar = ({ user, onSignOut }) => {
             })}
             
             {user && (
-              <button
-                onClick={onSignOut}
-                className="px-4 py-2 rounded-lg text-sm font-semibold bg-red-600 text-white hover:bg-red-700 transition-all duration-200 transform hover:scale-105 flex items-center space-x-2 ml-2"
-              >
-                <FaTimes className="w-4 h-4" />
-                <span>Sign Out</span>
-              </button>
+              <div className="flex items-center space-x-3 ml-2">
+                {/* User Email Display */}
+                <div className="text-white text-sm">
+                  <span className="text-white/70">Signed in as:</span>
+                  <span className="ml-1 font-medium">{auth?.currentUser?.email || 'Unknown'}</span>
+                </div>
+                
+                {/* Sign Out Button */}
+                <button
+                  onClick={onSignOut}
+                  className="px-4 py-2 rounded-lg text-sm font-semibold bg-red-600 text-white hover:bg-red-700 transition-all duration-200 transform hover:scale-105 flex items-center space-x-2"
+                >
+                  <FaTimes className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
             )}
           </div>
 
@@ -136,16 +144,25 @@ const Navbar = ({ user, onSignOut }) => {
               })}
               
               {user && (
-                <button
-                  onClick={() => {
-                    onSignOut();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="px-4 py-3 rounded-lg text-sm font-semibold bg-red-600 text-white hover:bg-red-700 transition-all duration-200 flex items-center space-x-3"
-                >
-                  <FaTimes className="w-5 h-5" />
-                  <span>Sign Out</span>
-                </button>
+                <>
+                  {/* User Email Display (Mobile) */}
+                  <div className="px-4 py-3 text-white text-sm border-b border-white/20">
+                    <span className="text-white/70">Signed in as:</span>
+                    <div className="font-medium mt-1">{auth?.currentUser?.email || 'Unknown'}</div>
+                  </div>
+                  
+                  {/* Sign Out Button (Mobile) */}
+                  <button
+                    onClick={() => {
+                      onSignOut();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="px-4 py-3 rounded-lg text-sm font-semibold bg-red-600 text-white hover:bg-red-700 transition-all duration-200 flex items-center space-x-3"
+                  >
+                    <FaTimes className="w-5 h-5" />
+                    <span>Sign Out</span>
+                  </button>
+                </>
               )}
             </div>
           </div>

@@ -1,6 +1,7 @@
 {
   "short_name": "Hawks Baseball Photos",
   "name": "Hawks Baseball Photo Sharing App",
+  "description": "Capture and share memories from the Hawks' Cooperstown Dreams Park journey",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,6 +21,9 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#1e3a8a",
+  "background_color": "#ffffff",
+  "orientation": "portrait",
+  "categories": ["sports", "photo", "social"],
+  "lang": "en"
 } 

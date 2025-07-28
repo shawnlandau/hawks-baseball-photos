@@ -21,14 +21,10 @@ export const FirebaseProvider = ({ children }) => {
     try {
       // Initialize Firebase App
       let configString = '{}';
+      
       if (typeof __firebase_config !== 'undefined' && __firebase_config !== '') {
         configString = __firebase_config;
-      } else if (
-        typeof process !== 'undefined' &&
-        typeof process.env !== 'undefined' &&
-        typeof process.env.REACT_APP_FIREBASE_CONFIG !== 'undefined' &&
-        process.env.REACT_APP_FIREBASE_CONFIG !== ''
-      ) {
+      } else if (process.env.REACT_APP_FIREBASE_CONFIG && process.env.REACT_APP_FIREBASE_CONFIG !== '{}') {
         configString = process.env.REACT_APP_FIREBASE_CONFIG;
       }
       
@@ -54,11 +50,12 @@ export const FirebaseProvider = ({ children }) => {
       
       // Validate that we have a proper config
       if (!firebaseConfig || !firebaseConfig.projectId) {
+        console.warn('No Firebase config found. Please set up environment variables or Firebase config.');
         const fallbackConfig = {
           apiKey: "AIzaSyCouuChPSVEKmaxkw3f4r4-Xx-4vADiBWc",
           authDomain: "hawksbaseballphotos-5bb61.firebaseapp.com",
           projectId: "hawksbaseballphotos-5bb61",
-          storageBucket: "hawksbaseballphotos-5bb61.appspot.com",
+          storageBucket: "hawksbaseballphotos-5bb61.firebasestorage.app",
           messagingSenderId: "1090003594150",
           appId: "1:1090003594150:web:92ff02eb4fe204a67f7d67",
           measurementId: "G-RS15QL2HJ0"

@@ -21,9 +21,13 @@ const PhotoUpload = ({ onUploadSuccess }) => {
 
   // Hawks team roster for tagging
   const hawksPlayers = [
-    'Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5',
-    'Player 6', 'Player 7', 'Player 8', 'Player 9', 'Player 10',
-    'Player 11', 'Player 12', 'Coach 1', 'Coach 2'
+    // Players
+    'Asher Joslin-White', 'Ashton McCarthy', 'Brian Aguliar', 'Cole Thomas',
+    'Dylan Johnson', 'Ethan Heiss', 'Hudson Brunton', 'Jared Landau',
+    'Matthew Covington', 'Maxwell Millay', 'Michael Woodruff', 'Reed Kleamovich',
+    'Thad Clark',
+    // Coach
+    'Mike Woodruff'
   ];
 
   const albums = [
@@ -134,6 +138,7 @@ const PhotoUpload = ({ onUploadSuccess }) => {
       // Save to Firestore
       const photoData = {
         url: downloadURL,
+        storagePath: `photos/${fileName}`, // Store the storage path for deletion
         caption: formData.caption,
         tags: formData.tags,
         album: formData.album,
@@ -236,9 +241,20 @@ const PhotoUpload = ({ onUploadSuccess }) => {
           <p className="text-gray-500 mb-4">
             or click to select files
           </p>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-gray-400 mb-4">
             Supports: JPG, PNG, GIF, WebP (Max 10MB each)
           </p>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              document.querySelector('input[type="file"]').click();
+            }}
+            className="bg-hawks-red text-white px-6 py-2 rounded-lg font-semibold hover:bg-hawks-red-dark transition-colors duration-200 flex items-center space-x-2 mx-auto"
+          >
+            <FaCloudUploadAlt className="w-4 h-4" />
+            <span>Browse Files</span>
+          </button>
         </div>
       </div>
 

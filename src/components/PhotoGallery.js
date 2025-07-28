@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaSearch, FaFilter, FaTimes, FaHeart, FaComment, FaDownload, FaShare, FaCalendar, FaUser, FaTag, FaImages } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaTimes, FaHeart, FaComment, FaDownload, FaShare, FaCalendar, FaUser, FaTag, FaImages, FaTrash } from 'react-icons/fa';
 import { useFirebase } from '../hooks/useFirebase';
 import { collection, orderBy, onSnapshot, doc, deleteDoc, updateDoc, query } from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
@@ -17,7 +17,7 @@ const formatDate = (timestamp) => {
 };
 
 const PhotoGallery = () => {
-  const { db, storage, userId } = useFirebase();
+  const { db, storage, userId, auth } = useFirebase();
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPhotos, setSelectedPhotos] = useState(new Set());
@@ -27,11 +27,46 @@ const PhotoGallery = () => {
   const [sortBy, setSortBy] = useState('date');
   const [showFilters, setShowFilters] = useState(false);
 
+  // Admin user configuration
+  const ADMIN_EMAIL = 'shawnjl@outlook.com';
+  const isAdmin = auth?.currentUser?.email === ADMIN_EMAIL;
+
+  // Helper function to get storage path from photo
+  const getStoragePath = (photo) => {
+    if (photo.storagePath) {
+      return photo.storagePath;
+    }
+    
+    // Fallback: try to extract path from URL for existing photos
+    if (photo.url && photo.fileName) {
+      return `photos/${photo.fileName}`;
+    }
+    
+    // Last resort: try to extract from URL
+    if (photo.url) {
+      try {
+        const url = new URL(photo.url);
+        const pathParts = url.pathname.split('/');
+        const fileName = pathParts[pathParts.length - 1];
+        return `photos/${fileName}`;
+      } catch (error) {
+        console.error('Error parsing storage URL:', error);
+        return null;
+      }
+    }
+    
+    return null;
+  };
+
   // Hawks team roster for tagging
   const hawksPlayers = [
-    'Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5',
-    'Player 6', 'Player 7', 'Player 8', 'Player 9', 'Player 10',
-    'Player 11', 'Player 12', 'Coach 1', 'Coach 2'
+    // Players
+    'Asher Joslin-White', 'Ashton McCarthy', 'Brian Aguliar', 'Cole Thomas',
+    'Dylan Johnson', 'Ethan Heiss', 'Hudson Brunton', 'Jared Landau',
+    'Matthew Covington', 'Maxwell Millay', 'Michael Woodruff', 'Reed Kleamovich',
+    'Thad Clark',
+    // Coach
+    'Mike Woodruff'
   ];
 
   useEffect(() => {
@@ -89,13 +124,38 @@ const PhotoGallery = () => {
     if (!window.confirm(`Delete ${selectedPhotos.size} selected photo(s)?`)) return;
 
     try {
-      const deletePromises = Array.from(selectedPhotos).map(async (photoId) => {
+      let photosToDelete;
+      
+      if (isAdmin) {
+        // Admin can delete any photo
+        photosToDelete = Array.from(selectedPhotos);
+      } else {
+        // Regular users can only delete their own photos
+        photosToDelete = Array.from(selectedPhotos).filter(photoId => {
+          const photo = photos.find(p => p.id === photoId);
+          return photo && photo.uploadedBy === userId;
+        });
+
+        if (photosToDelete.length === 0) {
+          alert('You can only delete photos that you uploaded.');
+          return;
+        }
+
+        if (photosToDelete.length !== selectedPhotos.size) {
+          alert(`You can only delete ${photosToDelete.length} of ${selectedPhotos.size} selected photos (only your own photos).`);
+        }
+      }
+
+      const deletePromises = photosToDelete.map(async (photoId) => {
         const photo = photos.find(p => p.id === photoId);
         if (photo && db && storage) {
           try {
             // Delete from Storage
-            const storageRef = ref(storage, photo.url);
-            await deleteObject(storageRef);
+            const storagePath = getStoragePath(photo);
+            if (storagePath) {
+              const storageRef = ref(storage, storagePath);
+              await deleteObject(storageRef);
+            }
           } catch (storageError) {
             console.error('Error deleting from storage:', storageError);
           }
@@ -111,6 +171,48 @@ const PhotoGallery = () => {
     } catch (error) {
       console.error('Error deleting photos:', error);
       alert('Error deleting photos. Please try again.');
+    }
+  };
+
+  const handleDeletePhoto = async (photoId) => {
+    const photo = photos.find(p => p.id === photoId);
+    
+    if (!photo) return;
+    
+
+    
+    // Check if user owns the photo or is admin
+    if (!isAdmin && photo.uploadedBy !== userId) {
+      alert('You can only delete photos that you uploaded.');
+      return;
+    }
+
+    const confirmMessage = isAdmin 
+      ? 'Are you sure you want to delete this photo? (Admin action)'
+      : 'Are you sure you want to delete this photo?';
+      
+    if (!window.confirm(confirmMessage)) return;
+
+    try {
+      if (db && storage) {
+        try {
+          // Delete from Storage
+          const storagePath = getStoragePath(photo);
+          if (storagePath) {
+            const storageRef = ref(storage, storagePath);
+            await deleteObject(storageRef);
+          }
+        } catch (storageError) {
+          console.error('Error deleting from storage:', storageError);
+        }
+        
+        // Delete from Firestore
+        const photoRef = doc(db, 'photos', photoId);
+        await deleteDoc(photoRef);
+      }
+    } catch (error) {
+      console.error('Error deleting photo:', error);
+      alert('Error deleting photo. Please try again.');
     }
   };
 
@@ -174,9 +276,16 @@ const PhotoGallery = () => {
       <div className="bg-white rounded-lg p-6 shadow-lg border border-gray-200">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-hawks-navy mb-2">
-              Photo Gallery
-            </h2>
+            <div className="flex items-center gap-2 mb-2">
+              <h2 className="text-2xl font-bold text-hawks-navy">
+                Photo Gallery
+              </h2>
+              {isAdmin && (
+                <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+                  ADMIN
+                </span>
+              )}
+            </div>
             <p className="text-gray-600">
               {filteredPhotos.length} photo{filteredPhotos.length !== 1 ? 's' : ''} found
             </p>
@@ -312,13 +421,31 @@ const PhotoGallery = () => {
                 )}
 
                 {/* Action Buttons */}
-                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-2">
                   <button
                     onClick={() => handlePhotoSelect(photo.id)}
                     className="bg-white/90 text-gray-700 p-2 rounded-full hover:bg-white transition-colors"
                   >
                     <FaTimes className="w-4 h-4" />
                   </button>
+                  
+                  {/* Delete button - show for photos uploaded by current user or for admin */}
+                  {(photo.uploadedBy === userId || isAdmin) && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeletePhoto(photo.id);
+                      }}
+                      className={`p-2 rounded-full transition-colors ${
+                        isAdmin 
+                          ? 'bg-orange-500/90 text-white hover:bg-orange-600' 
+                          : 'bg-red-500/90 text-white hover:bg-red-600'
+                      }`}
+                      title={isAdmin ? "Delete photo (Admin)" : "Delete photo"}
+                    >
+                      <FaTrash className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
 
                 {/* Tags Overlay */}
@@ -398,6 +525,8 @@ const PhotoGallery = () => {
           onClose={() => setLightboxPhoto(null)}
           onLike={() => handleLike(lightboxPhoto.id)}
           onComment={(comment) => handleComment(lightboxPhoto.id, comment)}
+          onDelete={() => handleDeletePhoto(lightboxPhoto.id)}
+          isAdmin={isAdmin}
           totalPhotos={sortedPhotos.length}
           currentIndex={sortedPhotos.findIndex(p => p.id === lightboxPhoto.id)}
           onNavigate={(direction) => {
@@ -414,7 +543,7 @@ const PhotoGallery = () => {
 };
 
 // Lightbox Component
-const Lightbox = ({ photo, onClose, onLike, onComment, totalPhotos, currentIndex, onNavigate }) => {
+const Lightbox = ({ photo, onClose, onLike, onComment, onDelete, isAdmin, totalPhotos, currentIndex, onNavigate }) => {
   const [comment, setComment] = useState('');
   const { userId } = useFirebase();
 
@@ -489,6 +618,23 @@ const Lightbox = ({ photo, onClose, onLike, onComment, totalPhotos, currentIndex
               <button className="text-gray-400 hover:text-gray-600 transition-colors">
                 <FaDownload className="w-5 h-5" />
               </button>
+              {/* Delete button in lightbox - show for photos uploaded by current user or for admin */}
+              {(photo.uploadedBy === userId || isAdmin) && (
+                <button
+                  onClick={() => {
+                    onClose();
+                    onDelete();
+                  }}
+                  className={`transition-colors ${
+                    isAdmin 
+                      ? 'text-orange-500 hover:text-orange-600' 
+                      : 'text-red-500 hover:text-red-600'
+                  }`}
+                  title={isAdmin ? "Delete photo (Admin)" : "Delete photo"}
+                >
+                  <FaTrash className="w-5 h-5" />
+                </button>
+              )}
             </div>
           </div>
 

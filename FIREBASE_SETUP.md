@@ -1,55 +1,110 @@
-# Firebase Setup Guide
+# Firebase Setup Guide for Hawks Baseball Photos
 
-## Enable Anonymous Authentication
+## Project: hawks2025dev
 
-To fix the authentication errors, you need to enable anonymous authentication in your Firebase project:
+### 1. Firebase Project Configuration
 
+#### Get Your Firebase Config:
 1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Select your project: `hawksbaseballphotos-5bb61`
-3. Navigate to **Authentication** in the left sidebar
-4. Click on **Sign-in method** tab
-5. Find **Anonymous** in the list of providers
-6. Click on **Anonymous** and toggle it **ON**
-7. Click **Save**
+2. Select your `hawks2025dev` project
+3. Click the gear icon (Project Settings)
+4. Scroll to "Your apps" section
+5. Click "Add app" if you haven't already
+6. Choose "Web" and register your app
+7. Copy the config object
 
-## Firebase Security Rules
-
-You'll also need to set up security rules for Firestore and Storage:
-
-### Firestore Rules
-Go to **Firestore Database** → **Rules** and use:
+#### Set Up Environment Variables:
+Create a `.env` file in the project root with:
 ```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /artifacts/{appId}/public/data/photos/{document} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-  }
-}
+REACT_APP_FIREBASE_CONFIG={"apiKey":"YOUR_API_KEY","authDomain":"hawks2025dev.firebaseapp.com","projectId":"hawks2025dev","storageBucket":"hawks2025dev.appspot.com","messagingSenderId":"YOUR_SENDER_ID","appId":"YOUR_APP_ID"}
 ```
 
-### Storage Rules
-Go to **Storage** → **Rules** and use:
+### 2. Firebase Services Setup
+
+#### Authentication:
+1. Go to Authentication > Sign-in method
+2. Enable Email/Password
+3. Enable Google sign-in
+4. Add your domain to authorized domains
+
+#### Firestore Database:
+1. Go to Firestore Database
+2. Create database in production mode
+3. Choose a location (us-central1 recommended)
+4. Deploy the security rules from `firestore.rules`
+
+#### Storage:
+1. Go to Storage
+2. Initialize storage
+3. Choose a location (us-central1 recommended)
+4. Deploy the security rules from `storage.rules`
+
+### 3. Security Rules
+
+#### Firestore Rules (`firestore.rules`):
+- ✅ Users can read all photos
+- ✅ Only authenticated users can create photos
+- ✅ Users can only update/delete their own photos
+- ✅ User profiles are protected
+
+#### Storage Rules (`storage.rules`):
+- ✅ Anyone can download photos
+- ✅ Only authenticated users can upload (10MB limit, images only)
+- ✅ Only authenticated users can delete
+
+### 4. Deploy Rules
+
+```bash
+# Install Firebase CLI if not already installed
+npm install -g firebase-tools
+
+# Login to Firebase
+firebase login
+
+# Initialize Firebase (if not already done)
+firebase init
+
+# Deploy rules
+firebase deploy --only firestore:rules
+firebase deploy --only storage
 ```
-rules_version = '2';
-service firebase.storage {
-  match /b/{bucket}/o {
-    match /artifacts/{appId}/public/data/photos/{allPaths=**} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-  }
-}
-```
 
-## Current App Status
+### 5. Test Authentication
 
-The app is now configured to:
-- ✅ Work without authentication for viewing photos
-- ✅ Show helpful error messages if upload fails due to auth
-- ✅ Handle missing logo files
-- ✅ Provide fallback for authentication errors
+1. Start the development server: `npm start`
+2. Go to http://localhost:3008
+3. Try signing up with email/password
+4. Try Google sign-in
+5. Test photo upload functionality
 
-Once you enable anonymous authentication in Firebase Console, the app will work fully with upload functionality. 
+### 6. Troubleshooting
+
+#### Common Issues:
+- **"Firebase not initialized"**: Check your `.env` file and restart the dev server
+- **"Permission denied"**: Deploy the security rules
+- **"Storage not found"**: Initialize Firebase Storage
+- **"Authentication failed"**: Enable the sign-in methods in Firebase Console
+
+#### Debug Steps:
+1. Check browser console for errors
+2. Verify Firebase config in `.env` file
+3. Ensure rules are deployed
+4. Check Firebase Console for any service issues
+
+### 7. Production Deployment
+
+When ready for production:
+1. Update authorized domains in Firebase Console
+2. Set up custom domain if needed
+3. Configure hosting rules
+4. Deploy to your hosting platform
+
+### 8. Security Checklist
+
+- ✅ Authentication enabled
+- ✅ Firestore rules deployed
+- ✅ Storage rules deployed
+- ✅ File size limits enforced
+- ✅ User permissions properly set
+- ✅ Environment variables configured
+- ✅ Domain authorized in Firebase Console 

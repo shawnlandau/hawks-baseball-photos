@@ -13,7 +13,6 @@ import PhotoUpload from './components/PhotoUpload';
 import HomePage from './pages/HomePage';
 import SchedulePage from './pages/SchedulePage';
 import MapPage from './pages/MapPage';
-import AboutPage from './pages/AboutPage';
 
 // Modal Component
 const Modal = ({ message, onClose }) => {
@@ -51,7 +50,7 @@ const ProtectedRoute = ({ children }) => {
 
 // Main App Component
 const App = () => {
-  const { userId, isAuthReady, firebaseInitError, handleAuth, handleSignOut } = useFirebase();
+  const { userId, isAuthReady, firebaseInitError, handleAuth, handleSignOut, auth } = useFirebase();
   const [authError, setAuthError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -137,7 +136,7 @@ const App = () => {
         </style>
 
         {/* Navigation */}
-        {userId && <Navbar user={userId} onSignOut={handleSignOutClick} />}
+        {userId && <Navbar user={userId} auth={auth} onSignOut={handleSignOutClick} />}
 
         {/* Routes */}
         <Routes>
@@ -207,14 +206,7 @@ const App = () => {
             } 
           />
           
-          <Route 
-            path="/about" 
-            element={
-              <ProtectedRoute>
-                <AboutPage />
-              </ProtectedRoute>
-            } 
-          />
+
 
           {/* Redirect to home for unknown routes */}
           <Route path="*" element={<Navigate to="/" replace />} />
