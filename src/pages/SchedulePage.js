@@ -406,20 +406,86 @@ END:VEVENT
 
 
 
+  // Generate full calendar ICS data
+  const generateFullCalendarICS = () => {
+    let icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Hawks Baseball//Tournament Schedule//EN',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH',
+      'X-WR-CALNAME:Hawks Baseball Tournament',
+      'X-WR-CALDESC:Cooperstown Dreams Park Tournament Schedule',
+      'X-WR-TIMEZONE:America/New_York'
+    ];
+
+    // Add all events to the calendar
+    Object.entries(schedule).forEach(([dayKey, events]) => {
+      const eventDate = getEventDate(dayKey);
+      events.forEach((event, index) => {
+        const eventId = `${dayKey}-${index}`;
+        const startTime = formatTimeForCalendar(event.time.split(' - ')[0]);
+        const endTime = event.time.includes(' - ') ? formatTimeForCalendar(event.time.split(' - ')[1]) : startTime;
+        
+        icsContent.push(
+          'BEGIN:VEVENT',
+          `UID:${eventId}@hawksbaseball.com`,
+          `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
+          `DTSTART:${eventDate}${startTime}`,
+          `DTEND:${eventDate}${endTime}`,
+          `SUMMARY:${event.event}`,
+          `DESCRIPTION:${event.description}\\nLocation: ${event.location}`,
+          `LOCATION:${event.location}`,
+          'END:VEVENT'
+        );
+      });
+    });
+
+    icsContent.push('END:VCALENDAR');
+    return icsContent.join('\r\n');
+  };
+
   // Calendar subscription functions
   const subscribeToGoogleCalendar = () => {
-    const webcalUrl = `webcal://${window.location.host}/hawks-tournament.ics`;
-    window.open(webcalUrl, '_blank');
+    // Generate ICS data dynamically and create a data URL
+    const icsData = generateFullCalendarICS();
+    const blob = new Blob([icsData], { type: 'text/calendar' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'hawks-cooperstown-tournament.ics';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const subscribeToAppleCalendar = () => {
-    const webcalUrl = `webcal://${window.location.host}/hawks-tournament.ics`;
-    window.open(webcalUrl, '_blank');
+    // Generate ICS data dynamically and create a data URL
+    const icsData = generateFullCalendarICS();
+    const blob = new Blob([icsData], { type: 'text/calendar' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'hawks-cooperstown-tournament.ics';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const subscribeToOutlook = () => {
-    const webcalUrl = `webcal://${window.location.host}/hawks-tournament.ics`;
-    window.open(webcalUrl, '_blank');
+    // Generate ICS data dynamically and create a data URL
+    const icsData = generateFullCalendarICS();
+    const blob = new Blob([icsData], { type: 'text/calendar' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'hawks-cooperstown-tournament.ics';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const toggleEventExpansion = (eventId) => {
