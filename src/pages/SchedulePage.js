@@ -404,12 +404,7 @@ END:VEVENT
          URL.revokeObjectURL(url);
    };
 
-   const subscribeToCalendar = () => {
-     // For now, we'll use the same ICS content but as a webcal subscription
-     // In a real implementation, this would be hosted on a server
-     const webcalUrl = `webcal://${window.location.host}/hawks-tournament.ics`;
-     window.open(webcalUrl, '_blank');
-   };
+
 
   const filteredSchedule = selectedDay === 'all' 
     ? Object.entries(schedule)
