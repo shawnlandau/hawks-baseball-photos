@@ -50,7 +50,7 @@ const ProtectedRoute = ({ children }) => {
 
 // Main App Component
 const App = () => {
-  const { userId, isAuthReady, firebaseInitError, handleAuth, handleSignOut, auth } = useFirebase();
+  const { userId, isAuthReady, firebaseInitError, handleAuth, handleSignOut, handleForgotPassword, auth } = useFirebase();
   const [authError, setAuthError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -59,7 +59,12 @@ const App = () => {
     setAuthError('');
     
     try {
-      await handleAuth(email, password, isSignUp, authMethod);
+      if (authMethod === 'forgot-password') {
+        // Handle forgot password
+        await handleForgotPassword(email);
+      } else {
+        await handleAuth(email, password, isSignUp, authMethod);
+      }
     } catch (error) {
       console.error('Authentication error:', error);
       let errorMessage = 'Authentication failed. Please try again.';
@@ -79,6 +84,7 @@ const App = () => {
       }
       
       setAuthError(errorMessage);
+      throw error; // Re-throw for the AuthForm to handle
     } finally {
       setIsLoading(false);
     }

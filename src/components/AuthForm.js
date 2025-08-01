@@ -5,6 +5,11 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+  const [forgotPasswordError, setForgotPasswordError] = useState('');
+  const [forgotPasswordSuccess, setForgotPasswordSuccess] = useState(false);
+  const [isForgotPasswordLoading, setIsForgotPasswordLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -70,8 +75,50 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
   };
 
   const handleForgotPassword = () => {
-    // TODO: Implement forgot password functionality
-    alert('Forgot password functionality will be implemented soon.');
+    setShowForgotPassword(true);
+    setForgotPasswordEmail(formData.email);
+    setForgotPasswordError('');
+    setForgotPasswordSuccess(false);
+  };
+
+  const handleForgotPasswordSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!forgotPasswordEmail || !/\S+@\S+\.\S+/.test(forgotPasswordEmail)) {
+      setForgotPasswordError('Please enter a valid email address');
+      return;
+    }
+
+    setIsForgotPasswordLoading(true);
+    setForgotPasswordError('');
+
+    try {
+      // Call the forgot password function from the parent component
+      await onAuth(forgotPasswordEmail, null, false, 'forgot-password');
+      setForgotPasswordSuccess(true);
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      let errorMessage = 'Failed to send password reset email. Please try again.';
+      
+      if (error.code === 'auth/user-not-found') {
+        errorMessage = 'No account found with this email address.';
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Please enter a valid email address.';
+      } else if (error.code === 'auth/too-many-requests') {
+        errorMessage = 'Too many attempts. Please try again later.';
+      }
+      
+      setForgotPasswordError(errorMessage);
+    } finally {
+      setIsForgotPasswordLoading(false);
+    }
+  };
+
+  const handleBackToSignIn = () => {
+    setShowForgotPassword(false);
+    setForgotPasswordEmail('');
+    setForgotPasswordError('');
+    setForgotPasswordSuccess(false);
   };
 
   const getPasswordStrength = (password) => {
@@ -341,6 +388,89 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
             </p>
           </div>
         </div>
+
+        {/* Forgot Password Modal */}
+        {showForgotPassword && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-hawks-navy mb-2">Reset Password</h2>
+                <p className="text-gray-600 text-sm">
+                  Enter your email address and we'll send you a link to reset your password.
+                </p>
+              </div>
+
+              {forgotPasswordSuccess ? (
+                <div className="text-center">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                    <p className="text-green-600 text-sm">
+                      ✅ Password reset email sent! Check your inbox and follow the link to reset your password.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleBackToSignIn}
+                    className="w-full bg-hawks-red text-white py-3 px-4 rounded-lg font-semibold hover:bg-hawks-red-dark transition-colors"
+                  >
+                    Back to Sign In
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleForgotPasswordSubmit} className="space-y-4">
+                  <div>
+                    <label htmlFor="forgot-email" className="block text-sm font-semibold text-gray-700 mb-2">
+                      Email Address
+                    </label>
+                    <div className="relative">
+                      <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" aria-hidden="true" />
+                      <input
+                        type="email"
+                        id="forgot-email"
+                        value={forgotPasswordEmail}
+                        onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hawks-red focus:border-transparent transition-colors text-base"
+                        placeholder="Enter your email address"
+                        disabled={isForgotPasswordLoading}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {forgotPasswordError && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3" role="alert">
+                      <p className="text-red-600 text-sm">{forgotPasswordError}</p>
+                    </div>
+                  )}
+
+                  <div className="flex space-x-3">
+                    <button
+                      type="button"
+                      onClick={handleBackToSignIn}
+                      disabled={isForgotPasswordLoading}
+                      className="flex-1 bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isForgotPasswordLoading}
+                      className="flex-1 bg-hawks-red text-white py-3 px-4 rounded-lg font-semibold hover:bg-hawks-red-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                    >
+                      {isForgotPasswordLoading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" aria-hidden="true"></div>
+                          <span>Sending...</span>
+                        </>
+                      ) : (
+                        <span>Send Reset Link</span>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="text-center mt-6">

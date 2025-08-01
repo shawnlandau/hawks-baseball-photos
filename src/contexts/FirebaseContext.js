@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
@@ -119,6 +119,15 @@ export const FirebaseProvider = ({ children }) => {
     }
   };
 
+  const handleForgotPassword = async (email) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (error) {
+      console.error('Password reset error:', error);
+      throw error;
+    }
+  };
+
   const value = {
     app,
     db,
@@ -128,7 +137,8 @@ export const FirebaseProvider = ({ children }) => {
     isAuthReady,
     firebaseInitError,
     handleAuth,
-    handleSignOut
+    handleSignOut,
+    handleForgotPassword
   };
 
   return (
