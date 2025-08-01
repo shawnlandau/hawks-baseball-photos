@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { FaDownload, FaHeart, FaShare, FaTimes, FaChevronLeft, FaChevronRight, FaExpand, FaCompress, FaPlay, FaPause } from 'react-icons/fa';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FaDownload, FaHeart, FaTimes, FaChevronLeft, FaChevronRight, FaExpand } from 'react-icons/fa';
 import { useFirebase } from '../hooks/useFirebase';
 
 const PhotoGallery = () => {
-  const { storage, userId } = useFirebase();
+  const { storage } = useFirebase();
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAutoPlay, setIsAutoPlay] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState(new Set());
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'masonry'
 
@@ -65,7 +64,7 @@ const PhotoGallery = () => {
     setSelectedPhoto(photos[currentIndex]);
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = useCallback((e) => {
     if (!lightboxOpen) return;
     
     switch (e.key) {
@@ -81,7 +80,7 @@ const PhotoGallery = () => {
       default:
         break;
     }
-  };
+  }, [lightboxOpen]);
 
   const downloadPhoto = async (photo) => {
     try {
@@ -127,7 +126,7 @@ const PhotoGallery = () => {
   useEffect(() => {
     document.addEventListener('keydown', handleKeyPress);
     return () => document.removeEventListener('keydown', handleKeyPress);
-  }, [lightboxOpen, currentIndex, photos]);
+  }, [handleKeyPress]);
 
   if (loading) {
     return (
@@ -246,7 +245,7 @@ const PhotoGallery = () => {
                 <div className="relative aspect-square bg-gray-200">
                   <img
                     src={photo.url}
-                    alt={`Hawks Baseball photo - ${photo.name}`}
+                    alt={`Hawks Baseball - ${photo.name}`}
                     className="w-full h-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
                     onClick={() => openLightbox(photo, index)}
                     loading="lazy"
@@ -338,7 +337,7 @@ const PhotoGallery = () => {
             <div className="relative">
               <img
                 src={selectedPhoto.url}
-                alt={`Hawks Baseball photo - ${selectedPhoto.name}`}
+                alt={`Hawks Baseball - ${selectedPhoto.name}`}
                 className="max-w-full max-h-[80vh] object-contain rounded-lg"
               />
               
