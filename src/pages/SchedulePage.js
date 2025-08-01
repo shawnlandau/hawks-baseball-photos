@@ -124,7 +124,7 @@ const SchedulePage = () => {
         time: '11:30 AM',
         event: 'Hawks Baseball vs Texas Smoke',
         location: 'Field 17',
-        description: 'Tournament Game - Hawks Baseball (CA) vs Texas Smoke (TX)',
+        description: 'Pool Play Game - Hawks Baseball (CA) vs Texas Smoke (TX)',
         type: 'game',
         gameId: '373285',
         homeTeam: 'Texas Smoke',
@@ -141,7 +141,7 @@ const SchedulePage = () => {
         time: '7:00 PM',
         event: 'Great Bay All Stars vs Hawks Baseball',
         location: 'Field 1',
-        description: 'Tournament Game - Great Bay All Stars (NH) vs Hawks Baseball (CA)',
+        description: 'Pool Play Game - Great Bay All Stars (NH) vs Hawks Baseball (CA)',
         type: 'game',
         gameId: '373332',
         homeTeam: 'Great Bay All Stars',
@@ -165,37 +165,7 @@ const SchedulePage = () => {
       },
       {
         time: '9:00 AM, 11:30 AM, 2:00 PM, 4:30 PM & 7:00 PM',
-        event: 'Pool Play Games',
-        location: 'Various Fields',
-        description: 'Pool play tournament games',
-        type: 'game'
-      },
-      {
-        time: '11:00 AM - 2:30 PM',
-        event: 'Lunch',
-        location: 'Dining Hall',
-        description: 'Team lunch service',
-        type: 'meal'
-      },
-      {
-        time: '5:00 PM - 8:30 PM',
-        event: 'Dinner',
-        location: 'Dining Hall',
-        description: 'Team dinner service',
-        type: 'meal'
-      }
-    ],
-    'Day 5 - Monday, August 4': [
-      {
-        time: '6:30 AM - 9:30 AM',
-        event: 'Breakfast',
-        location: 'Dining Hall',
-        description: 'Team breakfast service',
-        type: 'meal'
-      },
-      {
-        time: '9:00 AM, 11:30 AM, 2:00 PM, 4:30 PM & 7:00 PM',
-        event: 'Single Elimination Tournament Games',
+        event: 'Tournament Games',
         location: 'Various Fields',
         description: 'Single elimination tournament games',
         type: 'game'
@@ -215,7 +185,7 @@ const SchedulePage = () => {
         type: 'meal'
       }
     ],
-    'Day 6 - Tuesday, August 5': [
+    'Day 5 - Monday, August 4': [
       {
         time: '6:30 AM - 9:30 AM',
         event: 'Breakfast',
@@ -287,7 +257,7 @@ const SchedulePage = () => {
         type: 'game'
       }
     ],
-    'Day 7 - Wednesday, August 6': [
+    'Day 6 - Tuesday, August 5': [
       {
         time: '6:00 AM - 9:00 AM',
         event: 'Team Check-Out',
@@ -295,7 +265,8 @@ const SchedulePage = () => {
         description: 'Team check-out and departure',
         type: 'registration'
       }
-    ]
+          ],
+      
   };
 
   const eventTypes = {

@@ -33,8 +33,9 @@ const PhotoUpload = ({ onUploadSuccess }) => {
   const albums = [
     'Day 1 - Opening Ceremonies',
     'Day 2 - Pool Play',
-    'Day 3 - Tournament Games',
-    'Day 4 - Championship',
+    'Day 3 - Pool Play',
+    'Day 4 - Tournament Games',
+    'Day 5 - Championship',
     'Team Photos',
     'Action Shots',
     'Celebration Moments',
