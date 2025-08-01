@@ -114,7 +114,8 @@ const Navbar = ({ user, auth, onSignOut }) => {
           {/* Mobile menu button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors duration-200"
+            className="md:hidden p-3 text-white hover:bg-white/10 rounded-lg transition-colors duration-200"
+            aria-label="Toggle mobile menu"
           >
             {isMobileMenuOpen ? <FaTimes className="w-6 h-6" /> : <FaBars className="w-6 h-6" />}
           </button>
@@ -123,7 +124,7 @@ const Navbar = ({ user, auth, onSignOut }) => {
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
           <div className="md:hidden mt-4 pb-4 border-t border-white/20">
-            <div className="flex flex-col space-y-2 pt-4">
+            <div className="flex flex-col space-y-3 pt-4">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -131,13 +132,13 @@ const Navbar = ({ user, auth, onSignOut }) => {
                     key={item.path}
                     to={item.path}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center space-x-3 ${
+                    className={`px-6 py-4 rounded-lg text-base font-semibold transition-all duration-200 flex items-center space-x-4 ${
                       isActive(item.path)
-                        ? 'bg-hawks-red text-white'
+                        ? 'bg-hawks-red text-white shadow-lg'
                         : 'text-white hover:bg-white/10'
                     }`}
                   >
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-6 h-6" />
                     <span>{item.label}</span>
                   </Link>
                 );
