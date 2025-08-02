@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { FaDownload, FaHeart, FaTimes, FaChevronLeft, FaChevronRight, FaExpand } from 'react-icons/fa';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { FaDownload, FaHeart, FaTimes, FaChevronLeft, FaChevronRight, FaExpand, FaSpinner, FaCheck } from 'react-icons/fa';
 import { useFirebase } from '../hooks/useFirebase';
 
 const PhotoGallery = () => {
-  const { storage } = useFirebase();
+  const { storage, userId } = useFirebase();
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
@@ -11,6 +11,10 @@ const PhotoGallery = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedPhotos, setSelectedPhotos] = useState(new Set());
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'masonry'
+  const [downloadingPhotos, setDownloadingPhotos] = useState(new Set());
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const lightboxRef = useRef(null);
 
   useEffect(() => {
     const fetchPhotos = async () => {
@@ -55,13 +59,37 @@ const PhotoGallery = () => {
     setSelectedPhoto(null);
   };
 
-  const navigateLightbox = (direction) => {
+  const navigateLightbox = useCallback((direction) => {
     if (direction === 'next') {
       setCurrentIndex((prev) => (prev + 1) % photos.length);
     } else {
       setCurrentIndex((prev) => (prev - 1 + photos.length) % photos.length);
     }
     setSelectedPhoto(photos[currentIndex]);
+  }, [photos, currentIndex]);
+
+  // Touch gesture handlers for mobile
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      navigateLightbox('next');
+    } else if (isRightSwipe) {
+      navigateLightbox('prev');
+    }
   };
 
   const handleKeyPress = useCallback((e) => {
@@ -83,6 +111,13 @@ const PhotoGallery = () => {
   }, [lightboxOpen]);
 
   const downloadPhoto = async (photo) => {
+    if (!userId) {
+      alert('Please sign in to download photos.');
+      return;
+    }
+
+    setDownloadingPhotos(prev => new Set(prev).add(photo.id));
+    
     try {
       const response = await fetch(photo.url);
       const blob = await response.blob();
@@ -94,8 +129,23 @@ const PhotoGallery = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
+      
+      // Show success feedback
+      setTimeout(() => {
+        setDownloadingPhotos(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(photo.id);
+          return newSet;
+        });
+      }, 1000);
     } catch (error) {
       console.error('Error downloading photo:', error);
+      alert('Failed to download photo. Please try again.');
+      setDownloadingPhotos(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(photo.id);
+        return newSet;
+      });
     }
   };
 
@@ -143,10 +193,10 @@ const PhotoGallery = () => {
     <div className="min-h-screen bg-gradient-to-br from-hawks-navy via-hawks-navy-dark to-hawks-red">
       {/* Header */}
       <div className="bg-white/10 backdrop-blur-sm border-b border-white/20">
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-4 py-4 sm:py-6">
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
                 Photo Gallery
               </h1>
               <p className="text-white/80 text-sm sm:text-base">
@@ -155,12 +205,12 @@ const PhotoGallery = () => {
             </div>
             
             {/* View Controls */}
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4">
               {/* View Mode Toggle */}
               <div className="flex bg-white/10 rounded-lg p-1">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-4 py-3 rounded-md text-sm font-medium transition-colors ${
                     viewMode === 'grid' 
                       ? 'bg-hawks-red text-white' 
                       : 'text-white/70 hover:text-white'
@@ -170,7 +220,7 @@ const PhotoGallery = () => {
                 </button>
                 <button
                   onClick={() => setViewMode('masonry')}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-4 py-3 rounded-md text-sm font-medium transition-colors ${
                     viewMode === 'masonry' 
                       ? 'bg-hawks-red text-white' 
                       : 'text-white/70 hover:text-white'
@@ -182,20 +232,20 @@ const PhotoGallery = () => {
 
               {/* Selection Controls */}
               {selectedPhotos.size > 0 && (
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
                   <span className="text-white text-sm">
                     {selectedPhotos.size} selected
                   </span>
                   <button
                     onClick={downloadSelectedPhotos}
-                    className="bg-hawks-red text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-hawks-red-dark transition-colors flex items-center space-x-2"
+                    className="bg-hawks-red text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-hawks-red-dark transition-colors flex items-center justify-center space-x-2 min-h-[48px]"
                   >
                     <FaDownload className="w-4 h-4" />
                     <span>Download ({selectedPhotos.size})</span>
                   </button>
                   <button
                     onClick={clearSelection}
-                    className="bg-gray-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors"
+                    className="bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors min-h-[48px]"
                   >
                     Clear
                   </button>
@@ -207,10 +257,10 @@ const PhotoGallery = () => {
       </div>
 
       {/* Gallery Grid */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
         {photos.length === 0 ? (
           <div className="text-center py-12">
-            <div className="bg-white/10 rounded-2xl p-8 max-w-md mx-auto">
+            <div className="bg-white/10 rounded-2xl p-6 sm:p-8 max-w-md mx-auto">
               <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FaHeart className="w-8 h-8 text-white/60" />
               </div>
@@ -220,14 +270,14 @@ const PhotoGallery = () => {
               </p>
               <a
                 href="/upload"
-                className="inline-flex items-center space-x-2 bg-hawks-red text-white px-6 py-3 rounded-lg font-medium hover:bg-hawks-red-dark transition-colors"
+                className="inline-flex items-center justify-center space-x-2 bg-hawks-red text-white px-6 py-3 rounded-lg font-medium hover:bg-hawks-red-dark transition-colors min-h-[48px]"
               >
                 <span>Upload Photos</span>
               </a>
             </div>
           </div>
         ) : (
-          <div className={`grid gap-4 sm:gap-6 ${
+          <div className={`grid gap-3 sm:gap-4 lg:gap-6 ${
             viewMode === 'grid' 
               ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
               : 'columns-1 sm:columns-2 lg:columns-3 xl:columns-4'
@@ -259,7 +309,7 @@ const PhotoGallery = () => {
                         type="checkbox"
                         checked={selectedPhotos.has(photo.id)}
                         onChange={() => togglePhotoSelection(photo.id)}
-                        className="w-5 h-5 rounded border-2 border-white bg-white/20 checked:bg-hawks-red checked:border-hawks-red focus:ring-2 focus:ring-hawks-red focus:ring-offset-2"
+                        className="w-6 h-6 rounded border-2 border-white bg-white/20 checked:bg-hawks-red checked:border-hawks-red focus:ring-2 focus:ring-hawks-red focus:ring-offset-2"
                       />
                     </div>
 
@@ -270,17 +320,22 @@ const PhotoGallery = () => {
                           e.stopPropagation();
                           downloadPhoto(photo);
                         }}
-                        className="w-10 h-10 bg-white/90 hover:bg-white text-gray-800 rounded-full flex items-center justify-center transition-colors shadow-lg"
+                        disabled={downloadingPhotos.has(photo.id)}
+                        className="w-12 h-12 bg-white/90 hover:bg-white text-gray-800 rounded-full flex items-center justify-center transition-colors shadow-lg disabled:opacity-50 min-h-[48px]"
                         aria-label="Download photo"
                       >
-                        <FaDownload className="w-4 h-4" />
+                        {downloadingPhotos.has(photo.id) ? (
+                          <FaSpinner className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <FaDownload className="w-4 h-4" />
+                        )}
                       </button>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           openLightbox(photo, index);
                         }}
-                        className="w-10 h-10 bg-white/90 hover:bg-white text-gray-800 rounded-full flex items-center justify-center transition-colors shadow-lg"
+                        className="w-12 h-12 bg-white/90 hover:bg-white text-gray-800 rounded-full flex items-center justify-center transition-colors shadow-lg min-h-[48px]"
                         aria-label="View full screen"
                       >
                         <FaExpand className="w-4 h-4" />
@@ -306,8 +361,14 @@ const PhotoGallery = () => {
 
       {/* Lightbox */}
       {lightboxOpen && selectedPhoto && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-          <div className="relative max-w-7xl max-h-full">
+        <div 
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-2 sm:p-4"
+          ref={lightboxRef}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
+          <div className="relative max-w-full max-h-full w-full h-full flex items-center justify-center">
             {/* Close Button */}
             <button
               onClick={closeLightbox}
@@ -320,45 +381,50 @@ const PhotoGallery = () => {
             {/* Navigation Buttons */}
             <button
               onClick={() => navigateLightbox('prev')}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 w-12 h-12 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors"
+              className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 z-10 w-12 h-12 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors"
               aria-label="Previous photo"
             >
               <FaChevronLeft className="w-6 h-6" />
             </button>
             <button
               onClick={() => navigateLightbox('next')}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 w-12 h-12 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors"
+              className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 z-10 w-12 h-12 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors"
               aria-label="Next photo"
             >
               <FaChevronRight className="w-6 h-6" />
             </button>
 
             {/* Photo */}
-            <div className="relative">
+            <div className="relative w-full h-full flex items-center justify-center">
               <img
                 src={selectedPhoto.url}
                 alt={`Hawks Baseball - ${selectedPhoto.name}`}
-                className="max-w-full max-h-[80vh] object-contain rounded-lg"
+                className="max-w-full max-h-full object-contain rounded-lg"
               />
               
               {/* Photo Info */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 rounded-b-lg">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="text-white font-semibold text-lg">
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 sm:p-6 rounded-b-lg">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0">
+                  <div className="flex-1">
+                    <h3 className="text-white font-semibold text-base sm:text-lg">
                       {selectedPhoto.name}
                     </h3>
                     <p className="text-white/70 text-sm">
                       {(selectedPhoto.size / 1024 / 1024).toFixed(1)} MB • Photo {currentIndex + 1} of {photos.length}
                     </p>
                   </div>
-                  <div className="flex space-x-3">
+                  <div className="flex space-x-2 sm:space-x-3">
                     <button
                       onClick={() => downloadPhoto(selectedPhoto)}
-                      className="bg-hawks-red hover:bg-hawks-red-dark text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+                      disabled={downloadingPhotos.has(selectedPhoto.id)}
+                      className="bg-hawks-red hover:bg-hawks-red-dark text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2 min-h-[48px] disabled:opacity-50"
                     >
-                      <FaDownload className="w-4 h-4" />
-                      <span>Download</span>
+                      {downloadingPhotos.has(selectedPhoto.id) ? (
+                        <FaSpinner className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <FaDownload className="w-4 h-4" />
+                      )}
+                      <span className="hidden sm:inline">Download</span>
                     </button>
                   </div>
                 </div>

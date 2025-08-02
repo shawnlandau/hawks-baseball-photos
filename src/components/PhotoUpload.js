@@ -213,36 +213,36 @@ const PhotoUpload = ({ onUploadSuccess }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-lg p-6 shadow-lg border border-gray-200">
-        <h2 className="text-2xl font-bold text-hawks-navy mb-2">
+      <div className="bg-white rounded-lg p-4 sm:p-6 shadow-lg border border-gray-200">
+        <h2 className="text-xl sm:text-2xl font-bold text-hawks-navy mb-2">
           Share Your Memories
         </h2>
-        <p className="text-gray-600">
+        <p className="text-gray-600 text-sm sm:text-base">
           Upload photos from our Cooperstown Dreams Park journey. Tag players, add captions, and organize by albums.
         </p>
       </div>
 
       {/* Upload Area */}
-      <div className="bg-white rounded-lg p-6 shadow-lg border border-gray-200">
+      <div className="bg-white rounded-lg p-4 sm:p-6 shadow-lg border border-gray-200">
         <div
           {...getRootProps()}
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 ${
+          className={`border-2 border-dashed rounded-lg p-6 sm:p-8 text-center transition-all duration-200 ${
             isDragActive
               ? 'border-hawks-red bg-red-50'
               : 'border-gray-300 hover:border-hawks-red hover:bg-gray-50'
           }`}
         >
           <input {...getInputProps()} />
-          <FaCloudUploadAlt className="text-4xl text-gray-400 mx-auto mb-4" />
-          <p className="text-lg font-semibold text-gray-700 mb-2">
+          <FaCloudUploadAlt className="text-3xl sm:text-4xl text-gray-400 mx-auto mb-4" />
+          <p className="text-base sm:text-lg font-semibold text-gray-700 mb-2">
             {isDragActive ? 'Drop your photos here' : 'Drag & drop photos here'}
           </p>
-          <p className="text-gray-500 mb-4">
-            or click to select files
+          <p className="text-gray-500 mb-4 text-sm sm:text-base">
+            or tap to select files
           </p>
-          <p className="text-sm text-gray-400 mb-4">
+          <p className="text-xs sm:text-sm text-gray-400 mb-4">
             Supports: JPG, PNG, GIF, WebP (Max 10MB each)
           </p>
           <button
@@ -251,7 +251,7 @@ const PhotoUpload = ({ onUploadSuccess }) => {
               e.stopPropagation();
               document.querySelector('input[type="file"]').click();
             }}
-            className="bg-hawks-red text-white px-6 py-2 rounded-lg font-semibold hover:bg-hawks-red-dark transition-colors duration-200 flex items-center space-x-2 mx-auto"
+            className="bg-hawks-red text-white px-6 py-3 rounded-lg font-semibold hover:bg-hawks-red-dark transition-colors duration-200 flex items-center justify-center space-x-2 mx-auto min-h-[48px] w-full sm:w-auto"
           >
             <FaCloudUploadAlt className="w-4 h-4" />
             <span>Browse Files</span>
@@ -261,11 +261,11 @@ const PhotoUpload = ({ onUploadSuccess }) => {
 
       {/* Selected Files */}
       {selectedFiles.length > 0 && (
-        <div className="bg-white rounded-lg p-6 shadow-lg border border-gray-200">
+        <div className="bg-white rounded-lg p-4 sm:p-6 shadow-lg border border-gray-200">
           <h3 className="text-lg font-semibold text-hawks-navy mb-4">
             Selected Files ({selectedFiles.length})
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {selectedFiles.map((file, index) => (
               <div key={index} className="relative group">
                 <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
@@ -277,12 +277,13 @@ const PhotoUpload = ({ onUploadSuccess }) => {
                 </div>
                 <button
                   onClick={() => removeFile(index)}
-                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity min-h-[32px] min-w-[32px] flex items-center justify-center"
+                  aria-label="Remove file"
                 >
                   <FaTimes className="w-3 h-3" />
                 </button>
                 <div className="mt-2">
-                  <p className="text-sm font-medium text-gray-800 truncate">
+                  <p className="text-xs sm:text-sm font-medium text-gray-800 truncate">
                     {file.name}
                   </p>
                   <p className="text-xs text-gray-500">
@@ -297,7 +298,7 @@ const PhotoUpload = ({ onUploadSuccess }) => {
 
       {/* Form Fields */}
       {selectedFiles.length > 0 && (
-        <div className="bg-white rounded-lg p-6 shadow-lg border border-gray-200 space-y-6">
+        <div className="bg-white rounded-lg p-4 sm:p-6 shadow-lg border border-gray-200 space-y-4 sm:space-y-6">
           {/* Caption */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -307,7 +308,7 @@ const PhotoUpload = ({ onUploadSuccess }) => {
               value={formData.caption}
               onChange={(e) => setFormData(prev => ({ ...prev, caption: e.target.value }))}
               placeholder="Describe this moment..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hawks-red focus:border-transparent resize-none"
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hawks-red focus:border-transparent resize-none"
               rows="3"
             />
           </div>
@@ -320,7 +321,7 @@ const PhotoUpload = ({ onUploadSuccess }) => {
             <select
               value={formData.album}
               onChange={(e) => setFormData(prev => ({ ...prev, album: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hawks-red focus:border-transparent"
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hawks-red focus:border-transparent"
             >
               <option value="">Select an album...</option>
               {albums.map(album => (
@@ -339,7 +340,7 @@ const PhotoUpload = ({ onUploadSuccess }) => {
                 <button
                   key={player}
                   onClick={() => toggleTag(player)}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                  className={`px-3 py-2 rounded-full text-sm font-medium transition-colors min-h-[40px] ${
                     formData.tags.includes(player)
                       ? 'bg-hawks-red text-white'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -363,9 +364,9 @@ const PhotoUpload = ({ onUploadSuccess }) => {
                   {Math.round(uploadProgress)}%
                 </span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-gray-200 rounded-full h-3">
                 <div
-                  className="bg-hawks-red h-2 rounded-full transition-all duration-300"
+                  className="bg-hawks-red h-3 rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
@@ -375,16 +376,16 @@ const PhotoUpload = ({ onUploadSuccess }) => {
           {/* Error Message */}
           {uploadError && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-2">
-              <FaExclamationTriangle className="text-red-500" />
-              <p className="text-red-600">{uploadError}</p>
+              <FaExclamationTriangle className="text-red-500 flex-shrink-0" />
+              <p className="text-red-600 text-sm">{uploadError}</p>
             </div>
           )}
 
           {/* Success Message */}
           {uploadSuccess && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center space-x-2">
-              <FaCheck className="text-green-500" />
-              <p className="text-green-600">Photos uploaded successfully!</p>
+              <FaCheck className="text-green-500 flex-shrink-0" />
+              <p className="text-green-600 text-sm">Photos uploaded successfully!</p>
             </div>
           )}
 
@@ -392,7 +393,7 @@ const PhotoUpload = ({ onUploadSuccess }) => {
           <button
             onClick={handleUpload}
             disabled={uploading}
-            className="w-full bg-hawks-red text-white py-3 px-4 rounded-lg font-semibold hover:bg-hawks-red-dark transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+            className="w-full bg-hawks-red text-white py-4 px-4 rounded-lg font-semibold hover:bg-hawks-red-dark transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 min-h-[48px]"
           >
             {uploading ? (
               <>
