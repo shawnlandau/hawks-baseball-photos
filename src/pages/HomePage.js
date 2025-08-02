@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaImages, FaUpload, FaCalendar, FaMap, FaTrophy, FaHeart, FaStar, FaUsers, FaDownload, FaMessageCircle, FaCamera } from 'react-icons/fa';
+import { FaImages, FaUpload, FaCalendar, FaMap, FaTrophy, FaHeart, FaStar, FaUsers, FaDownload, FaMessageCircle, FaCameraAlt } from 'react-icons/fa';
 import PlayerCard from '../components/PlayerCard';
 import MemoryVault from '../components/MemoryVault';
 import MessageBoard from '../components/MessageBoard';
@@ -72,7 +72,7 @@ const HomePage = () => {
 
   const tabs = [
     { id: 'team', label: 'Meet the Team', icon: FaUsers },
-    { id: 'memories', label: 'Memory Vault', icon: FaCamera },
+    { id: 'memories', label: 'Memory Vault', icon: FaCameraAlt },
     { id: 'messages', label: 'Messages', icon: FaMessageCircle }
   ];
 
