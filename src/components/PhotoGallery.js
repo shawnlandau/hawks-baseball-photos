@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { FaDownload, FaHeart, FaTimes, FaChevronLeft, FaChevronRight, FaExpand, FaSpinner, FaCheck } from 'react-icons/fa';
+import { FaDownload, FaHeart, FaTimes, FaChevronLeft, FaChevronRight, FaExpand, FaSpinner, FaFilter } from 'react-icons/fa';
 import { useFirebase } from '../hooks/useFirebase';
+import { teamRoster } from '../data/teamRoster';
 
 const PhotoGallery = () => {
   const { storage, userId } = useFirebase();
@@ -14,6 +15,8 @@ const PhotoGallery = () => {
   const [downloadingPhotos, setDownloadingPhotos] = useState(new Set());
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [showPlayerFilter, setShowPlayerFilter] = useState(false);
   const lightboxRef = useRef(null);
 
   useEffect(() => {
@@ -108,7 +111,7 @@ const PhotoGallery = () => {
       default:
         break;
     }
-  }, [lightboxOpen]);
+  }, [lightboxOpen, navigateLightbox, closeLightbox]);
 
   const downloadPhoto = async (photo) => {
     if (!userId) {
@@ -173,6 +176,61 @@ const PhotoGallery = () => {
     setSelectedPhotos(new Set());
   };
 
+  // Player filtering functionality
+  const handlePlayerFilter = (player) => {
+    setSelectedPlayer(player);
+    setShowPlayerFilter(false);
+  };
+
+  const clearPlayerFilter = () => {
+    setSelectedPlayer(null);
+  };
+
+  const downloadAllPlayerPhotos = async () => {
+    if (!userId) {
+      alert('Please sign in to download photos.');
+      return;
+    }
+
+    if (!selectedPlayer) {
+      alert('Please select a player first.');
+      return;
+    }
+
+    const playerPhotos = photos.filter(photo => 
+      photo.tags && photo.tags.includes(selectedPlayer.name)
+    );
+
+    if (playerPhotos.length === 0) {
+      alert(`No photos found for ${selectedPlayer.name}.`);
+      return;
+    }
+
+    setDownloadingPhotos(prev => new Set([...prev, 'bulk']));
+    
+    try {
+      for (const photo of playerPhotos) {
+        await downloadPhoto(photo);
+        // Add small delay to prevent browser blocking multiple downloads
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    } catch (error) {
+      console.error('Error downloading player photos:', error);
+      alert('Failed to download some photos. Please try again.');
+    } finally {
+      setDownloadingPhotos(prev => {
+        const newSet = new Set(prev);
+        newSet.delete('bulk');
+        return newSet;
+      });
+    }
+  };
+
+  // Filter photos based on selected player
+  const filteredPhotos = selectedPlayer 
+    ? photos.filter(photo => photo.tags && photo.tags.includes(selectedPlayer.name))
+    : photos;
+
   useEffect(() => {
     document.addEventListener('keydown', handleKeyPress);
     return () => document.removeEventListener('keydown', handleKeyPress);
@@ -200,12 +258,65 @@ const PhotoGallery = () => {
                 Photo Gallery
               </h1>
               <p className="text-white/80 text-sm sm:text-base">
-                {photos.length} photos • Capture the Hawks' Cooperstown memories
+                {selectedPlayer 
+                  ? `${selectedPlayer.name}'s Photos (${filteredPhotos.length})` 
+                  : `${photos.length} photos • Capture the Hawks' Cooperstown memories`
+                }
               </p>
             </div>
             
-            {/* View Controls */}
+            {/* Controls */}
             <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4">
+              {/* Player Filter */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowPlayerFilter(!showPlayerFilter)}
+                  className="flex items-center space-x-2 bg-white/20 text-white px-4 py-3 rounded-lg hover:bg-white/30 transition-colors min-h-[48px]"
+                >
+                  <FaFilter className="w-4 h-4" />
+                  <span className="hidden sm:inline">Filter by Player</span>
+                </button>
+                
+                {showPlayerFilter && (
+                  <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl z-50 min-w-[200px] max-h-[400px] overflow-y-auto">
+                    <div className="p-2">
+                      <button
+                        onClick={clearPlayerFilter}
+                        className="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 text-sm font-medium"
+                      >
+                        All Photos
+                      </button>
+                      {teamRoster.map((player) => (
+                        <button
+                          key={player.id}
+                          onClick={() => handlePlayerFilter(player)}
+                          className="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 text-sm"
+                        >
+                          <div className="font-medium">{player.name}</div>
+                          <div className="text-xs text-gray-500">{player.position}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Download All for Player */}
+              {selectedPlayer && userId && (
+                <button
+                  onClick={downloadAllPlayerPhotos}
+                  disabled={downloadingPhotos.has('bulk')}
+                  className="flex items-center space-x-2 bg-hawks-red text-white px-4 py-3 rounded-lg hover:bg-hawks-red-dark transition-colors disabled:opacity-50 min-h-[48px]"
+                >
+                  {downloadingPhotos.has('bulk') ? (
+                    <FaSpinner className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <FaDownload className="w-4 h-4" />
+                  )}
+                  <span className="hidden sm:inline">Download All</span>
+                </button>
+              )}
+
               {/* View Mode Toggle */}
               <div className="flex bg-white/10 rounded-lg p-1">
                 <button
@@ -282,7 +393,7 @@ const PhotoGallery = () => {
               ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
               : 'columns-1 sm:columns-2 lg:columns-3 xl:columns-4'
           }`}>
-            {photos.map((photo, index) => (
+            {filteredPhotos.map((photo, index) => (
               <div
                 key={photo.id}
                 className={`group relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ${

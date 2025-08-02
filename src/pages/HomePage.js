@@ -1,8 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaImages, FaUpload, FaCalendar, FaMap, FaTrophy, FaHeart, FaStar } from 'react-icons/fa';
+import { FaImages, FaUpload, FaCalendar, FaMap, FaTrophy, FaHeart, FaStar, FaUsers, FaDownload, FaMessageCircle, FaCamera } from 'react-icons/fa';
+import PlayerCard from '../components/PlayerCard';
+import MemoryVault from '../components/MemoryVault';
+import MessageBoard from '../components/MessageBoard';
+import { teamRoster, teamStats, tournamentHighlights } from '../data/teamRoster';
 
 const HomePage = () => {
+  const [activeTab, setActiveTab] = useState('team');
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+
   const features = [
     {
       icon: FaImages,
@@ -50,6 +57,23 @@ const HomePage = () => {
       title: 'Tradition',
       description: 'Honoring the legacy of America\'s pastime'
     }
+  ];
+
+  const handlePlayerClick = (player) => {
+    setSelectedPlayer(player);
+    // Navigate to gallery with player filter
+    window.location.href = `/#/gallery?player=${player.id}`;
+  };
+
+  const handleDownloadAll = () => {
+    // Implement bulk download functionality
+    console.log('Downloading all photos...');
+  };
+
+  const tabs = [
+    { id: 'team', label: 'Meet the Team', icon: FaUsers },
+    { id: 'memories', label: 'Memory Vault', icon: FaCamera },
+    { id: 'messages', label: 'Messages', icon: FaMessageCircle }
   ];
 
   return (
@@ -115,16 +139,121 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* Features Section */}
+        {/* Team Stats Banner */}
+        <section className="py-8 px-4 bg-white/10 backdrop-blur-sm">
+          <div className="container mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+              <div className="bg-white/20 rounded-lg p-4">
+                <div className="text-2xl font-bold text-white">{teamStats.record}</div>
+                <div className="text-white/80 text-sm">Tournament Record</div>
+              </div>
+              <div className="bg-white/20 rounded-lg p-4">
+                <div className="text-2xl font-bold text-white">{teamStats.runsScored}</div>
+                <div className="text-white/80 text-sm">Runs Scored</div>
+              </div>
+              <div className="bg-white/20 rounded-lg p-4">
+                <div className="text-2xl font-bold text-white">{teamStats.teamBattingAverage}</div>
+                <div className="text-white/80 text-sm">Team Average</div>
+              </div>
+              <div className="bg-white/20 rounded-lg p-4">
+                <div className="text-2xl font-bold text-white">{teamStats.teamERA}</div>
+                <div className="text-white/80 text-sm">Team ERA</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Interactive Sections */}
+        <section className="py-16 px-4">
+          <div className="container mx-auto">
+            {/* Tab Navigation */}
+            <div className="flex flex-wrap justify-center mb-8">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 mx-2 mb-2 ${
+                      activeTab === tab.id
+                        ? 'bg-hawks-red text-white shadow-lg'
+                        : 'bg-white/20 text-white hover:bg-white/30'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Tab Content */}
+            <div className="min-h-[600px]">
+              {activeTab === 'team' && (
+                <div className="space-y-8">
+                  {/* Team Roster Header */}
+                  <div className="text-center">
+                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                      Meet the Team
+                    </h2>
+                    <p className="text-xl text-white/80 max-w-3xl mx-auto">
+                      Our amazing players who made this Cooperstown journey unforgettable. 
+                      Tap any player to view their photos and memories.
+                    </p>
+                  </div>
+
+                  {/* Player Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {teamRoster.map((player) => (
+                      <PlayerCard
+                        key={player.id}
+                        player={player}
+                        onPlayerClick={handlePlayerClick}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Tournament Highlights */}
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mt-12">
+                    <h3 className="text-2xl font-bold text-white mb-6 text-center">
+                      Tournament Highlights
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {tournamentHighlights.map((game, index) => (
+                        <div key={index} className="bg-white/20 rounded-lg p-4">
+                          <div className="text-white font-semibold mb-2">{game.game}</div>
+                          <div className="text-hawks-gold font-bold text-lg mb-1">{game.result}</div>
+                          <div className="text-white/80 text-sm">{game.highlight}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'memories' && (
+                <MemoryVault
+                  photos={[]} // This would be populated with actual photos
+                  onDownloadAll={handleDownloadAll}
+                />
+              )}
+
+              {activeTab === 'messages' && (
+                <MessageBoard />
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Quick Actions */}
         <section className="py-16 px-4 bg-white/95">
           <div className="container mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-hawks-navy mb-4">
-                Everything You Need
+                Quick Actions
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                From photo sharing to tournament updates, we've got everything covered 
-                for the ultimate Cooperstown experience.
+                Everything you need to stay connected with the team and preserve memories.
               </p>
             </div>
             
