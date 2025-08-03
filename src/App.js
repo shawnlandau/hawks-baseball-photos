@@ -11,8 +11,7 @@ import PhotoUpload from './components/PhotoUpload';
 
 // Pages
 import HomePage from './pages/HomePage';
-import SchedulePage from './pages/SchedulePage';
-import MapPage from './pages/MapPage';
+import GameResults from './pages/GameResults';
 
 // Modal Component
 const Modal = ({ message, onClose }) => {
@@ -195,19 +194,10 @@ const App = () => {
           />
           
           <Route 
-            path="/schedule" 
+            path="/results" 
             element={
               <ProtectedRoute>
-                <SchedulePage />
-              </ProtectedRoute>
-            } 
-          />
-          
-          <Route 
-            path="/map" 
-            element={
-              <ProtectedRoute>
-                <MapPage />
+                <GameResults />
               </ProtectedRoute>
             } 
           />

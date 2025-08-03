@@ -56,18 +56,6 @@ jest.mock('../pages/HomePage', () => {
   };
 });
 
-jest.mock('../pages/SchedulePage', () => {
-  return function MockSchedulePage() {
-    return <div data-testid="schedule-page">Schedule Page</div>;
-  };
-});
-
-jest.mock('../pages/MapPage', () => {
-  return function MockMapPage() {
-    return <div data-testid="map-page">Map Page</div>;
-  };
-});
-
 jest.mock('../components/PhotoGallery', () => {
   return function MockPhotoGallery() {
     return <div data-testid="photo-gallery">Photo Gallery</div>;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaHome, FaImages, FaUpload, FaCalendar, FaMap, FaBars, FaTimes } from 'react-icons/fa';
+import { FaHome, FaImages, FaUpload, FaTrophy, FaBars, FaTimes } from 'react-icons/fa';
 
 const Navbar = ({ user, auth, onSignOut }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -10,8 +10,7 @@ const Navbar = ({ user, auth, onSignOut }) => {
     { path: '/', label: 'Home', icon: FaHome },
     { path: '/gallery', label: 'Gallery', icon: FaImages },
     { path: '/upload', label: 'Upload', icon: FaUpload },
-    { path: '/schedule', label: 'Schedule', icon: FaCalendar },
-    { path: '/map', label: 'Map', icon: FaMap },
+    { path: '/results', label: 'Game Results', icon: FaTrophy },
   ];
 
   const isActive = (path) => location.pathname === path;

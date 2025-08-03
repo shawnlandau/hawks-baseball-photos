@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FaHeart, FaSmile, FaThumbsUp, FaDownload, FaCalendar, FaUser, FaComment } from 'react-icons/fa';
 
 const MemoryVault = ({ photos = [], onDownloadAll }) => {
-  const [selectedPhoto, setSelectedPhoto] = useState(null);
+
   const [reactions, setReactions] = useState({});
   const [comments, setComments] = useState({});
 

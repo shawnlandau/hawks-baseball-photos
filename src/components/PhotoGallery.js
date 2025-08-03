@@ -57,10 +57,10 @@ const PhotoGallery = () => {
     setLightboxOpen(true);
   };
 
-  const closeLightbox = () => {
+  const closeLightbox = useCallback(() => {
     setLightboxOpen(false);
     setSelectedPhoto(null);
-  };
+  }, []);
 
   const navigateLightbox = useCallback((direction) => {
     if (direction === 'next') {

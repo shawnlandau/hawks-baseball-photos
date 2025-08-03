@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaImages, FaUpload, FaCalendar, FaMap, FaTrophy, FaHeart, FaStar, FaUsers, FaDownload, FaMessageCircle, FaCameraAlt } from 'react-icons/fa';
+import { FaImages, FaUpload, FaTrophy, FaHeart, FaStar, FaComments, FaCamera } from 'react-icons/fa';
 import PlayerCard from '../components/PlayerCard';
 import MemoryVault from '../components/MemoryVault';
 import MessageBoard from '../components/MessageBoard';
 import { teamRoster, teamStats, tournamentHighlights } from '../data/teamRoster';
 
 const HomePage = () => {
-  const [activeTab, setActiveTab] = useState('team');
+  const [activeTab, setActiveTab] = useState('memories');
+  // eslint-disable-next-line no-unused-vars
   const [selectedPlayer, setSelectedPlayer] = useState(null);
 
   const features = [
@@ -26,18 +27,11 @@ const HomePage = () => {
       link: '/upload'
     },
     {
-      icon: FaCalendar,
-      title: 'Tournament Schedule',
-      description: 'Stay updated with game times and team events',
+      icon: FaTrophy,
+      title: 'Game Results',
+      description: 'View all our tournament games, scores, and highlights',
       color: 'bg-hawks-red',
-      link: '/schedule'
-    },
-    {
-      icon: FaMap,
-      title: 'Dreams Park Map',
-      description: 'Navigate the historic grounds and find your way around',
-      color: 'bg-hawks-navy',
-      link: '/map'
+      link: '/results'
     }
   ];
 
@@ -71,9 +65,8 @@ const HomePage = () => {
   };
 
   const tabs = [
-    { id: 'team', label: 'Meet the Team', icon: FaUsers },
-    { id: 'memories', label: 'Memory Vault', icon: FaCameraAlt },
-    { id: 'messages', label: 'Messages', icon: FaMessageCircle }
+    { id: 'memories', label: 'Memory Vault', icon: FaCamera },
+    { id: 'messages', label: 'Messages', icon: FaComments }
   ];
 
   return (
@@ -139,6 +132,60 @@ const HomePage = () => {
           </div>
         </section>
 
+        {/* Meet the Team Section - Moved to top */}
+        <section className="py-16 px-4">
+          <div className="container mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                Meet the Team
+              </h2>
+              <p className="text-xl text-white/80 max-w-3xl mx-auto">
+                Our amazing players who made this Cooperstown journey unforgettable. 
+                Tap any player to view their photos and memories.
+              </p>
+            </div>
+
+            {/* Coach Cards - Both coaches above players */}
+            <div className="flex justify-center gap-6 mb-8">
+              <PlayerCard
+                player={teamRoster[0]} // Head Coach
+                onPlayerClick={handlePlayerClick}
+              />
+              <PlayerCard
+                player={teamRoster[1]} // Assistant Coach
+                onPlayerClick={handlePlayerClick}
+              />
+            </div>
+
+            {/* Player Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+              {teamRoster.slice(2).map((player) => (
+                <PlayerCard
+                  key={player.id}
+                  player={player}
+                  onPlayerClick={handlePlayerClick}
+                />
+              ))}
+            </div>
+
+            {/* Tournament Highlights */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+              <h3 className="text-2xl font-bold text-white mb-6 text-center">
+                Tournament Highlights
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {tournamentHighlights.map((game, index) => (
+                  <div key={index} className="bg-white/20 rounded-lg p-4">
+                    <div className="text-white font-semibold mb-2">{game.game}</div>
+                    <div className="text-hawks-gold font-bold text-lg mb-1">{game.result}</div>
+                    <div className="text-white/80 text-sm">{game.highlight}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Team Stats Banner */}
         <section className="py-8 px-4 bg-white/10 backdrop-blur-sm">
           <div className="container mx-auto">
@@ -163,12 +210,12 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* Interactive Sections */}
+        {/* Memory Vault and Messages Section */}
         <section className="py-16 px-4">
           <div className="container mx-auto">
             {/* Tab Navigation */}
             <div className="flex flex-wrap justify-center mb-8">
-              {tabs.map((tab) => {
+              {tabs.slice(1).map((tab) => {
                 const Icon = tab.icon;
                 return (
                   <button
@@ -189,48 +236,6 @@ const HomePage = () => {
 
             {/* Tab Content */}
             <div className="min-h-[600px]">
-              {activeTab === 'team' && (
-                <div className="space-y-8">
-                  {/* Team Roster Header */}
-                  <div className="text-center">
-                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                      Meet the Team
-                    </h2>
-                    <p className="text-xl text-white/80 max-w-3xl mx-auto">
-                      Our amazing players who made this Cooperstown journey unforgettable. 
-                      Tap any player to view their photos and memories.
-                    </p>
-                  </div>
-
-                  {/* Player Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {teamRoster.map((player) => (
-                      <PlayerCard
-                        key={player.id}
-                        player={player}
-                        onPlayerClick={handlePlayerClick}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Tournament Highlights */}
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mt-12">
-                    <h3 className="text-2xl font-bold text-white mb-6 text-center">
-                      Tournament Highlights
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {tournamentHighlights.map((game, index) => (
-                        <div key={index} className="bg-white/20 rounded-lg p-4">
-                          <div className="text-white font-semibold mb-2">{game.game}</div>
-                          <div className="text-hawks-gold font-bold text-lg mb-1">{game.result}</div>
-                          <div className="text-white/80 text-sm">{game.highlight}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {activeTab === 'memories' && (
                 <MemoryVault
                   photos={[]} // This would be populated with actual photos
@@ -334,11 +339,11 @@ const HomePage = () => {
                 <span>Upload Photos</span>
               </Link>
               <Link
-                to="/schedule"
+                to="/results"
                 className="bg-hawks-navy text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-hawks-navy-dark transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center space-x-2"
               >
-                <FaCalendar className="w-5 h-5" />
-                <span>View Schedule</span>
+                <FaTrophy className="w-5 h-5" />
+                <span>View Results</span>
               </Link>
             </div>
           </div>
