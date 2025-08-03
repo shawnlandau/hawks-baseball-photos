@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { FaHeart, FaSmile, FaThumbsUp, FaDownload, FaCalendar, FaUser, FaComment } from 'react-icons/fa';
+import { FaHeart, FaSmile, FaThumbsUp, FaDownload, FaCalendar, FaUser, FaComment, FaPlus } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 const MemoryVault = ({ photos = [], onDownloadAll }) => {
 
@@ -38,7 +39,7 @@ const MemoryVault = ({ photos = [], onDownloadAll }) => {
 
   if (photos.length === 0) {
     return (
-      <div className="text-center py-12">
+      <div className="text-center py-12 relative">
         <div className="bg-white/10 rounded-2xl p-8 max-w-md mx-auto">
           <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <FaHeart className="w-8 h-8 text-white/60" />
@@ -47,13 +48,29 @@ const MemoryVault = ({ photos = [], onDownloadAll }) => {
           <p className="text-white/70 text-sm mb-4">
             Share photos to start building our team's memory wall!
           </p>
+          <Link
+            to="/upload"
+            className="inline-flex items-center justify-center space-x-2 bg-hawks-red text-white px-6 py-3 rounded-lg font-medium hover:bg-hawks-red-dark transition-colors min-h-[48px]"
+          >
+            <FaPlus className="w-4 h-4" />
+            <span>Upload Photos</span>
+          </Link>
         </div>
+
+        {/* Floating Action Button */}
+        <Link
+          to="/upload"
+          className="fixed bottom-6 right-6 bg-hawks-red text-white w-16 h-16 rounded-full shadow-lg hover:bg-hawks-red-dark transition-all duration-200 transform hover:scale-110 flex items-center justify-center z-40 min-h-[64px] min-w-[64px]"
+          aria-label="Upload photos"
+        >
+          <FaPlus className="w-6 h-6" />
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       {/* Header */}
       <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
@@ -133,21 +150,21 @@ const MemoryVault = ({ photos = [], onDownloadAll }) => {
                 <div className="flex space-x-2">
                   <button
                     onClick={() => addReaction(photo.id, '❤️')}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    className="p-2 hover:bg-gray-100 rounded-full transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
                     aria-label="Add heart reaction"
                   >
                     <FaHeart className="w-4 h-4 text-red-500" />
                   </button>
                   <button
                     onClick={() => addReaction(photo.id, '😊')}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    className="p-2 hover:bg-gray-100 rounded-full transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
                     aria-label="Add smile reaction"
                   >
                     <FaSmile className="w-4 h-4 text-yellow-500" />
                   </button>
                   <button
                     onClick={() => addReaction(photo.id, '👍')}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    className="p-2 hover:bg-gray-100 rounded-full transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
                     aria-label="Add thumbs up reaction"
                   >
                     <FaThumbsUp className="w-4 h-4 text-blue-500" />
@@ -191,7 +208,7 @@ const MemoryVault = ({ photos = [], onDownloadAll }) => {
                   <input
                     type="text"
                     placeholder="Add a memory or comment..."
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hawks-red focus:border-transparent text-sm"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hawks-red focus:border-transparent text-sm min-h-[40px]"
                     onKeyPress={(e) => {
                       if (e.key === 'Enter') {
                         addComment(photo.id, e.target.value);
@@ -205,7 +222,7 @@ const MemoryVault = ({ photos = [], onDownloadAll }) => {
                       addComment(photo.id, input.value);
                       input.value = '';
                     }}
-                    className="px-4 py-2 bg-hawks-red text-white rounded-lg hover:bg-hawks-red-dark transition-colors flex items-center space-x-1"
+                    className="px-4 py-2 bg-hawks-red text-white rounded-lg hover:bg-hawks-red-dark transition-colors flex items-center space-x-1 min-h-[40px]"
                   >
                     <FaComment className="w-3 h-3" />
                     <span className="text-sm">Add</span>
@@ -216,6 +233,15 @@ const MemoryVault = ({ photos = [], onDownloadAll }) => {
           </div>
         ))}
       </div>
+
+      {/* Floating Action Button */}
+      <Link
+        to="/upload"
+        className="fixed bottom-6 right-6 bg-hawks-red text-white w-16 h-16 rounded-full shadow-lg hover:bg-hawks-red-dark transition-all duration-200 transform hover:scale-110 flex items-center justify-center z-40 min-h-[64px] min-w-[64px]"
+        aria-label="Upload photos"
+      >
+        <FaPlus className="w-6 h-6" />
+      </Link>
     </div>
   );
 };

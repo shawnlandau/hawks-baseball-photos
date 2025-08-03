@@ -14,9 +14,9 @@ const PlayerCard = ({ player, onPlayerClick, isSelected = false }) => {
   return (
     <div
       onClick={handleClick}
-      className={`group relative bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1 ${
+      className={`group relative bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1 hover:ring-2 hover:ring-hawks-red/50 ${
         isSelected ? 'ring-4 ring-hawks-red' : ''
-      } ${isCoach ? 'ring-2 ring-hawks-gold' : ''}`}
+      } ${isCoach ? 'ring-2 ring-hawks-gold hover:ring-hawks-gold/70' : ''}`}
     >
       {/* Player Photo */}
       <div className={`relative h-48 rounded-t-xl overflow-hidden ${isCoach ? 'bg-gradient-to-br from-hawks-gold to-yellow-400' : 'bg-gradient-to-br from-hawks-navy to-hawks-red'}`}>
@@ -24,7 +24,7 @@ const PlayerCard = ({ player, onPlayerClick, isSelected = false }) => {
         
         {/* Jersey Number */}
         {!isCoach && (
-          <div className="absolute top-2 right-2 bg-white/80 text-hawks-navy text-sm font-medium px-2 py-1 rounded-full shadow-sm">
+          <div className="absolute top-2 right-2 bg-white/90 text-hawks-navy text-sm font-medium px-2 py-1 rounded-full shadow-sm">
             {player.jerseyNumber}
           </div>
         )}
@@ -43,13 +43,13 @@ const PlayerCard = ({ player, onPlayerClick, isSelected = false }) => {
             />
           ) : null}
           <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br from-hawks-navy to-hawks-red ${player.photo ? 'hidden' : ''}`}>
-            <FaUser className="text-white/60 text-4xl" />
+            <FaUser className="text-white/80 text-4xl" />
           </div>
         </div>
         
         {/* Photo Count Badge */}
         {player.photoCount && player.photoCount > 0 && (
-          <div className="absolute bottom-3 left-3 bg-white/90 text-hawks-navy px-2 py-1 rounded-full text-sm font-medium shadow-lg flex items-center space-x-1">
+          <div className="absolute bottom-3 left-3 bg-white/95 text-hawks-navy px-2 py-1 rounded-full text-sm font-medium shadow-lg flex items-center space-x-1">
             <FaCamera className="w-3 h-3" />
             <span>{player.photoCount}</span>
           </div>
@@ -64,7 +64,7 @@ const PlayerCard = ({ player, onPlayerClick, isSelected = false }) => {
             {player.name}
           </h3>
           {isCoach && (
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-gray-700 mt-1">
               {isHeadCoach ? 'Head Coach' : 'Assistant Coach'}
             </p>
           )}

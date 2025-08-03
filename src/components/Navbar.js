@@ -81,7 +81,7 @@ const Navbar = ({ user, auth, onSignOut }) => {
                   className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 transform hover:scale-105 flex items-center space-x-2 ${
                     isActive(item.path)
                       ? 'bg-hawks-red text-white shadow-lg'
-                      : 'text-white hover:bg-white/10'
+                      : 'text-white hover:bg-white/15 hover:shadow-md'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -94,7 +94,7 @@ const Navbar = ({ user, auth, onSignOut }) => {
               <div className="flex items-center space-x-3 ml-2">
                 {/* User Email Display */}
                 <div className="text-white text-sm">
-                  <span className="text-white/70">Signed in as:</span>
+                  <span className="text-white/80">Signed in as:</span>
                   <span className="ml-1 font-medium">{auth?.currentUser?.email || 'Unknown'}</span>
                 </div>
                 
@@ -113,7 +113,7 @@ const Navbar = ({ user, auth, onSignOut }) => {
           {/* Mobile menu button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-3 text-white hover:bg-white/10 rounded-lg transition-colors duration-200"
+            className="md:hidden p-3 text-white hover:bg-white/15 rounded-lg transition-colors duration-200"
             aria-label="Toggle mobile menu"
           >
             {isMobileMenuOpen ? <FaTimes className="w-6 h-6" /> : <FaBars className="w-6 h-6" />}
@@ -134,7 +134,7 @@ const Navbar = ({ user, auth, onSignOut }) => {
                     className={`px-6 py-4 rounded-lg text-base font-semibold transition-all duration-200 flex items-center space-x-4 ${
                       isActive(item.path)
                         ? 'bg-hawks-red text-white shadow-lg'
-                        : 'text-white hover:bg-white/10'
+                        : 'text-white hover:bg-white/15'
                     }`}
                   >
                     <Icon className="w-6 h-6" />
@@ -147,7 +147,7 @@ const Navbar = ({ user, auth, onSignOut }) => {
                 <>
                   {/* User Email Display (Mobile) */}
                   <div className="px-4 py-3 text-white text-sm border-b border-white/20">
-                    <span className="text-white/70">Signed in as:</span>
+                    <span className="text-white/80">Signed in as:</span>
                     <div className="font-medium mt-1">{auth?.currentUser?.email || 'Unknown'}</div>
                   </div>
                   

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { FaDownload, FaHeart, FaTimes, FaChevronLeft, FaChevronRight, FaExpand, FaSpinner, FaFilter } from 'react-icons/fa';
+import { FaDownload, FaHeart, FaTimes, FaChevronLeft, FaChevronRight, FaExpand, FaSpinner, FaFilter, FaPlus, FaCamera } from 'react-icons/fa';
 import { useFirebase } from '../hooks/useFirebase';
 import { teamRoster } from '../data/teamRoster';
+import { Link } from 'react-router-dom';
 
 const PhotoGallery = () => {
   const { storage, userId } = useFirebase();
@@ -17,7 +18,10 @@ const PhotoGallery = () => {
   const [touchEnd, setTouchEnd] = useState(null);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [showPlayerFilter, setShowPlayerFilter] = useState(false);
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
   const lightboxRef = useRef(null);
+  const imageRef = useRef(null);
 
   useEffect(() => {
     const fetchPhotos = async () => {
@@ -55,11 +59,15 @@ const PhotoGallery = () => {
     setSelectedPhoto(photo);
     setCurrentIndex(index);
     setLightboxOpen(true);
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
   };
 
   const closeLightbox = useCallback(() => {
     setLightboxOpen(false);
     setSelectedPhoto(null);
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
   }, []);
 
   const navigateLightbox = useCallback((direction) => {
@@ -69,16 +77,46 @@ const PhotoGallery = () => {
       setCurrentIndex((prev) => (prev - 1 + photos.length) % photos.length);
     }
     setSelectedPhoto(photos[currentIndex]);
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
   }, [photos, currentIndex]);
 
-  // Touch gesture handlers for mobile
+  // Enhanced touch gesture handlers for mobile with pinch-to-zoom
   const onTouchStart = (e) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+    if (e.touches.length === 1) {
+      // Single touch for swipe navigation
+      setTouchEnd(null);
+      setTouchStart(e.targetTouches[0].clientX);
+    } else if (e.touches.length === 2) {
+      // Two finger touch for pinch-to-zoom
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) +
+        Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      setTouchStart(distance);
+    }
   };
 
   const onTouchMove = (e) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    if (e.touches.length === 1) {
+      setTouchEnd(e.targetTouches[0].clientX);
+    } else if (e.touches.length === 2) {
+      // Handle pinch-to-zoom
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) +
+        Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      
+      if (touchStart) {
+        const scaleChange = distance / touchStart;
+        const newScale = Math.max(0.5, Math.min(3, scale * scaleChange));
+        setScale(newScale);
+      }
+    }
   };
 
   const onTouchEnd = () => {
@@ -93,6 +131,9 @@ const PhotoGallery = () => {
     } else if (isRightSwipe) {
       navigateLightbox('prev');
     }
+    
+    setTouchStart(null);
+    setTouchEnd(null);
   };
 
   const handleKeyPress = useCallback((e) => {
@@ -379,12 +420,13 @@ const PhotoGallery = () => {
               <p className="text-white/70 text-sm mb-4">
                 Be the first to share photos from the Hawks' Cooperstown journey!
               </p>
-              <a
-                href="/upload"
+              <Link
+                to="/upload"
                 className="inline-flex items-center justify-center space-x-2 bg-hawks-red text-white px-6 py-3 rounded-lg font-medium hover:bg-hawks-red-dark transition-colors min-h-[48px]"
               >
+                <FaCamera className="w-4 h-4" />
                 <span>Upload Photos</span>
-              </a>
+              </Link>
             </div>
           </div>
         ) : (
@@ -470,16 +512,25 @@ const PhotoGallery = () => {
         )}
       </div>
 
-      {/* Lightbox */}
+      {/* Floating Action Button for Upload */}
+      <Link
+        to="/upload"
+        className="fixed bottom-6 right-6 bg-hawks-red text-white w-16 h-16 rounded-full shadow-lg hover:bg-hawks-red-dark transition-all duration-200 transform hover:scale-110 flex items-center justify-center z-40 min-h-[64px] min-w-[64px]"
+        aria-label="Upload photos"
+      >
+        <FaPlus className="w-6 h-6" />
+      </Link>
+
+      {/* Enhanced Lightbox with Pinch-to-Zoom */}
       {lightboxOpen && selectedPhoto && (
         <div 
-          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-2 sm:p-4"
+          className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-2 sm:p-4"
           ref={lightboxRef}
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
-          <div className="relative max-w-full max-h-full w-full h-full flex items-center justify-center">
+          <div className="relative max-w-full max-h-full w-full h-full flex items-center justify-center overflow-hidden">
             {/* Close Button */}
             <button
               onClick={closeLightbox}
@@ -505,12 +556,18 @@ const PhotoGallery = () => {
               <FaChevronRight className="w-6 h-6" />
             </button>
 
-            {/* Photo */}
-            <div className="relative w-full h-full flex items-center justify-center">
+            {/* Photo with Pinch-to-Zoom */}
+            <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
               <img
+                ref={imageRef}
                 src={selectedPhoto.url}
                 alt={`Hawks Baseball - ${selectedPhoto.name}`}
-                className="max-w-full max-h-full object-contain rounded-lg"
+                className="max-w-full max-h-full object-contain rounded-lg transition-transform duration-200"
+                style={{
+                  transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
+                  cursor: scale > 1 ? 'grab' : 'default'
+                }}
+                draggable={scale > 1}
               />
               
               {/* Photo Info */}

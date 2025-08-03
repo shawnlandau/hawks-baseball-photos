@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { FaCloudUploadAlt, FaTimes, FaCheck, FaExclamationTriangle, FaTag, FaSpinner } from 'react-icons/fa';
+import { FaCloudUploadAlt, FaTimes, FaCheck, FaExclamationTriangle, FaTag, FaSpinner, FaCamera, FaImage } from 'react-icons/fa';
 import { useFirebase } from '../hooks/useFirebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -18,6 +18,8 @@ const PhotoUpload = ({ onUploadSuccess }) => {
     tags: [],
     album: ''
   });
+  const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
 
   // Hawks team roster for tagging
   const hawksPlayers = [
@@ -73,6 +75,32 @@ const PhotoUpload = ({ onUploadSuccess }) => {
     maxSize: 10 * 1024 * 1024, // 10MB
     multiple: true
   });
+
+  const handleCameraCapture = () => {
+    if (cameraInputRef.current) {
+      cameraInputRef.current.click();
+    }
+  };
+
+  const handleFileSelect = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleCameraInputChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+      onDrop(files);
+    }
+  };
+
+  const handleFileInputChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+      onDrop(files);
+    }
+  };
 
   const removeFile = (index) => {
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
@@ -224,8 +252,55 @@ const PhotoUpload = ({ onUploadSuccess }) => {
         </p>
       </div>
 
-      {/* Upload Area */}
+      {/* Mobile Upload Options */}
       <div className="bg-white rounded-lg p-4 sm:p-6 shadow-lg border border-gray-200">
+        <h3 className="text-lg font-semibold text-hawks-navy mb-4">
+          Choose Upload Method
+        </h3>
+        
+        {/* Large Upload Buttons */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          {/* Camera Capture */}
+          <button
+            onClick={handleCameraCapture}
+            className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-hawks-red to-hawks-red-dark text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 min-h-[120px]"
+          >
+            <FaCamera className="w-8 h-8 mb-3" />
+            <span className="text-lg font-semibold">Take Photo</span>
+            <span className="text-sm opacity-90">Use camera</span>
+          </button>
+
+          {/* File Selection */}
+          <button
+            onClick={handleFileSelect}
+            className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-hawks-navy to-hawks-navy-dark text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 min-h-[120px]"
+          >
+            <FaImage className="w-8 h-8 mb-3" />
+            <span className="text-lg font-semibold">Choose Files</span>
+            <span className="text-sm opacity-90">From gallery</span>
+          </button>
+        </div>
+
+        {/* Hidden file inputs */}
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleCameraInputChange}
+          className="hidden"
+          multiple
+        />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileInputChange}
+          className="hidden"
+          multiple
+        />
+
+        {/* Drag & Drop Area */}
         <div
           {...getRootProps()}
           className={`border-2 border-dashed rounded-lg p-6 sm:p-8 text-center transition-all duration-200 ${
@@ -249,7 +324,7 @@ const PhotoUpload = ({ onUploadSuccess }) => {
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              document.querySelector('input[type="file"]').click();
+              handleFileSelect();
             }}
             className="bg-hawks-red text-white px-6 py-3 rounded-lg font-semibold hover:bg-hawks-red-dark transition-colors duration-200 flex items-center justify-center space-x-2 mx-auto min-h-[48px] w-full sm:w-auto"
           >
@@ -308,7 +383,7 @@ const PhotoUpload = ({ onUploadSuccess }) => {
               value={formData.caption}
               onChange={(e) => setFormData(prev => ({ ...prev, caption: e.target.value }))}
               placeholder="Describe this moment..."
-              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hawks-red focus:border-transparent resize-none"
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hawks-red focus:border-transparent resize-none min-h-[80px]"
               rows="3"
             />
           </div>
@@ -321,7 +396,7 @@ const PhotoUpload = ({ onUploadSuccess }) => {
             <select
               value={formData.album}
               onChange={(e) => setFormData(prev => ({ ...prev, album: e.target.value }))}
-              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hawks-red focus:border-transparent"
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hawks-red focus:border-transparent min-h-[48px]"
             >
               <option value="">Select an album...</option>
               {albums.map(album => (
