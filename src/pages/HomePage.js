@@ -110,6 +110,29 @@ const HomePage = () => {
           </div>
         </div>
 
+        {/* Team Photo Section */}
+        <section className="py-8 px-4">
+          <div className="container mx-auto text-center">
+            <div className="max-w-4xl mx-auto">
+              <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                <img 
+                  src="/players/TEAMPHOTO-2025-JULY 30-TEAM-40931-20251004-HAWKS BASEBALL-13.jpeg" 
+                  alt="Hawks Baseball Team - Cooperstown Dreams Park 2025" 
+                  className="w-full h-auto max-h-96 object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+                <div className="p-6 bg-gradient-to-r from-hawks-navy to-hawks-navy-dark text-white">
+                  <h2 className="text-2xl font-bold mb-2">Hawks Baseball Team</h2>
+                  <p className="text-white/90">Cooperstown Dreams Park 2025</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* 1. Meet the Team Section - Players First */}
         <section className="py-12 px-4">
           <div className="container mx-auto">
