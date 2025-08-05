@@ -44,7 +44,7 @@ export const teamRoster = [
   {
     id: 6,
     name: 'Thad Clark',
-    jerseyNumber: 6,
+    jerseyNumber: 11,
     photo: '/players/thad-clark.jpg'
   },
   {
@@ -56,7 +56,7 @@ export const teamRoster = [
   {
     id: 8,
     name: 'Reed Kleamovich',
-    jerseyNumber: 8,
+    jerseyNumber: 9,
     photo: '/players/reed-kleamovich.jpg'
   },
   {
@@ -80,7 +80,7 @@ export const teamRoster = [
   {
     id: 12,
     name: 'Maxwell Millay',
-    jerseyNumber: 12,
+    jerseyNumber: 8,
     photo: '/players/maxwell-millay.jpg'
   }
 ];
