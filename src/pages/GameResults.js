@@ -5,63 +5,27 @@ const GameResults = () => {
   const [games, setGames] = useState([
     {
       id: 1,
-      opponent: 'Titans Baseball Club (CA)',
+      opponent: 'Burlington Bulldogs (CT)',
       date: 'July 30, 2025',
-      time: '7:00 PM',
-      location: 'Field 16',
+      time: '9:00 AM',
+      location: 'Field 14',
       result: 'W',
-      score: '10-5',
-      highlight: 'Strong opening game performance with solid pitching and timely hitting',
+      score: '6-5',
+      highlight: 'Exciting opening game with strong pitching and clutch hitting',
       players: ['Cole Thomas', 'Asher Joslin-White', 'Dylan Johnson'],
-      day: 'Sunday'
+      day: 'Friday'
     },
     {
       id: 2,
-      opponent: 'Manalapan Braves Red (NJ)',
-      date: 'July 30, 2025',
-      time: '7:00 PM',
-      location: 'Field 16',
+      opponent: 'Great Bay All Stars (NH)',
+      date: 'July 31, 2025',
+      time: '5:30 PM',
+      location: 'Field 1',
       result: 'W',
-      score: '10-5',
-      highlight: 'Excellent team defense and clutch hitting in tournament play',
+      score: '8-4',
+      highlight: 'Dominant performance with excellent team defense',
       players: ['Asher Joslin-White', 'Brian Aguilar', 'Jared Landau'],
-      day: 'Sunday'
-    },
-    {
-      id: 3,
-      opponent: 'Warriors Baseball PA (PA)',
-      date: 'July 31, 2025',
-      time: '7:00 PM',
-      location: 'Field 15',
-      result: 'W',
-      score: '12-3',
-      highlight: 'Dominant pitching performance with explosive offense',
-      players: ['Matthew Covington', 'Ethan Heiss', 'Reed Kleamovich'],
-      day: 'Monday'
-    },
-    {
-      id: 4,
-      opponent: 'Lowell Red Raiders (MA)',
-      date: 'July 31, 2025',
-      time: '7:00 PM',
-      location: 'Field 15',
-      result: 'W',
-      score: '12-3',
-      highlight: 'Complete team effort with contributions from every player',
-      players: ['Reed Kleamovich', 'Maxwell Millay', 'Thad Clark'],
-      day: 'Monday'
-    },
-    {
-      id: 5,
-      opponent: 'Easton Tigers (MA)',
-      date: 'July 31, 2025',
-      time: '7:00 PM',
-      location: 'Field 17',
-      result: 'W',
-      score: '1-19',
-      highlight: 'Outstanding defensive plays and aggressive base running',
-      players: ['Hudson Brunton', 'Ashton McCarthy', 'Cole Thomas'],
-      day: 'Monday'
+      day: 'Saturday'
     }
   ]);
 
@@ -126,6 +90,9 @@ const GameResults = () => {
                   <FaMapMarkerAlt className="text-hawks-gold w-5 h-5" />
                   <span className="text-white/90">Cooperstown, NY</span>
                 </div>
+                <div className="mt-4 text-center">
+                  <span className="text-hawks-gold font-bold text-lg">Hawks Baseball (CA)</span>
+                </div>
               </div>
             </div>
           </div>
@@ -136,7 +103,7 @@ const GameResults = () => {
           <div className="container mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                Tournament Games
+                Regular Games
               </h2>
               <p className="text-xl text-white/80 max-w-3xl mx-auto">
                 Our complete tournament record and game highlights
