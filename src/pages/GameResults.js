@@ -12,7 +12,6 @@ const GameResults = () => {
       result: 'W',
       score: '6-5',
       highlight: 'Exciting opening game with strong pitching and clutch hitting',
-      players: ['Cole Thomas', 'Asher Joslin-White', 'Dylan Johnson'],
       day: 'Friday'
     },
     {
@@ -24,7 +23,6 @@ const GameResults = () => {
       result: 'W',
       score: '19-13',
       highlight: 'Offensive explosion with excellent hitting throughout the lineup',
-      players: ['Asher Joslin-White', 'Brian Aguilar', 'Jared Landau'],
       day: 'Friday'
     },
     {
@@ -36,7 +34,6 @@ const GameResults = () => {
       result: 'L',
       score: '16-19',
       highlight: 'High-scoring game with late rally that came up short',
-      players: ['Matthew Covington', 'Ethan Heiss', 'Reed Kleamovich'],
       day: 'Friday'
     },
     {
@@ -48,7 +45,6 @@ const GameResults = () => {
       result: 'L',
       score: '3-21',
       highlight: 'Facing strong opponent with challenging game conditions',
-      players: ['Reed Kleamovich', 'Maxwell Millay', 'Thad Clark'],
       day: 'Saturday'
     },
     {
@@ -60,7 +56,6 @@ const GameResults = () => {
       result: 'W',
       score: '8-4',
       highlight: 'Strong finish to the tournament with excellent team defense',
-      players: ['Hudson Brunton', 'Ashton McCarthy', 'Cole Thomas'],
       day: 'Saturday'
     }
   ]);
@@ -75,7 +70,6 @@ const GameResults = () => {
       result: '',
       score: '',
       highlight: '',
-      players: [],
       day: ''
     };
     setGames([...games, newGame]);
@@ -186,18 +180,7 @@ const GameResults = () => {
                       <p className="text-gray-700">{game.highlight}</p>
                     </div>
 
-                    {game.players.length > 0 && (
-                      <div>
-                        <h4 className="text-lg font-semibold text-hawks-navy mb-2">Key Players</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {game.players.map((player, index) => (
-                            <span key={index} className="bg-hawks-red/10 text-hawks-red px-3 py-1 rounded-full text-sm font-medium">
-                              {player}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+
                   </div>
                 </div>
               ))}
