@@ -18,10 +18,22 @@ export const teamRoster = [
     photo: '/players/jared-landau.jpg'
   },
   {
-    id: 2,
-    name: 'Dylan Johnson',
-    jerseyNumber: 6,
-    photo: '/players/dylan-johnson.jpg'
+    id: 10,
+    name: 'Ashton McCarthy',
+    jerseyNumber: 2,
+    photo: '/players/ashton-mccarthy.jpg'
+  },
+  {
+    id: 7,
+    name: 'Brian Aguilar',
+    jerseyNumber: 3,
+    photo: '/players/brian-aguilar.jpg'
+  },
+  {
+    id: 11,
+    name: 'Hudson Brunton',
+    jerseyNumber: 4,
+    photo: '/players/hudson-brunton.jpg'
   },
   {
     id: 3,
@@ -30,10 +42,28 @@ export const teamRoster = [
     photo: '/players/cole-thomas.jpg'
   },
   {
+    id: 2,
+    name: 'Dylan Johnson',
+    jerseyNumber: 6,
+    photo: '/players/dylan-johnson.jpg'
+  },
+  {
     id: 4,
     name: 'Asher Joslin-White',
     jerseyNumber: 7,
     photo: '/players/asher-joslin-white.jpg'
+  },
+  {
+    id: 12,
+    name: 'Maxwell Millay',
+    jerseyNumber: 8,
+    photo: '/players/maxwell-millay.jpg'
+  },
+  {
+    id: 8,
+    name: 'Reed Kleamovich',
+    jerseyNumber: 9,
+    photo: '/players/reed-kleamovich.jpg'
   },
   {
     id: 5,
@@ -48,40 +78,10 @@ export const teamRoster = [
     photo: '/players/thad-clark.jpg'
   },
   {
-    id: 7,
-    name: 'Brian Aguilar',
-    jerseyNumber: 3,
-    photo: '/players/brian-aguilar.jpg'
-  },
-  {
-    id: 8,
-    name: 'Reed Kleamovich',
-    jerseyNumber: 9,
-    photo: '/players/reed-kleamovich.jpg'
-  },
-  {
     id: 9,
     name: 'Ethan Heiss',
     jerseyNumber: 12,
     photo: '/players/ethan-heiss.jpg'
-  },
-  {
-    id: 10,
-    name: 'Ashton McCarthy',
-    jerseyNumber: 2,
-    photo: '/players/ashton-mccarthy.jpg'
-  },
-  {
-    id: 11,
-    name: 'Hudson Brunton',
-    jerseyNumber: 4,
-    photo: '/players/hudson-brunton.jpg'
-  },
-  {
-    id: 12,
-    name: 'Maxwell Millay',
-    jerseyNumber: 8,
-    photo: '/players/maxwell-millay.jpg'
   }
 ];
 
