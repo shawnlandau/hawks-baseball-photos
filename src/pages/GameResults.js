@@ -1,62 +1,67 @@
 import React, { useState } from 'react';
-import { FaTrophy, FaCalendar, FaClock, FaBaseballBall, FaStar } from 'react-icons/fa';
+import { FaTrophy, FaCalendar, FaClock, FaBaseballBall, FaStar, FaMapMarkerAlt } from 'react-icons/fa';
 
 const GameResults = () => {
   const [games, setGames] = useState([
     {
       id: 1,
-      opponent: 'Bulldogs',
+      opponent: 'Titans Baseball Club (CA)',
       date: 'July 30, 2025',
-      time: '9:00 AM',
-      location: 'Field 1',
+      time: '7:00 PM',
+      location: 'Field 16',
       result: 'W',
-      score: '12-2',
-      highlight: 'Cole Thomas 3-run homer in opening ceremony game',
-      players: ['Cole Thomas', 'Asher Joslin-White', 'Dylan Johnson']
+      score: '10-5',
+      highlight: 'Strong opening game performance with solid pitching and timely hitting',
+      players: ['Cole Thomas', 'Asher Joslin-White', 'Dylan Johnson'],
+      day: 'Sunday'
     },
     {
       id: 2,
-      opponent: 'Titans',
-      date: 'July 31, 2025',
-      time: '2:00 PM',
-      location: 'Field 3',
+      opponent: 'Manalapan Braves Red (NJ)',
+      date: 'July 30, 2025',
+      time: '7:00 PM',
+      location: 'Field 16',
       result: 'W',
-      score: '8-3',
-      highlight: 'Asher Joslin-White hits 2 doubles',
-      players: ['Asher Joslin-White', 'Brian Aguilar', 'Jared Landau']
+      score: '10-5',
+      highlight: 'Excellent team defense and clutch hitting in tournament play',
+      players: ['Asher Joslin-White', 'Brian Aguilar', 'Jared Landau'],
+      day: 'Sunday'
     },
     {
       id: 3,
-      opponent: 'Marauders',
-      date: 'August 1, 2025',
-      time: '10:30 AM',
-      location: 'Field 2',
+      opponent: 'Warriors Baseball PA (PA)',
+      date: 'July 31, 2025',
+      time: '7:00 PM',
+      location: 'Field 15',
       result: 'W',
-      score: '15-0',
-      highlight: 'Matthew Covington throws no-hitter',
-      players: ['Matthew Covington', 'Ethan Heiss', 'Reed Kleamovich']
+      score: '12-3',
+      highlight: 'Dominant pitching performance with explosive offense',
+      players: ['Matthew Covington', 'Ethan Heiss', 'Reed Kleamovich'],
+      day: 'Monday'
     },
     {
       id: 4,
-      opponent: 'All Stars',
-      date: 'August 2, 2025',
-      time: '1:00 PM',
-      location: 'Field 4',
+      opponent: 'Lowell Red Raiders (MA)',
+      date: 'July 31, 2025',
+      time: '7:00 PM',
+      location: 'Field 15',
       result: 'W',
-      score: '7-6',
-      highlight: 'Reed Kleamovich walk-off home run',
-      players: ['Reed Kleamovich', 'Maxwell Millay', 'Thad Clark']
+      score: '12-3',
+      highlight: 'Complete team effort with contributions from every player',
+      players: ['Reed Kleamovich', 'Maxwell Millay', 'Thad Clark'],
+      day: 'Monday'
     },
     {
       id: 5,
-      opponent: 'Titans',
-      date: 'August 3, 2025',
-      time: '3:00 PM',
-      location: 'Championship Field',
+      opponent: 'Easton Tigers (MA)',
+      date: 'July 31, 2025',
+      time: '7:00 PM',
+      location: 'Field 17',
       result: 'W',
-      score: '6-4',
-      highlight: 'Michael Woodruff game-winning catch',
-      players: ['Hudson Brunton', 'Ashton McCarthy', 'Cole Thomas']
+      score: '1-19',
+      highlight: 'Outstanding defensive plays and aggressive base running',
+      players: ['Hudson Brunton', 'Ashton McCarthy', 'Cole Thomas'],
+      day: 'Monday'
     }
   ]);
 
@@ -70,10 +75,20 @@ const GameResults = () => {
       result: '',
       score: '',
       highlight: '',
-      players: []
+      players: [],
+      day: ''
     };
     setGames([...games, newGame]);
   };
+
+  // Calculate tournament statistics
+  const totalGames = games.length;
+  const wins = games.filter(game => game.result === 'W').length;
+  const losses = games.filter(game => game.result === 'L').length;
+  const totalRunsScored = games.reduce((total, game) => {
+    const hawksScore = parseInt(game.score.split('-')[0]);
+    return total + hawksScore;
+  }, 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-hawks-navy via-hawks-navy-dark to-hawks-red">
@@ -102,6 +117,16 @@ const GameResults = () => {
                 Relive every game, every victory, and every unforgettable moment 
                 from our incredible Cooperstown journey.
               </p>
+
+              {/* Tournament Info */}
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8">
+                <h2 className="text-2xl font-bold text-white mb-4">Tournament #12 - July 30, 2025</h2>
+                <p className="text-white/90 text-lg">Official Cooperstown Dreams Park Tournament</p>
+                <div className="flex justify-center items-center space-x-4 mt-4">
+                  <FaMapMarkerAlt className="text-hawks-gold w-5 h-5" />
+                  <span className="text-white/90">Cooperstown, NY</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -125,7 +150,7 @@ const GameResults = () => {
                   {/* Game Header */}
                   <div className={`p-6 ${game.result === 'W' ? 'bg-green-500' : game.result === 'L' ? 'bg-red-500' : 'bg-gray-500'} text-white`}>
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-2xl font-bold">vs {game.opponent}</h3>
+                      <h3 className="text-xl font-bold">vs {game.opponent}</h3>
                       <div className="text-right">
                         <div className="text-3xl font-bold">{game.result}</div>
                         <div className="text-lg">{game.score}</div>
@@ -135,7 +160,7 @@ const GameResults = () => {
                     <div className="flex items-center space-x-4 text-sm">
                       <div className="flex items-center space-x-2">
                         <FaCalendar className="w-4 h-4" />
-                        <span>{game.date}</span>
+                        <span>{game.day} - {game.date}</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <FaClock className="w-4 h-4" />
@@ -200,29 +225,49 @@ const GameResults = () => {
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               <div className="text-center">
-                <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-white text-2xl font-bold">5</span>
+                <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-white text-2xl font-bold">{totalGames}</span>
                 </div>
                 <h3 className="text-xl font-semibold text-hawks-navy mb-2">Games Played</h3>
                 <p className="text-gray-600">Complete tournament record</p>
               </div>
               
               <div className="text-center">
-                <div className="w-20 h-20 bg-hawks-gold rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-hawks-navy text-2xl font-bold">5</span>
+                <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-white text-2xl font-bold">{wins}</span>
                 </div>
                 <h3 className="text-xl font-semibold text-hawks-navy mb-2">Victories</h3>
-                <p className="text-gray-600">Undefeated tournament run</p>
+                <p className="text-gray-600">Tournament wins</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-white text-2xl font-bold">{losses}</span>
+                </div>
+                <h3 className="text-xl font-semibold text-hawks-navy mb-2">Losses</h3>
+                <p className="text-gray-600">Tournament losses</p>
               </div>
               
               <div className="text-center">
                 <div className="w-20 h-20 bg-hawks-red rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-white text-2xl font-bold">48</span>
+                  <span className="text-white text-2xl font-bold">{totalRunsScored}</span>
                 </div>
                 <h3 className="text-xl font-semibold text-hawks-navy mb-2">Runs Scored</h3>
-                <p className="text-gray-600">Dominant offensive performance</p>
+                <p className="text-gray-600">Total offensive production</p>
+              </div>
+            </div>
+
+            {/* Win Percentage */}
+            <div className="text-center mt-8">
+              <div className="bg-hawks-gold rounded-xl p-6 inline-block">
+                <h3 className="text-2xl font-bold text-hawks-navy mb-2">
+                  Win Percentage: {totalGames > 0 ? Math.round((wins / totalGames) * 100) : 0}%
+                </h3>
+                <p className="text-hawks-navy font-medium">
+                  {wins}-{losses} Record
+                </p>
               </div>
             </div>
           </div>
