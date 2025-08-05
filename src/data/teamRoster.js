@@ -20,25 +20,25 @@ export const teamRoster = [
   {
     id: 2,
     name: 'Dylan Johnson',
-    jerseyNumber: 2,
+    jerseyNumber: 6,
     photo: '/players/dylan-johnson.jpg'
   },
   {
     id: 3,
     name: 'Cole Thomas',
-    jerseyNumber: 3,
+    jerseyNumber: 5,
     photo: '/players/cole-thomas.jpg'
   },
   {
     id: 4,
     name: 'Asher Joslin-White',
-    jerseyNumber: 4,
+    jerseyNumber: 7,
     photo: '/players/asher-joslin-white.jpg'
   },
   {
     id: 5,
     name: 'Matthew Covington',
-    jerseyNumber: 5,
+    jerseyNumber: 10,
     photo: '/players/matthew-covington.jpg'
   },
   {
@@ -50,7 +50,7 @@ export const teamRoster = [
   {
     id: 7,
     name: 'Brian Aguilar',
-    jerseyNumber: 7,
+    jerseyNumber: 3,
     photo: '/players/brian-aguilar.jpg'
   },
   {
@@ -62,19 +62,19 @@ export const teamRoster = [
   {
     id: 9,
     name: 'Ethan Heiss',
-    jerseyNumber: 9,
+    jerseyNumber: 12,
     photo: '/players/ethan-heiss.jpg'
   },
   {
     id: 10,
     name: 'Ashton McCarthy',
-    jerseyNumber: 10,
+    jerseyNumber: 2,
     photo: '/players/ashton-mccarthy.jpg'
   },
   {
     id: 11,
     name: 'Hudson Brunton',
-    jerseyNumber: 11,
+    jerseyNumber: 4,
     photo: '/players/hudson-brunton.jpg'
   },
   {
