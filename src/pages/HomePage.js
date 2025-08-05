@@ -4,7 +4,7 @@ import { FaImages, FaUpload, FaTrophy, FaHeart, FaStar, FaComments, FaCamera } f
 import PlayerCard from '../components/PlayerCard';
 import ParentMessages from '../components/ParentMessages';
 import EnhancedMemoryVault from '../components/EnhancedMemoryVault';
-import { teamRoster, teamStats, tournamentHighlights } from '../data/teamRoster';
+import { teamRoster, teamStats } from '../data/teamRoster';
 
 const HomePage = () => {
   const [activeTab, setActiveTab] = useState('memories');
@@ -153,21 +153,7 @@ const HomePage = () => {
               ))}
             </div>
 
-            {/* Tournament Highlights */}
-            <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 animate-fade-in">
-              <h3 className="text-2xl font-bold text-white mb-6 text-center">
-                Tournament Highlights
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {tournamentHighlights.map((game, index) => (
-                  <div key={index} className="bg-white/25 rounded-lg p-4 animate-slide-up hover:bg-white/30 transition-colors duration-200" style={{ animationDelay: `${index * 150}ms` }}>
-                    <div className="text-white font-semibold mb-2">{game.game}</div>
-                    <div className="text-hawks-gold font-bold text-lg mb-1">{game.result}</div>
-                    <div className="text-white/90 text-sm">{game.highlight}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
+
           </div>
         </section>
 
