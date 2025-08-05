@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FaTrophy, FaCalendar, FaClock, FaBaseballBall, FaStar, FaMapMarkerAlt } from 'react-icons/fa';
 
 const GameResults = () => {
-  const [games, setGames] = useState([
+  const [regularGames, setRegularGames] = useState([
     {
       id: 1,
       opponent: 'Burlington Bulldogs (CT)',
@@ -60,9 +60,35 @@ const GameResults = () => {
     }
   ]);
 
+  // eslint-disable-next-line no-unused-vars
+  const [tournamentGames, setTournamentGames] = useState([
+    {
+      id: 1,
+      opponent: 'Ridgewood Raiders Black (NJ)',
+      date: 'August 1, 2025',
+      time: '2:00 PM',
+      location: 'Field 22',
+      result: 'W',
+      score: '5-4',
+      highlight: 'Close tournament game with clutch late-inning performance',
+      day: 'Sunday'
+    },
+    {
+      id: 2,
+      opponent: 'Titans Baseball Club (CA)',
+      date: 'August 1, 2025',
+      time: '4:30 PM',
+      location: 'Field 22',
+      result: 'L',
+      score: '3-15',
+      highlight: 'Challenging tournament matchup against strong opponent',
+      day: 'Sunday'
+    }
+  ]);
+
   const addGame = () => {
     const newGame = {
-      id: games.length + 1,
+      id: regularGames.length + 1,
       opponent: '',
       date: '',
       time: '',
@@ -72,14 +98,15 @@ const GameResults = () => {
       highlight: '',
       day: ''
     };
-    setGames([...games, newGame]);
+    setRegularGames([...regularGames, newGame]);
   };
 
   // Calculate tournament statistics
-  const totalGames = games.length;
-  const wins = games.filter(game => game.result === 'W').length;
-  const losses = games.filter(game => game.result === 'L').length;
-  const totalRunsScored = games.reduce((total, game) => {
+  const allGames = [...regularGames, ...tournamentGames];
+  const totalGames = allGames.length;
+  const wins = allGames.filter(game => game.result === 'W').length;
+  const losses = allGames.filter(game => game.result === 'L').length;
+  const totalRunsScored = allGames.reduce((total, game) => {
     const hawksScore = parseInt(game.score.split('-')[0]);
     return total + hawksScore;
   }, 0);
@@ -128,7 +155,7 @@ const GameResults = () => {
           </div>
         </section>
 
-        {/* Game Results */}
+        {/* Regular Games */}
         <section className="py-16 px-4">
           <div className="container mx-auto">
             <div className="text-center mb-12">
@@ -136,13 +163,13 @@ const GameResults = () => {
                 Regular Games
               </h2>
               <p className="text-xl text-white/80 max-w-3xl mx-auto">
-                Our complete tournament record and game highlights
+                Our complete regular season tournament record and game highlights
               </p>
             </div>
 
             {/* Games Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-              {games.map((game) => (
+              {regularGames.map((game) => (
                 <div key={game.id} className="bg-white rounded-xl shadow-lg overflow-hidden">
                   {/* Game Header */}
                   <div className={`p-6 ${game.result === 'W' ? 'bg-green-500' : game.result === 'L' ? 'bg-red-500' : 'bg-gray-500'} text-white`}>
@@ -179,23 +206,81 @@ const GameResults = () => {
                       </h4>
                       <p className="text-gray-700">{game.highlight}</p>
                     </div>
-
-
                   </div>
                 </div>
               ))}
             </div>
+          </div>
+        </section>
 
-            {/* Add Game Button */}
-            <div className="text-center">
-              <button
-                onClick={addGame}
-                className="bg-hawks-gold text-hawks-navy px-8 py-4 rounded-lg font-semibold text-lg hover:bg-yellow-400 transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center space-x-2 mx-auto"
-              >
-                <FaTrophy className="w-5 h-5" />
-                <span>Add Game Result</span>
-              </button>
+        {/* Tournament Games */}
+        <section className="py-16 px-4 bg-white/10">
+          <div className="container mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                Tournament Games
+              </h2>
+              <p className="text-xl text-white/80 max-w-3xl mx-auto">
+                Championship bracket and elimination tournament games
+              </p>
             </div>
+
+            {/* Games Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+              {tournamentGames.map((game) => (
+                <div key={game.id} className="bg-white rounded-xl shadow-lg overflow-hidden">
+                  {/* Game Header */}
+                  <div className={`p-6 ${game.result === 'W' ? 'bg-green-500' : game.result === 'L' ? 'bg-red-500' : 'bg-gray-500'} text-white`}>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xl font-bold">vs {game.opponent}</h3>
+                      <div className="text-right">
+                        <div className="text-3xl font-bold">{game.result}</div>
+                        <div className="text-lg">{game.score}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-4 text-sm">
+                      <div className="flex items-center space-x-2">
+                        <FaCalendar className="w-4 h-4" />
+                        <span>{game.day} - {game.date}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <FaClock className="w-4 h-4" />
+                        <span>{game.time}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <FaBaseballBall className="w-4 h-4" />
+                        <span>{game.location}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Game Details */}
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <h4 className="text-lg font-semibold text-hawks-navy mb-2 flex items-center">
+                        <FaStar className="text-hawks-gold w-4 h-4 mr-2" />
+                        Game Highlight
+                      </h4>
+                      <p className="text-gray-700">{game.highlight}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Add Game Button */}
+        <section className="py-8 px-4">
+          <div className="container mx-auto text-center">
+            <button
+              onClick={addGame}
+              className="bg-hawks-gold text-hawks-navy px-8 py-4 rounded-lg font-semibold text-lg hover:bg-yellow-400 transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center space-x-2 mx-auto"
+            >
+              <FaTrophy className="w-5 h-5" />
+              <span>Add Game Result</span>
+            </button>
           </div>
         </section>
 
