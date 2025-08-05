@@ -17,14 +17,50 @@ const GameResults = () => {
     },
     {
       id: 2,
+      opponent: 'Premier Sports Baseball (NY)',
+      date: 'July 30, 2025',
+      time: '5:30 PM',
+      location: 'Field 15',
+      result: 'W',
+      score: '19-13',
+      highlight: 'Offensive explosion with excellent hitting throughout the lineup',
+      players: ['Asher Joslin-White', 'Brian Aguilar', 'Jared Landau'],
+      day: 'Friday'
+    },
+    {
+      id: 3,
+      opponent: 'Massachusetts Marauders (MA)',
+      date: 'July 30, 2025',
+      time: '11:00 PM',
+      location: 'Field 1',
+      result: 'L',
+      score: '16-19',
+      highlight: 'High-scoring game with late rally that came up short',
+      players: ['Matthew Covington', 'Ethan Heiss', 'Reed Kleamovich'],
+      day: 'Friday'
+    },
+    {
+      id: 4,
+      opponent: 'Texas Smoke (TX)',
+      date: 'July 31, 2025',
+      time: '1:30 PM',
+      location: 'Field 17',
+      result: 'L',
+      score: '3-21',
+      highlight: 'Facing strong opponent with challenging game conditions',
+      players: ['Reed Kleamovich', 'Maxwell Millay', 'Thad Clark'],
+      day: 'Saturday'
+    },
+    {
+      id: 5,
       opponent: 'Great Bay All Stars (NH)',
       date: 'July 31, 2025',
-      time: '5:30 PM',
+      time: '7:30 PM',
       location: 'Field 1',
       result: 'W',
       score: '8-4',
-      highlight: 'Dominant performance with excellent team defense',
-      players: ['Asher Joslin-White', 'Brian Aguilar', 'Jared Landau'],
+      highlight: 'Strong finish to the tournament with excellent team defense',
+      players: ['Hudson Brunton', 'Ashton McCarthy', 'Cole Thomas'],
       day: 'Saturday'
     }
   ]);
