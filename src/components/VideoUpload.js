@@ -1,11 +1,11 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { FaCloudUploadAlt, FaTimes, FaCheck, FaExclamationTriangle, FaTag, FaSpinner, FaImage } from 'react-icons/fa';
+import { FaVideo, FaTimes, FaCheck, FaExclamationTriangle, FaTag, FaSpinner, FaPlay, FaUpload } from 'react-icons/fa';
 import { useFirebase } from '../hooks/useFirebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-const PhotoUpload = ({ onUploadSuccess }) => {
+const VideoUpload = ({ onUploadSuccess }) => {
   const { db, storage, userId, auth } = useFirebase();
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -37,41 +37,90 @@ const PhotoUpload = ({ onUploadSuccess }) => {
     'Day 3 - Pool Play',
     'Day 4 - Tournament Games',
     'Day 5 - Championship',
-    'Team Photos',
+    'Team Videos',
     'Action Shots',
     'Celebration Moments',
     'Dreams Park Tour'
   ];
 
-  const onDrop = useCallback((acceptedFiles) => {
-    const validFiles = acceptedFiles.filter(file => {
-      const isValidType = file.type.startsWith('image/');
-      const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB limit
-      
-      if (!isValidType) {
-        alert(`${file.name} is not an image file.`);
-        return false;
-      }
-      
-      if (!isValidSize) {
-        alert(`${file.name} is too large. Maximum size is 10MB.`);
-        return false;
-      }
-      
-      return true;
-    });
+  const validateVideo = (file) => {
+    // Check file type
+    const validTypes = ['video/mp4', 'video/mov', 'video/avi', 'video/quicktime'];
+    if (!validTypes.includes(file.type)) {
+      return { valid: false, error: `${file.name} is not a supported video format. Please use MP4, MOV, or AVI.` };
+    }
 
-    setSelectedFiles(validFiles);
+    // Check file size (50MB limit)
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    if (file.size > maxSize) {
+      return { valid: false, error: `${file.name} is too large. Maximum size is 50MB.` };
+    }
+
+    return { valid: true };
+  };
+
+  const checkVideoDuration = (file) => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      
+      video.onloadedmetadata = () => {
+        const duration = video.duration;
+        if (duration > 60) {
+          resolve({ valid: false, error: `${file.name} is too long. Maximum duration is 60 seconds.` });
+        } else {
+          resolve({ valid: true, duration });
+        }
+      };
+      
+      video.onerror = () => {
+        resolve({ valid: false, error: `Could not read video duration for ${file.name}.` });
+      };
+      
+      video.src = URL.createObjectURL(file);
+    });
+  };
+
+  const onDrop = useCallback(async (acceptedFiles) => {
+    console.log('VideoUpload: Files dropped:', acceptedFiles.length);
     setUploadError('');
     setUploadSuccess(false);
+    
+    const validFiles = [];
+    
+    for (const file of acceptedFiles) {
+      console.log('VideoUpload: Processing file:', file.name, file.type, file.size);
+      
+      // Basic validation
+      const basicValidation = validateVideo(file);
+      if (!basicValidation.valid) {
+        console.log('VideoUpload: File validation failed:', basicValidation.error);
+        alert(basicValidation.error);
+        continue;
+      }
+      
+      // Duration validation
+      const durationValidation = await checkVideoDuration(file);
+      if (!durationValidation.valid) {
+        console.log('VideoUpload: Duration validation failed:', durationValidation.error);
+        alert(durationValidation.error);
+        continue;
+      }
+      
+      console.log('VideoUpload: File validated successfully');
+      validFiles.push(file);
+    }
+
+    console.log('VideoUpload: Valid files:', validFiles.length);
+    setSelectedFiles(validFiles);
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.webp']
+      'video/*': ['.mp4', '.mov', '.avi']
     },
-    maxSize: 10 * 1024 * 1024, // 10MB
+    maxSize: 50 * 1024 * 1024, // 50MB
     multiple: true
   });
 
@@ -101,86 +150,64 @@ const PhotoUpload = ({ onUploadSuccess }) => {
     }));
   };
 
-  const resizeImage = (file) => {
-    return new Promise((resolve) => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
-      
-      img.onload = () => {
-        const maxWidth = 1920;
-        const maxHeight = 1080;
-        let { width, height } = img;
-        
-        if (width > maxWidth || height > maxHeight) {
-          const ratio = Math.min(maxWidth / width, maxHeight / height);
-          width *= ratio;
-          height *= ratio;
-        }
-        
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(img, 0, 0, width, height);
-        
-        canvas.toBlob(resolve, 'image/jpeg', 0.8);
-      };
-      
-      img.src = URL.createObjectURL(file);
-    });
-  };
-
   const uploadFile = async (file, index) => {
+    console.log('VideoUpload: Starting upload for file:', file.name, 'index:', index);
+    
     if (!db || !storage || !userId) {
+      console.error('VideoUpload: Firebase not initialized');
       throw new Error('Firebase not initialized');
     }
     
     try {
-      // Resize image if needed
-      const resizedBlob = await resizeImage(file);
-      const resizedFile = new File([resizedBlob], file.name, { type: 'image/jpeg' });
-      
       // Create storage reference
       const timestamp = Date.now();
       const fileName = `${userId}_${timestamp}_${index}_${file.name}`;
-      const storageRef = ref(storage, `photos/${fileName}`);
+      const storageRef = ref(storage, `videos/${fileName}`);
+      
+      console.log('VideoUpload: Uploading to storage path:', `videos/${fileName}`);
       
       // Upload to Firebase Storage
-      const uploadResult = await uploadBytes(storageRef, resizedFile);
+      const uploadResult = await uploadBytes(storageRef, file);
+      console.log('VideoUpload: File uploaded to storage successfully');
       
       // Get download URL
       const downloadURL = await getDownloadURL(uploadResult.ref);
+      console.log('VideoUpload: Got download URL:', downloadURL);
       
       // Save to Firestore
-      const photoData = {
+      const videoData = {
         url: downloadURL,
-        storagePath: `photos/${fileName}`, // Store the storage path for deletion
+        storagePath: `videos/${fileName}`,
         caption: formData.caption,
         tags: formData.tags,
         album: formData.album,
         fileName: fileName,
         originalName: file.name,
-        fileSize: resizedFile.size,
+        fileSize: file.size,
         uploadedBy: userId,
         userEmail: auth?.currentUser?.email || 'Unknown',
         timestamp: new Date(),
+        type: 'video',
         likes: 0,
         likedBy: [],
         comments: []
       };
       
-      const photosRef = collection(db, 'photos');
-      await addDoc(photosRef, photoData);
+      console.log('VideoUpload: Saving to Firestore:', videoData);
+      const videosRef = collection(db, 'videos');
+      await addDoc(videosRef, videoData);
+      console.log('VideoUpload: Video data saved to Firestore successfully');
       
       return downloadURL;
     } catch (error) {
-      console.error('Error uploading file:', error);
+      console.error('VideoUpload: Error uploading video:', error);
       throw error;
     }
   };
 
   const handleUpload = async () => {
     if (selectedFiles.length === 0) {
-      setUploadError('Please select at least one photo to upload.');
+      setUploadError('Please select at least one video to upload.');
       return;
     }
 
@@ -231,43 +258,15 @@ const PhotoUpload = ({ onUploadSuccess }) => {
       {/* Header */}
       <div className="bg-white rounded-lg p-4 sm:p-6 shadow-lg border border-gray-200">
         <h2 className="text-xl sm:text-2xl font-bold text-hawks-navy mb-2">
-          Share Your Memories
+          Share Team Videos
         </h2>
         <p className="text-gray-600 text-sm sm:text-base">
-          Upload photos from our Cooperstown Dreams Park journey. Tag players, add captions, and organize by albums.
+          Upload videos from our Cooperstown Dreams Park journey. Tag players, add captions, and organize by albums.
         </p>
       </div>
 
-      {/* File Selection */}
+      {/* Upload Area */}
       <div className="bg-white rounded-lg p-4 sm:p-6 shadow-lg border border-gray-200">
-        <h3 className="text-lg font-semibold text-hawks-navy mb-4">
-          Select Photos
-        </h3>
-        
-        {/* Large Upload Buttons */}
-        <div className="flex justify-center mb-6">
-          {/* File Selection */}
-          <button
-            onClick={handleFileSelect}
-            className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-hawks-navy to-hawks-navy-dark text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 min-h-[120px] w-full sm:w-auto"
-          >
-            <FaImage className="w-8 h-8 mb-3" />
-            <span className="text-lg font-semibold">Choose Files</span>
-            <span className="text-sm opacity-90">From gallery</span>
-          </button>
-        </div>
-
-        {/* Hidden file inputs */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileInputChange}
-          className="hidden"
-          multiple
-        />
-
-        {/* Drag & Drop Area */}
         <div
           {...getRootProps()}
           className={`border-2 border-dashed rounded-lg p-6 sm:p-8 text-center transition-all duration-200 ${
@@ -277,15 +276,15 @@ const PhotoUpload = ({ onUploadSuccess }) => {
           }`}
         >
           <input {...getInputProps()} />
-          <FaCloudUploadAlt className="text-3xl sm:text-4xl text-gray-400 mx-auto mb-4" />
+          <FaVideo className="text-3xl sm:text-4xl text-gray-400 mx-auto mb-4" />
           <p className="text-base sm:text-lg font-semibold text-gray-700 mb-2">
-            {isDragActive ? 'Drop your photos here' : 'Drag & drop photos here'}
+            {isDragActive ? 'Drop your videos here' : 'Drag & drop videos here'}
           </p>
           <p className="text-gray-500 mb-4 text-sm sm:text-base">
             or tap to select files
           </p>
           <p className="text-xs sm:text-sm text-gray-400 mb-4">
-            Supports: JPG, PNG, GIF, WebP (Max 10MB each)
+            Supports: MP4, MOV, AVI (Max 50MB, 60 seconds each)
           </p>
           <button
             type="button"
@@ -295,32 +294,45 @@ const PhotoUpload = ({ onUploadSuccess }) => {
             }}
             className="bg-hawks-red text-white px-6 py-3 rounded-lg font-semibold hover:bg-hawks-red-dark transition-colors duration-200 flex items-center justify-center space-x-2 mx-auto min-h-[48px] w-full sm:w-auto"
           >
-            <FaCloudUploadAlt className="w-4 h-4" />
-            <span>Browse Files</span>
+            <FaUpload className="w-4 h-4" />
+            <span>Browse Videos</span>
           </button>
         </div>
       </div>
+
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="video/*"
+        onChange={handleFileInputChange}
+        className="hidden"
+        multiple
+      />
 
       {/* Selected Files */}
       {selectedFiles.length > 0 && (
         <div className="bg-white rounded-lg p-4 sm:p-6 shadow-lg border border-gray-200">
           <h3 className="text-lg font-semibold text-hawks-navy mb-4">
-            Selected Files ({selectedFiles.length})
+            Selected Videos ({selectedFiles.length})
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {selectedFiles.map((file, index) => (
               <div key={index} className="relative group">
-                <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                  <img
+                <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden relative">
+                  <video
                     src={URL.createObjectURL(file)}
-                    alt={file.name}
                     className="w-full h-full object-cover"
+                    muted
                   />
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                    <FaPlay className="text-white text-2xl" />
+                  </div>
                 </div>
                 <button
                   onClick={() => removeFile(index)}
                   className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity min-h-[32px] min-w-[32px] flex items-center justify-center"
-                  aria-label="Remove file"
+                  aria-label="Remove video"
                 >
                   <FaTimes className="w-3 h-3" />
                 </button>
@@ -427,7 +439,7 @@ const PhotoUpload = ({ onUploadSuccess }) => {
           {uploadSuccess && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center space-x-2">
               <FaCheck className="text-green-500 flex-shrink-0" />
-              <p className="text-green-600 text-sm">Photos uploaded successfully!</p>
+              <p className="text-green-600 text-sm">Videos uploaded successfully!</p>
             </div>
           )}
 
@@ -444,8 +456,8 @@ const PhotoUpload = ({ onUploadSuccess }) => {
               </>
             ) : (
               <>
-                <FaCloudUploadAlt className="w-4 h-4" />
-                <span>Upload {selectedFiles.length} Photo{selectedFiles.length !== 1 ? 's' : ''}</span>
+                <FaVideo className="w-4 h-4" />
+                <span>Upload {selectedFiles.length} Video{selectedFiles.length !== 1 ? 's' : ''}</span>
               </>
             )}
           </button>
@@ -455,4 +467,4 @@ const PhotoUpload = ({ onUploadSuccess }) => {
   );
 };
 
-export default PhotoUpload; 
+export default VideoUpload; 

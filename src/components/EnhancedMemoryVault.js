@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaHeart, FaSmile, FaThumbsUp, FaDownload, FaCalendar, FaUser, FaComment, FaPlus, FaFilePdf, FaTag, FaFilter } from 'react-icons/fa';
+import { FaHeart, FaSmile, FaThumbsUp, FaDownload, FaCalendar, FaComment, FaPlus, FaFilePdf, FaTag, FaFilter } from 'react-icons/fa';
 import { useFirebase } from '../hooks/useFirebase';
 import { collection, onSnapshot, query, orderBy, limit, where } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
@@ -16,10 +16,15 @@ const EnhancedMemoryVault = () => {
   // Filter options
   const filterOptions = [
     { value: 'all', label: 'All Photos' },
-    { value: 'team-photos', label: 'Team Photos' },
-    { value: 'action-shots', label: 'Action Shots' },
-    { value: 'celebration-moments', label: 'Celebration Moments' },
-    { value: 'dreams-park-tour', label: 'Dreams Park Tour' }
+    { value: 'Day 1 - Opening Ceremonies', label: 'Opening Ceremonies' },
+    { value: 'Day 2 - Pool Play', label: 'Pool Play' },
+    { value: 'Day 3 - Pool Play', label: 'Pool Play' },
+    { value: 'Day 4 - Tournament Games', label: 'Tournament Games' },
+    { value: 'Day 5 - Championship', label: 'Championship' },
+    { value: 'Team Photos', label: 'Team Photos' },
+    { value: 'Action Shots', label: 'Action Shots' },
+    { value: 'Celebration Moments', label: 'Celebration Moments' },
+    { value: 'Dreams Park Tour', label: 'Dreams Park Tour' }
   ];
 
   useEffect(() => {
@@ -109,20 +114,26 @@ const EnhancedMemoryVault = () => {
   };
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    if (!date) return 'Unknown date';
+    
+    try {
+      const dateObj = date.toDate ? date.toDate() : new Date(date);
+      return dateObj.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Unknown date';
+    }
   };
 
   if (loading) {
     return (
       <div className="text-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hawks-red mx-auto mb-4"></div>
-        <p className="text-white text-lg">Loading memories...</p>
+        <p className="text-gray-600 text-lg">Loading memories...</p>
       </div>
     );
   }
@@ -130,12 +141,12 @@ const EnhancedMemoryVault = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+      <div className="bg-white rounded-xl shadow-lg p-6">
         <div className="text-center mb-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+          <h2 className="text-2xl sm:text-3xl font-bold text-hawks-navy mb-2">
             Memory Vault
           </h2>
-          <p className="text-white/80 text-sm sm:text-base">
+          <p className="text-gray-600 text-sm sm:text-base">
             Our team's journey through photos, memories, and moments that will last forever
           </p>
         </div>
@@ -144,11 +155,11 @@ const EnhancedMemoryVault = () => {
         <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
           {/* Filter */}
           <div className="flex items-center space-x-2">
-            <FaFilter className="w-4 h-4 text-white" />
+            <FaFilter className="w-4 h-4 text-hawks-navy" />
             <select
               value={selectedFilter}
               onChange={(e) => setSelectedFilter(e.target.value)}
-              className="bg-white/20 text-white border border-white/30 rounded-lg px-3 py-2 focus:ring-2 focus:ring-hawks-red focus:border-transparent min-h-[40px]"
+              className="bg-white border border-gray-300 text-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-hawks-red focus:border-transparent min-h-[40px]"
             >
               {filterOptions.map(option => (
                 <option key={option.value} value={option.value}>
@@ -194,10 +205,10 @@ const EnhancedMemoryVault = () => {
       {/* Photo Timeline */}
       {photos.length === 0 ? (
         <div className="text-center py-12">
-          <div className="bg-white/10 rounded-2xl p-8 max-w-md mx-auto">
-            <FaHeart className="w-16 h-16 text-white/60 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">Memory Vault Empty</h3>
-            <p className="text-white/70 text-sm mb-4">
+          <div className="bg-white rounded-xl shadow-lg p-8 max-w-md mx-auto">
+            <FaHeart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">Memory Vault Empty</h3>
+            <p className="text-gray-500 text-sm mb-4">
               Share photos to start building our team's memory wall!
             </p>
             <Link
@@ -228,10 +239,11 @@ const EnhancedMemoryVault = () => {
                       <FaCalendar className="w-4 h-4" />
                       <span className="text-sm">{formatDate(photo.timestamp)}</span>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <FaUser className="w-4 h-4" />
-                      <span className="text-sm">{photo.userEmail}</span>
-                    </div>
+                    {photo.album && (
+                      <div className="text-sm text-white/90">
+                        {photo.album}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -257,13 +269,6 @@ const EnhancedMemoryVault = () => {
                         <span>{tag}</span>
                       </span>
                     ))}
-                  </div>
-                )}
-
-                {/* Album */}
-                {photo.album && (
-                  <div className="text-sm text-gray-600">
-                    <span className="font-medium">Album:</span> {photo.album}
                   </div>
                 )}
 

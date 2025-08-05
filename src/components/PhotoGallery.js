@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { FaDownload, FaHeart, FaTimes, FaChevronLeft, FaChevronRight, FaExpand, FaSpinner, FaFilter, FaPlus, FaCamera } from 'react-icons/fa';
+import { FaDownload, FaHeart, FaTimes, FaChevronLeft, FaChevronRight, FaExpand, FaSpinner, FaFilter, FaPlus, FaCamera, FaVideo } from 'react-icons/fa';
 import { useFirebase } from '../hooks/useFirebase';
 import { teamRoster } from '../data/teamRoster';
 import { Link } from 'react-router-dom';
+import VideoPlayer from './VideoPlayer';
 
 const PhotoGallery = () => {
   const { storage, userId } = useFirebase();
   const [photos, setPhotos] = useState([]);
+  const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [selectedMedia, setSelectedMedia] = useState(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedPhotos, setSelectedPhotos] = useState(new Set());
@@ -20,15 +22,17 @@ const PhotoGallery = () => {
   const [showPlayerFilter, setShowPlayerFilter] = useState(false);
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [mediaType, setMediaType] = useState('all'); // 'all', 'photos', 'videos'
   const lightboxRef = useRef(null);
   const imageRef = useRef(null);
 
   useEffect(() => {
-    const fetchPhotos = async () => {
+    const fetchMedia = async () => {
       try {
-        const storageRef = storage.ref();
-        const result = await storageRef.listAll();
-        const photoPromises = result.items.map(async (item) => {
+        // Fetch photos
+        const photosRef = storage.ref('photos');
+        const photosResult = await photosRef.listAll();
+        const photoPromises = photosResult.items.map(async (item) => {
           const url = await item.getDownloadURL();
           const metadata = await item.getMetadata();
           return {
@@ -37,26 +41,68 @@ const PhotoGallery = () => {
             name: item.name,
             size: metadata.size,
             uploadedAt: metadata.timeCreated,
-            contentType: metadata.contentType
+            contentType: metadata.contentType,
+            type: 'photo'
+          };
+        });
+        
+        // Fetch videos
+        const videosRef = storage.ref('videos');
+        const videosResult = await videosRef.listAll();
+        const videoPromises = videosResult.items.map(async (item) => {
+          const url = await item.getDownloadURL();
+          const metadata = await item.getMetadata();
+          return {
+            id: item.name,
+            url,
+            name: item.name,
+            size: metadata.size,
+            uploadedAt: metadata.timeCreated,
+            contentType: metadata.contentType,
+            type: 'video'
           };
         });
         
         const photoList = await Promise.all(photoPromises);
+        const videoList = await Promise.all(videoPromises);
+        
         setPhotos(photoList.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt)));
+        setVideos(videoList.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt)));
       } catch (error) {
-        console.error('Error fetching photos:', error);
+        console.error('Error fetching media:', error);
       } finally {
         setLoading(false);
       }
     };
 
     if (storage) {
-      fetchPhotos();
+      fetchMedia();
     }
   }, [storage]);
 
-  const openLightbox = (photo, index) => {
-    setSelectedPhoto(photo);
+  const getAllMedia = useCallback(() => {
+    const allMedia = [...photos, ...videos];
+    return allMedia.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+  }, [photos, videos]);
+
+  const getFilteredMedia = useCallback(() => {
+    let media = getAllMedia();
+    
+    if (mediaType === 'photos') {
+      media = photos;
+    } else if (mediaType === 'videos') {
+      media = videos;
+    }
+    
+    if (selectedPlayer) {
+      media = media.filter(item => item.tags && item.tags.includes(selectedPlayer.name));
+    }
+    
+    return media;
+  }, [photos, videos, mediaType, selectedPlayer, getAllMedia]);
+
+  const openLightbox = (media, index) => {
+    setSelectedMedia(media);
     setCurrentIndex(index);
     setLightboxOpen(true);
     setScale(1);
@@ -65,21 +111,22 @@ const PhotoGallery = () => {
 
   const closeLightbox = useCallback(() => {
     setLightboxOpen(false);
-    setSelectedPhoto(null);
+    setSelectedMedia(null);
     setScale(1);
     setPosition({ x: 0, y: 0 });
   }, []);
 
   const navigateLightbox = useCallback((direction) => {
+    const filteredMedia = getFilteredMedia();
     if (direction === 'next') {
-      setCurrentIndex((prev) => (prev + 1) % photos.length);
+      setCurrentIndex((prev) => (prev + 1) % filteredMedia.length);
     } else {
-      setCurrentIndex((prev) => (prev - 1 + photos.length) % photos.length);
+      setCurrentIndex((prev) => (prev - 1 + filteredMedia.length) % filteredMedia.length);
     }
-    setSelectedPhoto(photos[currentIndex]);
+    setSelectedMedia(filteredMedia[currentIndex]);
     setScale(1);
     setPosition({ x: 0, y: 0 });
-  }, [photos, currentIndex]);
+  }, [currentIndex, getFilteredMedia]);
 
   // Enhanced touch gesture handlers for mobile with pinch-to-zoom
   const onTouchStart = (e) => {
@@ -154,21 +201,21 @@ const PhotoGallery = () => {
     }
   }, [lightboxOpen, navigateLightbox, closeLightbox]);
 
-  const downloadPhoto = async (photo) => {
+  const downloadMedia = async (media) => {
     if (!userId) {
-      alert('Please sign in to download photos.');
+      alert('Please sign in to download media.');
       return;
     }
 
-    setDownloadingPhotos(prev => new Set(prev).add(photo.id));
+    setDownloadingPhotos(prev => new Set(prev).add(media.id));
     
     try {
-      const response = await fetch(photo.url);
+      const response = await fetch(media.url);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = photo.name;
+      link.download = media.name;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -178,36 +225,36 @@ const PhotoGallery = () => {
       setTimeout(() => {
         setDownloadingPhotos(prev => {
           const newSet = new Set(prev);
-          newSet.delete(photo.id);
+          newSet.delete(media.id);
           return newSet;
         });
       }, 1000);
     } catch (error) {
-      console.error('Error downloading photo:', error);
-      alert('Failed to download photo. Please try again.');
+      console.error('Error downloading media:', error);
+      alert('Failed to download media. Please try again.');
       setDownloadingPhotos(prev => {
         const newSet = new Set(prev);
-        newSet.delete(photo.id);
+        newSet.delete(media.id);
         return newSet;
       });
     }
   };
 
-  const togglePhotoSelection = (photoId) => {
+  const togglePhotoSelection = (mediaId) => {
     const newSelected = new Set(selectedPhotos);
-    if (newSelected.has(photoId)) {
-      newSelected.delete(photoId);
+    if (newSelected.has(mediaId)) {
+      newSelected.delete(mediaId);
     } else {
-      newSelected.add(photoId);
+      newSelected.add(mediaId);
     }
     setSelectedPhotos(newSelected);
   };
 
   const downloadSelectedPhotos = async () => {
-    const selectedPhotoList = photos.filter(photo => selectedPhotos.has(photo.id));
+    const selectedMediaList = getFilteredMedia().filter(media => selectedPhotos.has(media.id));
     
-    for (const photo of selectedPhotoList) {
-      await downloadPhoto(photo);
+    for (const media of selectedMediaList) {
+      await downloadMedia(media);
       // Add small delay to prevent browser blocking multiple downloads
       await new Promise(resolve => setTimeout(resolve, 100));
     }
@@ -227,9 +274,9 @@ const PhotoGallery = () => {
     setSelectedPlayer(null);
   };
 
-  const downloadAllPlayerPhotos = async () => {
+  const downloadAllPlayerMedia = async () => {
     if (!userId) {
-      alert('Please sign in to download photos.');
+      alert('Please sign in to download media.');
       return;
     }
 
@@ -238,26 +285,26 @@ const PhotoGallery = () => {
       return;
     }
 
-    const playerPhotos = photos.filter(photo => 
-      photo.tags && photo.tags.includes(selectedPlayer.name)
+    const playerMedia = getFilteredMedia().filter(media => 
+      media.tags && media.tags.includes(selectedPlayer.name)
     );
 
-    if (playerPhotos.length === 0) {
-      alert(`No photos found for ${selectedPlayer.name}.`);
+    if (playerMedia.length === 0) {
+      alert(`No media found for ${selectedPlayer.name}.`);
       return;
     }
 
     setDownloadingPhotos(prev => new Set([...prev, 'bulk']));
     
     try {
-      for (const photo of playerPhotos) {
-        await downloadPhoto(photo);
+      for (const media of playerMedia) {
+        await downloadMedia(media);
         // Add small delay to prevent browser blocking multiple downloads
         await new Promise(resolve => setTimeout(resolve, 100));
       }
     } catch (error) {
-      console.error('Error downloading player photos:', error);
-      alert('Failed to download some photos. Please try again.');
+      console.error('Error downloading player media:', error);
+      alert('Failed to download some media. Please try again.');
     } finally {
       setDownloadingPhotos(prev => {
         const newSet = new Set(prev);
@@ -267,10 +314,8 @@ const PhotoGallery = () => {
     }
   };
 
-  // Filter photos based on selected player
-  const filteredPhotos = selectedPlayer 
-    ? photos.filter(photo => photo.tags && photo.tags.includes(selectedPlayer.name))
-    : photos;
+  // Filter media based on selected player and media type
+  const filteredMedia = getFilteredMedia();
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyPress);
@@ -282,7 +327,7 @@ const PhotoGallery = () => {
       <div className="min-h-screen bg-gradient-to-br from-hawks-navy via-hawks-navy-dark to-hawks-red flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-white text-lg">Loading photos...</p>
+          <p className="text-white text-lg">Loading media...</p>
         </div>
       </div>
     );
@@ -296,18 +341,52 @@ const PhotoGallery = () => {
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
-                Photo Gallery
+                Media Gallery
               </h1>
               <p className="text-white/80 text-sm sm:text-base">
                 {selectedPlayer 
-                  ? `${selectedPlayer.name}'s Photos (${filteredPhotos.length})` 
-                  : `${photos.length} photos • Capture the Hawks' Cooperstown memories`
+                  ? `${selectedPlayer.name}'s Media (${filteredMedia.length})` 
+                  : `${getAllMedia().length} items • Capture the Hawks' Cooperstown memories`
                 }
               </p>
             </div>
             
             {/* Controls */}
             <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4">
+              {/* Media Type Filter */}
+              <div className="flex bg-white/10 rounded-lg p-1">
+                <button
+                  onClick={() => setMediaType('all')}
+                  className={`px-4 py-3 rounded-md text-sm font-medium transition-colors ${
+                    mediaType === 'all' 
+                      ? 'bg-hawks-red text-white' 
+                      : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setMediaType('photos')}
+                  className={`px-4 py-3 rounded-md text-sm font-medium transition-colors ${
+                    mediaType === 'photos' 
+                      ? 'bg-hawks-red text-white' 
+                      : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  Photos
+                </button>
+                <button
+                  onClick={() => setMediaType('videos')}
+                  className={`px-4 py-3 rounded-md text-sm font-medium transition-colors ${
+                    mediaType === 'videos' 
+                      ? 'bg-hawks-red text-white' 
+                      : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  Videos
+                </button>
+              </div>
+
               {/* Player Filter */}
               <div className="relative">
                 <button
@@ -325,7 +404,7 @@ const PhotoGallery = () => {
                         onClick={clearPlayerFilter}
                         className="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 text-sm font-medium"
                       >
-                        All Photos
+                        All Media
                       </button>
                       {teamRoster.map((player) => (
                         <button
@@ -345,7 +424,7 @@ const PhotoGallery = () => {
               {/* Download All for Player */}
               {selectedPlayer && userId && (
                 <button
-                  onClick={downloadAllPlayerPhotos}
+                  onClick={downloadAllPlayerMedia}
                   disabled={downloadingPhotos.has('bulk')}
                   className="flex items-center space-x-2 bg-hawks-red text-white px-4 py-3 rounded-lg hover:bg-hawks-red-dark transition-colors disabled:opacity-50 min-h-[48px]"
                 >
@@ -410,22 +489,22 @@ const PhotoGallery = () => {
 
       {/* Gallery Grid */}
       <div className="container mx-auto px-4 py-6 sm:py-8">
-        {photos.length === 0 ? (
+        {filteredMedia.length === 0 ? (
           <div className="text-center py-12">
             <div className="bg-white/10 rounded-2xl p-6 sm:p-8 max-w-md mx-auto">
               <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FaHeart className="w-8 h-8 text-white/60" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">No Photos Yet</h3>
+              <h3 className="text-xl font-semibold text-white mb-2">No Media Yet</h3>
               <p className="text-white/70 text-sm mb-4">
-                Be the first to share photos from the Hawks' Cooperstown journey!
+                Be the first to share photos and videos from the Hawks' Cooperstown journey!
               </p>
               <Link
                 to="/upload"
                 className="inline-flex items-center justify-center space-x-2 bg-hawks-red text-white px-6 py-3 rounded-lg font-medium hover:bg-hawks-red-dark transition-colors min-h-[48px]"
               >
                 <FaCamera className="w-4 h-4" />
-                <span>Upload Photos</span>
+                <span>Upload Media</span>
               </Link>
             </div>
           </div>
@@ -435,33 +514,56 @@ const PhotoGallery = () => {
               ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
               : 'columns-1 sm:columns-2 lg:columns-3 xl:columns-4'
           }`}>
-            {filteredPhotos.map((photo, index) => (
+            {filteredMedia.map((media, index) => (
               <div
-                key={photo.id}
+                key={media.id}
                 className={`group relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ${
                   viewMode === 'masonry' ? 'break-inside-avoid mb-4' : ''
                 } ${
-                  selectedPhotos.has(photo.id) ? 'ring-4 ring-hawks-red' : ''
+                  selectedPhotos.has(media.id) ? 'ring-4 ring-hawks-red' : ''
                 }`}
               >
-                {/* Photo */}
+                {/* Media */}
                 <div className="relative aspect-square bg-gray-200">
-                  <img
-                    src={photo.url}
-                    alt={`Hawks Baseball - ${photo.name}`}
-                    className="w-full h-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
-                    onClick={() => openLightbox(photo, index)}
-                    loading="lazy"
-                  />
+                  {media.type === 'video' ? (
+                    <VideoPlayer
+                      src={media.url}
+                      className="w-full h-full"
+                      title={media.name}
+                    />
+                  ) : (
+                    <img
+                      src={media.url}
+                      alt={`Hawks Baseball - ${media.name}`}
+                      className="w-full h-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
+                      onClick={() => openLightbox(media, index)}
+                      loading="lazy"
+                    />
+                  )}
                   
                   {/* Overlay */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300">
-                    {/* Selection Checkbox */}
+                    {/* Media Type Badge */}
                     <div className="absolute top-3 left-3">
+                      {media.type === 'video' ? (
+                        <div className="bg-hawks-red text-white text-xs font-semibold px-2 py-1 rounded-full shadow-sm flex items-center space-x-1">
+                          <FaVideo className="w-3 h-3" />
+                          <span>VIDEO</span>
+                        </div>
+                      ) : (
+                        <div className="bg-white/90 text-hawks-navy text-xs font-semibold px-2 py-1 rounded-full shadow-sm flex items-center space-x-1">
+                          <FaCamera className="w-3 h-3" />
+                          <span>PHOTO</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Selection Checkbox */}
+                    <div className="absolute top-3 right-3">
                       <input
                         type="checkbox"
-                        checked={selectedPhotos.has(photo.id)}
-                        onChange={() => togglePhotoSelection(photo.id)}
+                        checked={selectedPhotos.has(media.id)}
+                        onChange={() => togglePhotoSelection(media.id)}
                         className="w-6 h-6 rounded border-2 border-white bg-white/20 checked:bg-hawks-red checked:border-hawks-red focus:ring-2 focus:ring-hawks-red focus:ring-offset-2"
                       />
                     </div>
@@ -471,13 +573,13 @@ const PhotoGallery = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          downloadPhoto(photo);
+                          downloadMedia(media);
                         }}
-                        disabled={downloadingPhotos.has(photo.id)}
+                        disabled={downloadingPhotos.has(media.id)}
                         className="w-12 h-12 bg-white/90 hover:bg-white text-gray-800 rounded-full flex items-center justify-center transition-colors shadow-lg disabled:opacity-50 min-h-[48px]"
-                        aria-label="Download photo"
+                        aria-label="Download media"
                       >
-                        {downloadingPhotos.has(photo.id) ? (
+                        {downloadingPhotos.has(media.id) ? (
                           <FaSpinner className="w-4 h-4 animate-spin" />
                         ) : (
                           <FaDownload className="w-4 h-4" />
@@ -486,7 +588,7 @@ const PhotoGallery = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          openLightbox(photo, index);
+                          openLightbox(media, index);
                         }}
                         className="w-12 h-12 bg-white/90 hover:bg-white text-gray-800 rounded-full flex items-center justify-center transition-colors shadow-lg min-h-[48px]"
                         aria-label="View full screen"
@@ -497,13 +599,13 @@ const PhotoGallery = () => {
                   </div>
                 </div>
 
-                {/* Photo Info */}
+                {/* Media Info */}
                 <div className="p-3 bg-white">
-                  <p className="text-sm text-gray-600 truncate" title={photo.name}>
-                    {photo.name}
+                  <p className="text-sm text-gray-600 truncate" title={media.name}>
+                    {media.name}
                   </p>
                   <p className="text-xs text-gray-400">
-                    {(photo.size / 1024 / 1024).toFixed(1)} MB
+                    {(media.size / 1024 / 1024).toFixed(1)} MB
                   </p>
                 </div>
               </div>
@@ -516,13 +618,13 @@ const PhotoGallery = () => {
       <Link
         to="/upload"
         className="fixed bottom-6 right-6 bg-hawks-red text-white w-16 h-16 rounded-full shadow-lg hover:bg-hawks-red-dark transition-all duration-200 transform hover:scale-110 flex items-center justify-center z-40 min-h-[64px] min-w-[64px]"
-        aria-label="Upload photos"
+        aria-label="Upload media"
       >
         <FaPlus className="w-6 h-6" />
       </Link>
 
-      {/* Enhanced Lightbox with Pinch-to-Zoom */}
-      {lightboxOpen && selectedPhoto && (
+      {/* Enhanced Lightbox with Video Support */}
+      {lightboxOpen && selectedMedia && (
         <div 
           className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-2 sm:p-4"
           ref={lightboxRef}
@@ -544,50 +646,58 @@ const PhotoGallery = () => {
             <button
               onClick={() => navigateLightbox('prev')}
               className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 z-10 w-12 h-12 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors"
-              aria-label="Previous photo"
+              aria-label="Previous media"
             >
               <FaChevronLeft className="w-6 h-6" />
             </button>
             <button
               onClick={() => navigateLightbox('next')}
               className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 z-10 w-12 h-12 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors"
-              aria-label="Next photo"
+              aria-label="Next media"
             >
               <FaChevronRight className="w-6 h-6" />
             </button>
 
-            {/* Photo with Pinch-to-Zoom */}
+            {/* Media */}
             <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
-              <img
-                ref={imageRef}
-                src={selectedPhoto.url}
-                alt={`Hawks Baseball - ${selectedPhoto.name}`}
-                className="max-w-full max-h-full object-contain rounded-lg transition-transform duration-200"
-                style={{
-                  transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
-                  cursor: scale > 1 ? 'grab' : 'default'
-                }}
-                draggable={scale > 1}
-              />
+              {selectedMedia.type === 'video' ? (
+                <VideoPlayer
+                  src={selectedMedia.url}
+                  className="max-w-full max-h-full"
+                  title={selectedMedia.name}
+                />
+              ) : (
+                <img
+                  ref={imageRef}
+                  src={selectedMedia.url}
+                  alt={`Hawks Baseball - ${selectedMedia.name}`}
+                  className="max-w-full max-h-full object-contain rounded-lg transition-transform duration-200"
+                  style={{
+                    transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
+                    cursor: scale > 1 ? 'grab' : 'default'
+                  }}
+                  draggable={scale > 1}
+                />
+              )}
               
-              {/* Photo Info */}
+              {/* Media Info */}
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 sm:p-6 rounded-b-lg">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0">
                   <div className="flex-1">
                     <h3 className="text-white font-semibold text-base sm:text-lg">
-                      {selectedPhoto.name}
+                      {selectedMedia.name}
                     </h3>
                     <p className="text-white/70 text-sm">
-                      {(selectedPhoto.size / 1024 / 1024).toFixed(1)} MB • Photo {currentIndex + 1} of {photos.length}
+                      {(selectedMedia.size / 1024 / 1024).toFixed(1)} MB • {selectedMedia.type === 'video' ? 'Video' : 'Photo'} {currentIndex + 1} of {filteredMedia.length}
                     </p>
                   </div>
                   <div className="flex space-x-2 sm:space-x-3">
                     <button
-                      onClick={() => downloadPhoto(selectedPhoto)}
-                      disabled={downloadingPhotos.has(selectedPhoto.id)}
+                      onClick={() => downloadMedia(selectedMedia)}
+                      disabled={downloadingPhotos.has(selectedMedia.id)}
                       className="bg-hawks-red hover:bg-hawks-red-dark text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2 min-h-[48px] disabled:opacity-50"
                     >
-                      {downloadingPhotos.has(selectedPhoto.id) ? (
+                      {downloadingPhotos.has(selectedMedia.id) ? (
                         <FaSpinner className="w-4 h-4 animate-spin" />
                       ) : (
                         <FaDownload className="w-4 h-4" />

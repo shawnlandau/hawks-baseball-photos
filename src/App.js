@@ -7,7 +7,8 @@ import { useFirebase } from './hooks/useFirebase';
 import Navbar from './components/Navbar';
 import AuthForm from './components/AuthForm';
 import PhotoGallery from './components/PhotoGallery';
-import PhotoUpload from './components/PhotoUpload';
+import VideoUpload from './components/VideoUpload';
+import UploadPage from './components/UploadPage';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -137,6 +138,32 @@ const App = () => {
           .tag-badge:hover {
             transform: scale(1.05);
           }
+          .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+          }
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          .animate-slide-up {
+            animation: slideUp 0.6s ease-out;
+          }
+          @keyframes slideUp {
+            from {
+              opacity: 0;
+              transform: translateY(20px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
           `}
         </style>
 
@@ -186,8 +213,17 @@ const App = () => {
             path="/upload" 
             element={
               <ProtectedRoute>
+                <UploadPage />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/upload-video" 
+            element={
+              <ProtectedRoute>
                 <div className="container mx-auto px-4 py-8">
-                  <PhotoUpload onUploadSuccess={() => {}} />
+                  <VideoUpload onUploadSuccess={() => {}} />
                 </div>
               </ProtectedRoute>
             } 

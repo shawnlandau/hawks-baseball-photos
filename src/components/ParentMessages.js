@@ -77,19 +77,26 @@ const ParentMessages = () => {
   };
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    if (!date) return 'Unknown date';
+    
+    try {
+      const dateObj = date.toDate ? date.toDate() : new Date(date);
+      return dateObj.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Unknown date';
+    }
   };
 
   if (loading) {
     return (
       <div className="text-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hawks-red mx-auto mb-4"></div>
-        <p className="text-white text-lg">Loading messages...</p>
+        <p className="text-gray-600 text-lg">Loading messages...</p>
       </div>
     );
   }
@@ -97,12 +104,12 @@ const ParentMessages = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+      <div className="bg-white rounded-xl shadow-lg p-6">
         <div className="text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+          <h2 className="text-2xl sm:text-3xl font-bold text-hawks-navy mb-2">
             Messages from Parents
           </h2>
-          <p className="text-white/80 text-sm sm:text-base">
+          <p className="text-gray-600 text-sm sm:text-base">
             Share your thoughts, memories, and messages with the team and families
           </p>
         </div>
@@ -166,16 +173,16 @@ const ParentMessages = () => {
 
       {/* Messages Wall */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-white mb-4">
+        <h3 className="text-lg font-semibold text-hawks-navy mb-4">
           Recent Messages ({messages.length})
         </h3>
         
         {messages.length === 0 ? (
           <div className="text-center py-8">
-            <div className="bg-white/10 rounded-xl p-6 max-w-md mx-auto">
-              <FaComment className="w-12 h-12 text-white/60 mx-auto mb-4" />
-              <h4 className="text-lg font-semibold text-white mb-2">No Messages Yet</h4>
-              <p className="text-white/70 text-sm">
+            <div className="bg-white rounded-xl shadow-lg p-6 max-w-md mx-auto">
+              <FaComment className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h4 className="text-lg font-semibold text-gray-700 mb-2">No Messages Yet</h4>
+              <p className="text-gray-500 text-sm">
                 Be the first to share a message with the team!
               </p>
             </div>

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaImages, FaUpload, FaTrophy, FaHeart, FaStar, FaComments, FaCamera } from 'react-icons/fa';
 import PlayerCard from '../components/PlayerCard';
-import MessageBoard from '../components/MessageBoard';
 import ParentMessages from '../components/ParentMessages';
 import EnhancedMemoryVault from '../components/EnhancedMemoryVault';
 import { teamRoster, teamStats, tournamentHighlights } from '../data/teamRoster';
@@ -78,38 +77,73 @@ const HomePage = () => {
       </div>
 
       <div className="relative z-10">
-        {/* 1. Meet the Hawks Section - Already at top */}
-        <section className="py-16 px-4">
+        {/* Sticky Header */}
+        <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-white/20 shadow-lg">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-center">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-lg border-2 border-hawks-red overflow-hidden">
+                  <img 
+                    src="/hawks-logo.jpg" 
+                    alt="Hawks Baseball Logo" 
+                    className="w-full h-full object-contain p-1"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                  <div className="text-center text-xs font-bold text-hawks-navy w-full px-1 hidden">
+                    <div className="text-xs font-bold leading-tight">HAWKS</div>
+                    <div className="text-hawks-red font-bold leading-tight">BASEBALL</div>
+                  </div>
+                </div>
+                <div>
+                  <h1 className="text-lg sm:text-xl font-bold text-hawks-navy">
+                    Hawks Baseball
+                  </h1>
+                  <p className="text-xs text-hawks-red font-medium">
+                    Cooperstown Dreams Park 2025
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 1. Meet the Team Section - Players First */}
+        <section className="py-12 px-4">
           <div className="container mx-auto">
-            <div className="text-center mb-12 animate-fade-in">
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                Meet the Hawks
+            <div className="text-center mb-8 animate-fade-in">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                Meet the Team
               </h2>
-              <p className="text-xl text-white/95 max-w-3xl mx-auto">
+              <p className="text-lg text-white/95 max-w-3xl mx-auto">
                 Our amazing players who made this Cooperstown journey unforgettable. 
                 Tap any player to view their photos and memories.
               </p>
             </div>
 
-            {/* Coach Cards - Both coaches above players */}
-            <div className="flex justify-center gap-6 mb-12 animate-slide-up">
-              <PlayerCard
-                player={teamRoster[0]} // Head Coach
-                onPlayerClick={handlePlayerClick}
-              />
-              <PlayerCard
-                player={teamRoster[1]} // Assistant Coach
-                onPlayerClick={handlePlayerClick}
-              />
+            {/* Coach Cards - Above players */}
+            <div className="flex justify-center mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 max-w-4xl">
+                <PlayerCard
+                  player={teamRoster[0]} // Head Coach
+                  onPlayerClick={handlePlayerClick}
+                />
+                <PlayerCard
+                  player={teamRoster[1]} // Assistant Coach
+                  onPlayerClick={handlePlayerClick}
+                />
+              </div>
             </div>
 
-            {/* Player Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+            {/* Player Grid - Responsive with compact cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 mb-12">
               {teamRoster.slice(2).map((player, index) => (
                 <div 
                   key={player.id} 
                   className="animate-slide-up"
-                  style={{ animationDelay: `${index * 100}ms` }}
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <PlayerCard
                     player={player}
@@ -157,7 +191,7 @@ const HomePage = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 mx-2 mb-2 ${
+                    className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 mx-2 mb-2 min-h-[48px] ${
                       activeTab === tab.id
                         ? 'bg-hawks-red text-white shadow-lg'
                         : 'bg-white/25 text-hawks-navy hover:bg-white/35 hover:shadow-md border border-gray-200'
@@ -180,13 +214,13 @@ const HomePage = () => {
               )}
 
               {activeTab === 'messages' && (
-                <MessageBoard />
+                <ParentMessages />
               )}
             </div>
           </div>
         </section>
 
-        {/* 3. Tournament Info Section - Dark background */}
+        {/* 4. Tournament Info Section - Dark background */}
         <section className="py-16 px-4 bg-gradient-to-r from-hawks-navy to-hawks-navy-dark">
           <div className="container mx-auto">
             <div className="text-center mb-12">
@@ -240,7 +274,7 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* 4. Messages from Parents Section - Light background */}
+        {/* 3. Messages from Parents Section - Light background */}
         <section className="py-16 px-4 bg-white">
           <div className="container mx-auto">
             <div className="text-center mb-12">
@@ -259,7 +293,7 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* Quick Actions - Dark background */}
+        {/* 4. Quick Actions - Dark background */}
         <section className="py-16 px-4 bg-gradient-to-br from-hawks-navy to-hawks-navy-dark">
           <div className="container mx-auto">
             <div className="text-center mb-12">
@@ -296,7 +330,7 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* Call to Action - Light background */}
+        {/* 5. Call to Action - Light background */}
         <section className="py-16 px-4 bg-gray-50">
           <div className="container mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-hawks-navy mb-6">
@@ -308,14 +342,14 @@ const HomePage = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link
                 to="/upload"
-                className="bg-hawks-red text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-hawks-red-dark transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center space-x-2"
+                className="bg-hawks-red text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-hawks-red-dark transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center space-x-2 min-h-[48px]"
               >
                 <FaUpload className="w-5 h-5" />
                 <span>Upload Photos</span>
               </Link>
               <Link
                 to="/results"
-                className="bg-hawks-navy text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-hawks-navy-dark transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center space-x-2"
+                className="bg-hawks-navy text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-hawks-navy-dark transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center space-x-2 min-h-[48px]"
               >
                 <FaTrophy className="w-5 h-5" />
                 <span>View Results</span>
