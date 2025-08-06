@@ -54,31 +54,20 @@ const HomePage = () => {
 
       <div className="relative z-10">
         {/* Hero Section with Quick Actions */}
-        <section className="py-6 px-4">
+        <section className="py-6 px-4 scroll-mt-20" id="hero">
           <div className="container mx-auto">
-            {/* Welcome Message with Logo Background */}
-            <div className="relative bg-white/10 backdrop-blur-sm rounded-xl p-6 text-white mb-6 text-center overflow-hidden">
-              {/* Background Logo */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-5">
+            {/* Welcome Message */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-white mb-6 text-center">
+              <div className="flex items-center justify-center mb-3">
                 <img 
                   src="/hawks-logo.jpg" 
-                  alt="Hawks Logo Background" 
-                  className="w-32 h-32 object-contain"
+                  alt="Hawks Baseball Logo" 
+                  className="w-12 h-12 rounded-lg shadow-lg border-2 border-white/20 mr-3"
+                  loading="lazy"
                 />
+                <h1 className="text-2xl sm:text-3xl font-bold">Welcome to Hawks Baseball</h1>
               </div>
-              
-              {/* Content */}
-              <div className="relative z-10">
-                <div className="flex items-center justify-center mb-3">
-                  <img 
-                    src="/hawks-logo.jpg" 
-                    alt="Hawks Baseball Logo" 
-                    className="w-12 h-12 rounded-lg shadow-lg border-2 border-white/20 mr-3"
-                  />
-                  <h1 className="text-2xl sm:text-3xl font-bold">Welcome to Hawks Baseball</h1>
-                </div>
-                <p className="text-white/90 text-sm sm:text-base">Cooperstown Dreams Park 2025 - Relive every moment of our incredible journey</p>
-              </div>
+              <p className="text-white/90 text-sm sm:text-base">Cooperstown Dreams Park 2025 - Relive every moment of our incredible journey</p>
             </div>
 
             {/* Quick Actions Grid */}
@@ -89,7 +78,7 @@ const HomePage = () => {
                   <Link
                     key={index}
                     to={feature.link}
-                    className="group bg-white/10 backdrop-blur-sm rounded-xl p-4 text-white hover:bg-white/20 transition-all duration-200 transform hover:-translate-y-1 border border-white/20"
+                    className="group bg-white/10 backdrop-blur-sm rounded-xl p-4 text-white hover:bg-white/20 transition-all duration-200 transform hover:scale-105 hover:-translate-y-1 border border-white/20"
                   >
                     <div className={`w-10 h-10 ${feature.color} rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-200`}>
                       <Icon className="text-white text-lg" />
@@ -108,7 +97,7 @@ const HomePage = () => {
         </section>
 
         {/* Compact Team Section */}
-        <section className="py-6 px-4 bg-white/5">
+        <section className="py-6 px-4 bg-white/5 scroll-mt-20" id="team">
           <div className="container mx-auto">
             <div className="text-center mb-4">
               <h2 className="text-xl font-bold text-white mb-1">Meet the Team</h2>
@@ -129,8 +118,8 @@ const HomePage = () => {
               </div>
             </div>
 
-            {/* Players Grid - 2 rows of 6 */}
-            <div className="grid grid-cols-6 gap-2 max-w-4xl mx-auto">
+            {/* Players Grid - Responsive */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 max-w-4xl mx-auto">
               {teamRoster.slice(2).map((player, index) => (
                 <div 
                   key={player.id} 
@@ -148,7 +137,7 @@ const HomePage = () => {
         </section>
 
         {/* Memory Vault Preview */}
-        <section className="py-6 px-4 bg-gray-50">
+        <section className="py-6 px-4 bg-gray-50 scroll-mt-20" id="memories">
           <div className="container mx-auto">
             <div className="text-center mb-4">
               <h2 className="text-xl font-bold text-hawks-navy mb-1">Recent Memories</h2>

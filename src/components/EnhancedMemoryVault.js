@@ -221,9 +221,9 @@ const EnhancedMemoryVault = () => {
           </div>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {photos.map((photo, index) => (
-            <div key={photo.id} className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div key={photo.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-200">
               {/* Photo */}
               <div className="relative">
                 <img
