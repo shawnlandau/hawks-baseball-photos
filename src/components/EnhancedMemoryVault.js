@@ -229,7 +229,7 @@ const EnhancedMemoryVault = () => {
                 <img
                   src={photo.url}
                   alt={photo.caption || 'Team memory'}
-                  className="w-full h-64 sm:h-80 object-cover"
+                  style={{ width: '100%', height: 'auto', objectFit: 'contain' }}
                 />
                 
                 {/* Photo Info Overlay */}

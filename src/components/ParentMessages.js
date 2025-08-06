@@ -7,6 +7,7 @@ const ParentMessages = () => {
   const { db, auth } = useFirebase();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     parentName: '',
@@ -14,20 +15,50 @@ const ParentMessages = () => {
   });
 
   useEffect(() => {
-    if (!db) return;
-
-    const q = query(collection(db, 'parentMessages'), orderBy('timestamp', 'desc'), limit(50));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const messageList = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setMessages(messageList);
+    if (!db) {
       setLoading(false);
-    });
+      setError('Database not available');
+      return;
+    }
 
-    return () => unsubscribe();
-  }, [db]);
+    try {
+      const q = query(collection(db, 'parentMessages'), orderBy('timestamp', 'desc'), limit(50));
+      
+      const unsubscribe = onSnapshot(q, 
+        (snapshot) => {
+          const messageList = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          setMessages(messageList);
+          setLoading(false);
+          setError(null);
+        },
+        (error) => {
+          console.error('Error fetching messages:', error);
+          setError('Failed to load messages. Please try again.');
+          setLoading(false);
+        }
+      );
+
+      // Set a timeout to prevent infinite loading
+      const timeout = setTimeout(() => {
+        if (loading) {
+          setLoading(false);
+          setError('Loading timeout. Please refresh the page.');
+        }
+      }, 10000); // 10 second timeout
+
+      return () => {
+        unsubscribe();
+        clearTimeout(timeout);
+      };
+    } catch (error) {
+      console.error('Error setting up messages listener:', error);
+      setError('Failed to connect to messages. Please try again.');
+      setLoading(false);
+    }
+  }, [db, loading]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -97,6 +128,24 @@ const ParentMessages = () => {
       <div className="text-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hawks-red mx-auto mb-4"></div>
         <p className="text-gray-600 text-lg">Loading messages...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <div className="bg-white rounded-xl shadow-lg p-6 max-w-md mx-auto">
+          <div className="text-red-500 text-4xl mb-4">⚠️</div>
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">Unable to Load Messages</h3>
+          <p className="text-gray-500 text-sm mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-hawks-red text-white px-4 py-2 rounded-lg hover:bg-hawks-red-dark transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
