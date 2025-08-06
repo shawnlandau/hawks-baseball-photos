@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { FaDownload, FaHeart, FaTimes, FaChevronLeft, FaChevronRight, FaExpand, FaSpinner, FaFilter, FaPlus, FaCamera, FaVideo } from 'react-icons/fa';
 import { ref, listAll, getDownloadURL, getMetadata } from 'firebase/storage';
 import { useFirebase } from '../hooks/useFirebase';
@@ -24,8 +25,10 @@ const PhotoGallery = () => {
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [mediaType, setMediaType] = useState('all'); // 'all', 'photos', 'videos'
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const lightboxRef = useRef(null);
   const imageRef = useRef(null);
+  const playerFilterRef = useRef(null);
 
   useEffect(() => {
     const fetchMedia = async () => {
@@ -323,6 +326,20 @@ const PhotoGallery = () => {
     return () => document.removeEventListener('keydown', handleKeyPress);
   }, [handleKeyPress]);
 
+  // Handle click outside to close player filter
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (playerFilterRef.current && !playerFilterRef.current.contains(event.target)) {
+        setShowPlayerFilter(false);
+      }
+    };
+
+    if (showPlayerFilter) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showPlayerFilter]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-hawks-navy via-hawks-navy-dark to-hawks-red flex items-center justify-center">
@@ -337,7 +354,7 @@ const PhotoGallery = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-hawks-navy via-hawks-navy-dark to-hawks-red">
       {/* Header */}
-      <div className="bg-white/15 backdrop-blur-md border-b border-white/20 shadow-xl">
+      <div className="bg-white/15 backdrop-blur-md border-b border-white/20 shadow-xl relative">
         <div className="container mx-auto px-4 py-6 sm:py-8">
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-6 sm:space-y-0">
             <div>
@@ -389,17 +406,33 @@ const PhotoGallery = () => {
               </div>
 
               {/* Player Filter */}
-              <div className="relative">
+              <div className="relative" ref={playerFilterRef}>
                 <button
-                  onClick={() => setShowPlayerFilter(!showPlayerFilter)}
+                  onClick={() => {
+                    if (!showPlayerFilter && playerFilterRef.current) {
+                      const rect = playerFilterRef.current.getBoundingClientRect();
+                      setDropdownPosition({
+                        top: rect.bottom + window.scrollY + 12,
+                        left: rect.right - 250 // 250px is min-width of dropdown
+                      });
+                    }
+                    setShowPlayerFilter(!showPlayerFilter);
+                  }}
                   className="flex items-center space-x-3 bg-white/20 text-white px-6 py-3 rounded-xl hover:bg-white/30 transition-all duration-200 min-h-[52px] shadow-lg"
                 >
                   <FaFilter className="w-5 h-5" />
                   <span className="hidden sm:inline font-semibold">Filter by Player</span>
                 </button>
                 
-                {showPlayerFilter && (
-                  <div className="absolute top-full right-0 mt-3 bg-white rounded-2xl shadow-2xl z-50 min-w-[250px] max-h-[400px] overflow-y-auto border border-gray-100">
+                {showPlayerFilter && createPortal(
+                  <div 
+                    className="fixed z-[9999] bg-white rounded-2xl shadow-2xl min-w-[250px] max-h-[400px] overflow-y-auto border border-gray-100"
+                    style={{
+                      top: dropdownPosition.top,
+                      left: dropdownPosition.left,
+                      maxHeight: '400px'
+                    }}
+                  >
                     <div className="p-3">
                       <button
                         onClick={clearPlayerFilter}
@@ -418,7 +451,8 @@ const PhotoGallery = () => {
                         </button>
                       ))}
                     </div>
-                  </div>
+                  </div>,
+                  document.body
                 )}
               </div>
 
