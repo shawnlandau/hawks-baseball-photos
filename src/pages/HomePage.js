@@ -116,7 +116,7 @@ const HomePage = () => {
             <div className="max-w-4xl mx-auto">
               <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                 <img 
-                  src="/team-photo.jpg" 
+                  src="/players/team-photo.JPG" 
                   alt="Hawks Baseball Team - Cooperstown Dreams Park 2025" 
                   className="w-full h-auto max-h-96 object-cover"
                   onError={(e) => {
