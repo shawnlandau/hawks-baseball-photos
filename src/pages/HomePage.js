@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaImages, FaUpload, FaTrophy, FaComments, FaCamera } from 'react-icons/fa';
+import { FaImages, FaUpload, FaCalendar, FaComments, FaCamera } from 'react-icons/fa';
 import PlayerCard from '../components/PlayerCard';
 import ParentMessages from '../components/ParentMessages';
 import { teamRoster } from '../data/teamRoster';
@@ -26,7 +26,7 @@ const HomePage = () => {
       link: '/upload'
     },
     {
-      icon: FaTrophy,
+      icon: FaCalendar,
       title: 'Game Results',
       description: 'View all our tournament games, scores, and highlights',
       color: 'bg-hawks-red',
