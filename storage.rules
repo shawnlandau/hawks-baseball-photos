@@ -1,17 +1,38 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    // Photos directory - allow read for everyone, write for authenticated users
     match /photos/{fileName} {
-      allow read: if true; // Anyone can download photos
+      allow read: if true; // Anyone can view/download photos
       allow write: if request.auth != null && 
         request.resource.size < 10 * 1024 * 1024 && // 10MB limit
         request.resource.contentType.matches('image/.*'); // Images only
-      allow delete: if request.auth != null; // Only authenticated users can delete (app logic handles admin checks)
+      allow delete: if request.auth != null; // Only authenticated users can delete
     }
     
+    // Videos directory - allow read for everyone, write for authenticated users
+    match /videos/{fileName} {
+      allow read: if true; // Anyone can view/download videos
+      allow write: if request.auth != null && 
+        request.resource.size < 100 * 1024 * 1024 && // 100MB limit for videos
+        request.resource.contentType.matches('video/.*'); // Videos only
+      allow delete: if request.auth != null; // Only authenticated users can delete
+    }
+    
+    // User-specific uploads (if needed for future features)
     match /users/{userId}/{fileName} {
       allow read: if request.auth != null;
       allow write: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow listing of photos and videos directories for authenticated users
+    match /photos {
+      allow list: if request.auth != null;
+    }
+    
+    match /videos {
+      allow list: if request.auth != null;
     }
   }
 } 
