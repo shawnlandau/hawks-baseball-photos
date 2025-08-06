@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaImages, FaUpload, FaCalendar, FaComments, FaCamera, FaTrophy, FaUser, FaSearch, FaUserTie } from 'react-icons/fa';
+import { ref, listAll, getDownloadURL } from 'firebase/storage';
 import ParentMessages from '../components/ParentMessages';
 import { teamRoster } from '../data/teamRoster';
 import { useFirebase } from '../hooks/useFirebase';
@@ -19,10 +20,10 @@ const HomePage = () => {
       if (!storage) return;
       
       try {
-        const photosRef = storage.ref('photos');
-        const photosResult = await photosRef.listAll();
+        const photosRef = ref(storage, 'photos');
+        const photosResult = await listAll(photosRef);
         const photoPromises = photosResult.items.slice(0, 3).map(async (item) => {
-          const url = await item.getDownloadURL();
+          const url = await getDownloadURL(item);
           return { id: item.name, url };
         });
         
