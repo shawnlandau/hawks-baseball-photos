@@ -56,10 +56,29 @@ const HomePage = () => {
         {/* Hero Section with Quick Actions */}
         <section className="py-6 px-4">
           <div className="container mx-auto">
-            {/* Welcome Message */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-white mb-6 text-center">
-              <h1 className="text-xl sm:text-2xl font-bold mb-1">Welcome to Hawks Baseball</h1>
-              <p className="text-white/90 text-sm">Cooperstown Dreams Park 2025 - Relive every moment of our incredible journey</p>
+            {/* Welcome Message with Logo Background */}
+            <div className="relative bg-white/10 backdrop-blur-sm rounded-xl p-6 text-white mb-6 text-center overflow-hidden">
+              {/* Background Logo */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-5">
+                <img 
+                  src="/hawks-logo.jpg" 
+                  alt="Hawks Logo Background" 
+                  className="w-32 h-32 object-contain"
+                />
+              </div>
+              
+              {/* Content */}
+              <div className="relative z-10">
+                <div className="flex items-center justify-center mb-3">
+                  <img 
+                    src="/hawks-logo.jpg" 
+                    alt="Hawks Baseball Logo" 
+                    className="w-12 h-12 rounded-lg shadow-lg border-2 border-white/20 mr-3"
+                  />
+                  <h1 className="text-2xl sm:text-3xl font-bold">Welcome to Hawks Baseball</h1>
+                </div>
+                <p className="text-white/90 text-sm sm:text-base">Cooperstown Dreams Park 2025 - Relive every moment of our incredible journey</p>
+              </div>
             </div>
 
             {/* Quick Actions Grid */}
