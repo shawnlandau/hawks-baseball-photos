@@ -118,7 +118,7 @@ const HomePage = () => {
                 <img 
                   src="/players/team-photo.JPG" 
                   alt="Hawks Baseball Team - Cooperstown Dreams Park 2025" 
-                  className="w-full h-auto max-h-96 object-cover"
+                  className="w-full h-auto max-h-[500px] object-contain"
                   onError={(e) => {
                     e.target.style.display = 'none';
                     e.target.nextSibling.style.display = 'flex';
