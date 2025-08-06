@@ -336,14 +336,14 @@ const PhotoGallery = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-hawks-navy via-hawks-navy-dark to-hawks-red">
       {/* Header */}
-      <div className="bg-white/10 backdrop-blur-sm border-b border-white/20">
-        <div className="container mx-auto px-4 py-4 sm:py-6">
-          <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+      <div className="bg-white/15 backdrop-blur-md border-b border-white/20 shadow-xl">
+        <div className="container mx-auto px-4 py-6 sm:py-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center space-y-6 sm:space-y-0">
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3">
                 Media Gallery
               </h1>
-              <p className="text-white/80 text-sm sm:text-base">
+              <p className="text-white/90 text-lg sm:text-xl">
                 {selectedPlayer 
                   ? `${selectedPlayer.name}'s Media (${filteredMedia.length})` 
                   : `${getAllMedia().length} items • Capture the Hawks' Cooperstown memories`
@@ -352,35 +352,35 @@ const PhotoGallery = () => {
             </div>
             
             {/* Controls */}
-            <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4">
+            <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
               {/* Media Type Filter */}
-              <div className="flex bg-white/10 rounded-lg p-1">
+              <div className="flex bg-white/15 rounded-xl p-1 shadow-lg">
                 <button
                   onClick={() => setMediaType('all')}
-                  className={`px-4 py-3 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
                     mediaType === 'all' 
-                      ? 'bg-hawks-red text-white' 
-                      : 'text-white/70 hover:text-white'
+                      ? 'bg-gradient-to-r from-hawks-red to-red-600 text-white shadow-lg' 
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
                   }`}
                 >
                   All
                 </button>
                 <button
                   onClick={() => setMediaType('photos')}
-                  className={`px-4 py-3 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
                     mediaType === 'photos' 
-                      ? 'bg-hawks-red text-white' 
-                      : 'text-white/70 hover:text-white'
+                      ? 'bg-gradient-to-r from-hawks-red to-red-600 text-white shadow-lg' 
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
                   }`}
                 >
                   Photos
                 </button>
                 <button
                   onClick={() => setMediaType('videos')}
-                  className={`px-4 py-3 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
                     mediaType === 'videos' 
-                      ? 'bg-hawks-red text-white' 
-                      : 'text-white/70 hover:text-white'
+                      ? 'bg-gradient-to-r from-hawks-red to-red-600 text-white shadow-lg' 
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
                   }`}
                 >
                   Videos
@@ -391,18 +391,18 @@ const PhotoGallery = () => {
               <div className="relative">
                 <button
                   onClick={() => setShowPlayerFilter(!showPlayerFilter)}
-                  className="flex items-center space-x-2 bg-white/20 text-white px-4 py-3 rounded-lg hover:bg-white/30 transition-colors min-h-[48px]"
+                  className="flex items-center space-x-3 bg-white/20 text-white px-6 py-3 rounded-xl hover:bg-white/30 transition-all duration-200 min-h-[52px] shadow-lg"
                 >
-                  <FaFilter className="w-4 h-4" />
-                  <span className="hidden sm:inline">Filter by Player</span>
+                  <FaFilter className="w-5 h-5" />
+                  <span className="hidden sm:inline font-semibold">Filter by Player</span>
                 </button>
                 
                 {showPlayerFilter && (
-                  <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl z-50 min-w-[200px] max-h-[400px] overflow-y-auto">
-                    <div className="p-2">
+                  <div className="absolute top-full right-0 mt-3 bg-white rounded-2xl shadow-2xl z-50 min-w-[250px] max-h-[400px] overflow-y-auto border border-gray-100">
+                    <div className="p-3">
                       <button
                         onClick={clearPlayerFilter}
-                        className="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 text-sm font-medium"
+                        className="w-full text-left px-4 py-3 rounded-xl hover:bg-gray-100 text-sm font-semibold transition-colors"
                       >
                         All Media
                       </button>
@@ -410,9 +410,9 @@ const PhotoGallery = () => {
                         <button
                           key={player.id}
                           onClick={() => handlePlayerFilter(player)}
-                          className="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 text-sm"
+                          className="w-full text-left px-4 py-3 rounded-xl hover:bg-gray-100 text-sm transition-colors"
                         >
-                          <div className="font-medium">{player.name}</div>
+                          <div className="font-semibold">{player.name}</div>
                           <div className="text-xs text-gray-500">{player.position}</div>
                         </button>
                       ))}
@@ -426,35 +426,35 @@ const PhotoGallery = () => {
                 <button
                   onClick={downloadAllPlayerMedia}
                   disabled={downloadingPhotos.has('bulk')}
-                  className="flex items-center space-x-2 bg-hawks-red text-white px-4 py-3 rounded-lg hover:bg-hawks-red-dark transition-colors disabled:opacity-50 min-h-[48px]"
+                  className="flex items-center space-x-3 bg-gradient-to-r from-hawks-red to-red-600 text-white px-6 py-3 rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-200 disabled:opacity-50 min-h-[52px] shadow-lg"
                 >
                   {downloadingPhotos.has('bulk') ? (
-                    <FaSpinner className="w-4 h-4 animate-spin" />
+                    <FaSpinner className="w-5 h-5 animate-spin" />
                   ) : (
-                    <FaDownload className="w-4 h-4" />
+                    <FaDownload className="w-5 h-5" />
                   )}
-                  <span className="hidden sm:inline">Download All</span>
+                  <span className="hidden sm:inline font-semibold">Download All</span>
                 </button>
               )}
 
               {/* View Mode Toggle */}
-              <div className="flex bg-white/10 rounded-lg p-1">
+              <div className="flex bg-white/15 rounded-xl p-1 shadow-lg">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`px-4 py-3 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
                     viewMode === 'grid' 
-                      ? 'bg-hawks-red text-white' 
-                      : 'text-white/70 hover:text-white'
+                      ? 'bg-gradient-to-r from-hawks-red to-red-600 text-white shadow-lg' 
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
                   }`}
                 >
                   Grid
                 </button>
                 <button
                   onClick={() => setViewMode('masonry')}
-                  className={`px-4 py-3 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
                     viewMode === 'masonry' 
-                      ? 'bg-hawks-red text-white' 
-                      : 'text-white/70 hover:text-white'
+                      ? 'bg-gradient-to-r from-hawks-red to-red-600 text-white shadow-lg' 
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
                   }`}
                 >
                   Masonry
@@ -463,20 +463,20 @@ const PhotoGallery = () => {
 
               {/* Selection Controls */}
               {selectedPhotos.size > 0 && (
-                <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                  <span className="text-white text-sm">
+                <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                  <span className="text-white text-base font-semibold">
                     {selectedPhotos.size} selected
                   </span>
                   <button
                     onClick={downloadSelectedPhotos}
-                    className="bg-hawks-red text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-hawks-red-dark transition-colors flex items-center justify-center space-x-2 min-h-[48px]"
+                    className="bg-gradient-to-r from-hawks-red to-red-600 text-white px-8 py-3 rounded-xl text-sm font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-200 flex items-center justify-center space-x-3 min-h-[52px] shadow-lg"
                   >
-                    <FaDownload className="w-4 h-4" />
+                    <FaDownload className="w-5 h-5" />
                     <span>Download ({selectedPhotos.size})</span>
                   </button>
                   <button
                     onClick={clearSelection}
-                    className="bg-gray-600 text-white px-4 py-3 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors min-h-[48px]"
+                    className="bg-gray-600 text-white px-6 py-3 rounded-xl text-sm font-semibold hover:bg-gray-700 transition-all duration-200 min-h-[52px] shadow-lg"
                   >
                     Clear
                   </button>
@@ -488,28 +488,28 @@ const PhotoGallery = () => {
       </div>
 
       {/* Gallery Grid */}
-      <div className="container mx-auto px-4 py-6 sm:py-8">
+      <div className="container mx-auto px-4 py-8 sm:py-12">
         {filteredMedia.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="bg-white/10 rounded-2xl p-6 sm:p-8 max-w-md mx-auto">
-              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FaHeart className="w-8 h-8 text-white/60" />
+          <div className="text-center py-16">
+            <div className="bg-white/15 backdrop-blur-md rounded-3xl p-8 sm:p-12 max-w-lg mx-auto border border-white/20 shadow-2xl">
+              <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <FaHeart className="w-10 h-10 text-white/60" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">No Media Yet</h3>
-              <p className="text-white/70 text-sm mb-4">
+              <h3 className="text-2xl font-bold text-white mb-4">No Media Yet</h3>
+              <p className="text-white/80 text-lg mb-8 leading-relaxed">
                 Be the first to share photos and videos from the Hawks' Cooperstown journey!
               </p>
               <Link
                 to="/upload"
-                className="inline-flex items-center justify-center space-x-2 bg-hawks-red text-white px-6 py-3 rounded-lg font-medium hover:bg-hawks-red-dark transition-colors min-h-[48px]"
+                className="inline-flex items-center justify-center space-x-3 bg-gradient-to-r from-hawks-red to-red-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 min-h-[56px]"
               >
-                <FaCamera className="w-4 h-4" />
+                <FaCamera className="w-6 h-6" />
                 <span>Upload Media</span>
               </Link>
             </div>
           </div>
         ) : (
-          <div className={`grid gap-4 ${
+          <div className={`grid gap-6 ${
             viewMode === 'grid' 
               ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4' 
               : 'columns-1 sm:columns-2 lg:columns-3 xl:columns-4'
@@ -517,8 +517,8 @@ const PhotoGallery = () => {
             {filteredMedia.map((media, index) => (
               <div
                 key={media.id}
-                className={`group relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ${
-                  viewMode === 'masonry' ? 'break-inside-avoid mb-4' : ''
+                className={`group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 ${
+                  viewMode === 'masonry' ? 'break-inside-avoid mb-6' : ''
                 } ${
                   selectedPhotos.has(media.id) ? 'ring-4 ring-hawks-red' : ''
                 }`}
@@ -542,16 +542,16 @@ const PhotoGallery = () => {
                   )}
                   
                   {/* Overlay */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300">
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300">
                     {/* Media Type Badge */}
-                    <div className="absolute top-3 left-3">
+                    <div className="absolute top-4 left-4">
                       {media.type === 'video' ? (
-                        <div className="bg-hawks-red text-white text-xs font-semibold px-2 py-1 rounded-full shadow-sm flex items-center space-x-1">
+                        <div className="bg-gradient-to-r from-hawks-red to-red-600 text-white text-xs font-bold px-3 py-2 rounded-full shadow-lg flex items-center space-x-2">
                           <FaVideo className="w-3 h-3" />
                           <span>VIDEO</span>
                         </div>
                       ) : (
-                        <div className="bg-white/90 text-hawks-navy text-xs font-semibold px-2 py-1 rounded-full shadow-sm flex items-center space-x-1">
+                        <div className="bg-white/95 text-hawks-navy text-xs font-bold px-3 py-2 rounded-full shadow-lg flex items-center space-x-2">
                           <FaCamera className="w-3 h-3" />
                           <span>PHOTO</span>
                         </div>
@@ -559,30 +559,30 @@ const PhotoGallery = () => {
                     </div>
 
                     {/* Selection Checkbox */}
-                    <div className="absolute top-3 right-3">
+                    <div className="absolute top-4 right-4">
                       <input
                         type="checkbox"
                         checked={selectedPhotos.has(media.id)}
                         onChange={() => togglePhotoSelection(media.id)}
-                        className="w-6 h-6 rounded border-2 border-white bg-white/20 checked:bg-hawks-red checked:border-hawks-red focus:ring-2 focus:ring-hawks-red focus:ring-offset-2"
+                        className="w-7 h-7 rounded border-2 border-white bg-white/20 checked:bg-hawks-red checked:border-hawks-red focus:ring-4 focus:ring-hawks-red focus:ring-offset-2 transition-all duration-200"
                       />
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="absolute bottom-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute bottom-4 right-4 flex space-x-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           downloadMedia(media);
                         }}
                         disabled={downloadingPhotos.has(media.id)}
-                        className="w-12 h-12 bg-white/90 hover:bg-white text-gray-800 rounded-full flex items-center justify-center transition-colors shadow-lg disabled:opacity-50 min-h-[48px]"
+                        className="w-14 h-14 bg-white/95 hover:bg-white text-gray-800 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg disabled:opacity-50 min-h-[56px] min-w-[56px]"
                         aria-label="Download media"
                       >
                         {downloadingPhotos.has(media.id) ? (
-                          <FaSpinner className="w-4 h-4 animate-spin" />
+                          <FaSpinner className="w-5 h-5 animate-spin" />
                         ) : (
-                          <FaDownload className="w-4 h-4" />
+                          <FaDownload className="w-5 h-5" />
                         )}
                       </button>
                       <button
@@ -590,21 +590,21 @@ const PhotoGallery = () => {
                           e.stopPropagation();
                           openLightbox(media, index);
                         }}
-                        className="w-12 h-12 bg-white/90 hover:bg-white text-gray-800 rounded-full flex items-center justify-center transition-colors shadow-lg min-h-[48px]"
+                        className="w-14 h-14 bg-white/95 hover:bg-white text-gray-800 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg min-h-[56px] min-w-[56px]"
                         aria-label="View full screen"
                       >
-                        <FaExpand className="w-4 h-4" />
+                        <FaExpand className="w-5 h-5" />
                       </button>
                     </div>
                   </div>
                 </div>
 
                 {/* Media Info */}
-                <div className="p-3 bg-white">
-                  <p className="text-sm text-gray-600 truncate" title={media.name}>
+                <div className="p-4 bg-white">
+                  <p className="text-sm text-gray-700 truncate font-medium" title={media.name}>
                     {media.name}
                   </p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-500 mt-1">
                     {(media.size / 1024 / 1024).toFixed(1)} MB
                   </p>
                 </div>
@@ -617,10 +617,10 @@ const PhotoGallery = () => {
       {/* Floating Action Button for Upload */}
       <Link
         to="/upload"
-        className="fixed bottom-6 right-6 bg-hawks-red text-white w-16 h-16 rounded-full shadow-lg hover:bg-hawks-red-dark transition-all duration-200 transform hover:scale-110 flex items-center justify-center z-40 min-h-[64px] min-w-[64px]"
+        className="fixed bottom-8 right-8 bg-gradient-to-r from-hawks-red to-red-600 text-white w-20 h-20 rounded-full shadow-2xl hover:from-red-700 hover:to-red-800 transition-all duration-300 transform hover:scale-110 flex items-center justify-center z-40 min-h-[80px] min-w-[80px]"
         aria-label="Upload media"
       >
-        <FaPlus className="w-6 h-6" />
+        <FaPlus className="w-8 h-8" />
       </Link>
 
       {/* Enhanced Lightbox with Video Support */}

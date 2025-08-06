@@ -67,8 +67,7 @@ describe('Navbar Component', () => {
       expect(screen.getByText('Home')).toBeInTheDocument();
       expect(screen.getByText('Gallery')).toBeInTheDocument();
       expect(screen.getByText('Upload')).toBeInTheDocument();
-      expect(screen.getByText('Schedule')).toBeInTheDocument();
-      expect(screen.getByText('Map')).toBeInTheDocument();
+      expect(screen.getByText('Game Results')).toBeInTheDocument();
     });
 
     test('navigation links have correct href attributes', () => {
@@ -77,14 +76,12 @@ describe('Navbar Component', () => {
       const homeLink = screen.getByText('Home').closest('a');
       const galleryLink = screen.getByText('Gallery').closest('a');
       const uploadLink = screen.getByText('Upload').closest('a');
-      const scheduleLink = screen.getByText('Schedule').closest('a');
-      const mapLink = screen.getByText('Map').closest('a');
+      const resultsLink = screen.getByText('Game Results').closest('a');
       
       expect(homeLink).toHaveAttribute('href', '/');
       expect(galleryLink).toHaveAttribute('href', '/gallery');
       expect(uploadLink).toHaveAttribute('href', '/upload');
-      expect(scheduleLink).toHaveAttribute('href', '/schedule');
-      expect(mapLink).toHaveAttribute('href', '/map');
+      expect(resultsLink).toHaveAttribute('href', '/results');
     });
 
     test('navigation links have proper icons', () => {
@@ -97,37 +94,44 @@ describe('Navbar Component', () => {
   });
 
   describe('User Authentication Display', () => {
-    test('shows user email when authenticated', () => {
+    test('shows user avatar when authenticated', () => {
       renderNavbar();
       
-      expect(screen.getByText('Signed in as:')).toBeInTheDocument();
+      // Check for user avatar button
+      const userMenuButton = screen.getByRole('button', { name: /user menu/i });
+      expect(userMenuButton).toBeInTheDocument();
+    });
+
+    test('shows user display name when authenticated', () => {
+      renderNavbar();
+      
+      expect(screen.getByText('test')).toBeInTheDocument();
       expect(screen.getByText('test@example.com')).toBeInTheDocument();
     });
 
-    test('shows "Unknown" when user email is not available', () => {
+    test('shows user avatar when user email is not available', () => {
       renderNavbar({
         auth: { currentUser: null }
       });
       
-      expect(screen.getByText('Unknown')).toBeInTheDocument();
-    });
-
-    test('renders sign out button', () => {
-      renderNavbar();
-      
-      expect(screen.getByText('Sign Out')).toBeInTheDocument();
+      const userMenuButton = screen.getByRole('button', { name: /user menu/i });
+      expect(userMenuButton).toBeInTheDocument();
     });
   });
 
   describe('Sign Out Functionality', () => {
     test('calls onSignOut when sign out button is clicked', async () => {
       const mockOnSignOut = jest.fn();
-      const user = userEvent.setup();
       
       renderNavbar({ onSignOut: mockOnSignOut });
       
+      // Open user menu
+      const userMenuButton = screen.getByRole('button', { name: /user menu/i });
+      await userEvent.click(userMenuButton);
+      
+      // Click sign out button
       const signOutButton = screen.getByText('Sign Out');
-      await user.click(signOutButton);
+      await userEvent.click(signOutButton);
       
       expect(mockOnSignOut).toHaveBeenCalled();
     });
@@ -137,86 +141,91 @@ describe('Navbar Component', () => {
     test('shows hamburger menu button on mobile', () => {
       renderNavbar();
       
-      const menuButton = screen.getByRole('button', { name: /menu/i });
+      const menuButton = screen.getByRole('button', { name: /toggle mobile menu/i });
       expect(menuButton).toBeInTheDocument();
     });
 
     test('toggles mobile menu when hamburger button is clicked', async () => {
-      const user = userEvent.setup();
       renderNavbar();
       
-      const menuButton = screen.getByRole('button', { name: /menu/i });
+      const menuButton = screen.getByRole('button', { name: /toggle mobile menu/i });
       
-      // Menu should be closed initially
-      expect(screen.queryByText('Home')).not.toBeInTheDocument();
+      // Menu should be closed initially (mobile menu items not visible)
+      const mobileMenuItems = screen.queryAllByText('Home');
+      expect(mobileMenuItems.length).toBe(1); // Only desktop Home link visible
       
       // Click to open menu
-      await user.click(menuButton);
+      await userEvent.click(menuButton);
       
-      // Menu should now be open
-      expect(screen.getByText('Home')).toBeInTheDocument();
-      expect(screen.getByText('Gallery')).toBeInTheDocument();
-      expect(screen.getByText('Upload')).toBeInTheDocument();
-      expect(screen.getByText('Schedule')).toBeInTheDocument();
-      expect(screen.getByText('Map')).toBeInTheDocument();
+      // Menu should now be open - check for mobile menu items
+      const allHomeLinks = screen.getAllByText('Home');
+      expect(allHomeLinks.length).toBe(2); // Desktop + mobile Home links
       
       // Click to close menu
-      await user.click(menuButton);
+      await userEvent.click(menuButton);
       
       // Menu should be closed again
-      expect(screen.queryByText('Home')).not.toBeInTheDocument();
+      const homeLinksAfterClose = screen.queryAllByText('Home');
+      expect(homeLinksAfterClose.length).toBe(1); // Only desktop Home link visible
     });
 
     test('closes mobile menu when navigation link is clicked', async () => {
-      const user = userEvent.setup();
       renderNavbar();
       
-      const menuButton = screen.getByRole('button', { name: /menu/i });
+      const menuButton = screen.getByRole('button', { name: /toggle mobile menu/i });
       
       // Open menu
-      await user.click(menuButton);
-      expect(screen.getByText('Home')).toBeInTheDocument();
+      await userEvent.click(menuButton);
+      const allHomeLinks = screen.getAllByText('Home');
+      expect(allHomeLinks.length).toBe(2); // Desktop + mobile Home links
       
-      // Click a navigation link
-      const homeLink = screen.getByText('Home');
-      await user.click(homeLink);
+      // Click the mobile navigation link (second Home link)
+      const mobileHomeLink = allHomeLinks[1];
+      await userEvent.click(mobileHomeLink);
       
       // Menu should be closed
-      expect(screen.queryByText('Home')).not.toBeInTheDocument();
+      const homeLinksAfterClick = screen.queryAllByText('Home');
+      expect(homeLinksAfterClick.length).toBe(1); // Only desktop Home link visible
     });
 
-    test('shows user email in mobile menu', async () => {
-      const user = userEvent.setup();
+    test('shows user avatar in mobile menu', async () => {
       renderNavbar();
       
-      const menuButton = screen.getByRole('button', { name: /menu/i });
-      await user.click(menuButton);
+      const menuButton = screen.getByRole('button', { name: /toggle mobile menu/i });
+      await userEvent.click(menuButton);
       
-      expect(screen.getByText('Signed in as:')).toBeInTheDocument();
-      expect(screen.getByText('test@example.com')).toBeInTheDocument();
+      // Check for user avatar in mobile menu - use getAllByRole to get the mobile one
+      const userMenuButtons = screen.getAllByRole('button', { name: /user menu/i });
+      expect(userMenuButtons.length).toBeGreaterThan(0);
     });
 
     test('shows sign out button in mobile menu', async () => {
-      const user = userEvent.setup();
       renderNavbar();
       
-      const menuButton = screen.getByRole('button', { name: /menu/i });
-      await user.click(menuButton);
+      const menuButton = screen.getByRole('button', { name: /toggle mobile menu/i });
+      await userEvent.click(menuButton);
+      
+      // Open user menu in mobile - get the second one (mobile menu)
+      const userMenuButtons = screen.getAllByRole('button', { name: /user menu/i });
+      await userEvent.click(userMenuButtons[1]);
       
       expect(screen.getByText('Sign Out')).toBeInTheDocument();
     });
 
     test('calls onSignOut when mobile sign out button is clicked', async () => {
       const mockOnSignOut = jest.fn();
-      const user = userEvent.setup();
       
       renderNavbar({ onSignOut: mockOnSignOut });
       
-      const menuButton = screen.getByRole('button', { name: /menu/i });
-      await user.click(menuButton);
+      const menuButton = screen.getByRole('button', { name: /toggle mobile menu/i });
+      await userEvent.click(menuButton);
+      
+      // Open user menu in mobile - get the second one (mobile menu)
+      const userMenuButtons = screen.getAllByRole('button', { name: /user menu/i });
+      await userEvent.click(userMenuButtons[1]);
       
       const signOutButton = screen.getByText('Sign Out');
-      await user.click(signOutButton);
+      await userEvent.click(signOutButton);
       
       expect(mockOnSignOut).toHaveBeenCalled();
     });
@@ -232,14 +241,14 @@ describe('Navbar Component', () => {
     });
 
     test('highlights active page in mobile navigation', async () => {
-      const user = userEvent.setup();
       renderNavbar();
       
-      const menuButton = screen.getByRole('button', { name: /menu/i });
-      await user.click(menuButton);
+      const menuButton = screen.getByRole('button', { name: /toggle mobile menu/i });
+      await userEvent.click(menuButton);
       
-      const homeLink = screen.getByText('Home').closest('a');
-      expect(homeLink).toHaveClass('bg-hawks-red');
+      const homeLinks = screen.getAllByText('Home');
+      const mobileHomeLink = homeLinks[1]; // Get the second Home link (mobile menu)
+      expect(mobileHomeLink.closest('a')).toHaveClass('bg-hawks-red');
     });
   });
 
@@ -248,14 +257,14 @@ describe('Navbar Component', () => {
       renderNavbar();
       
       // Desktop navigation should be hidden on mobile (md:hidden class)
-      const desktopNav = screen.getByText('Home').closest('nav');
+      const desktopNav = screen.getByText('Home').closest('div');
       expect(desktopNav).toHaveClass('hidden', 'md:flex');
     });
 
     test('shows mobile menu button on mobile', () => {
       renderNavbar();
       
-      const menuButton = screen.getByRole('button', { name: /menu/i });
+      const menuButton = screen.getByRole('button', { name: /toggle mobile menu/i });
       expect(menuButton).toHaveClass('md:hidden');
     });
   });
@@ -264,7 +273,7 @@ describe('Navbar Component', () => {
     test('has proper ARIA labels for menu button', () => {
       renderNavbar();
       
-      const menuButton = screen.getByRole('button', { name: /menu/i });
+      const menuButton = screen.getByRole('button', { name: /toggle mobile menu/i });
       expect(menuButton).toBeInTheDocument();
     });
 

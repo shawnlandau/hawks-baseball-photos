@@ -1,14 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaImages, FaUpload, FaCalendar, FaComments, FaCamera } from 'react-icons/fa';
+import { FaImages, FaUpload, FaCalendar, FaComments, FaCamera, FaTrophy, FaHeart, FaUser } from 'react-icons/fa';
 import PlayerCard from '../components/PlayerCard';
 import ParentMessages from '../components/ParentMessages';
 import { teamRoster } from '../data/teamRoster';
+import { useFirebase } from '../hooks/useFirebase';
 
 const HomePage = () => {
   const [activeTab, setActiveTab] = useState('memories');
-  // eslint-disable-next-line no-unused-vars
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [latestPhotos, setLatestPhotos] = useState([]);
+  const [uploadCount, setUploadCount] = useState(0);
+  const [gameStats, setGameStats] = useState({ wins: 0, losses: 0, totalGames: 0 });
+  const { storage } = useFirebase();
+
+  // Fetch latest photos for gallery preview
+  useEffect(() => {
+    const fetchLatestPhotos = async () => {
+      if (!storage) return;
+      
+      try {
+        const photosRef = storage.ref('photos');
+        const photosResult = await photosRef.listAll();
+        const photoPromises = photosResult.items.slice(0, 3).map(async (item) => {
+          const url = await item.getDownloadURL();
+          return { id: item.name, url };
+        });
+        
+        const photos = await Promise.all(photoPromises);
+        setLatestPhotos(photos);
+      } catch (error) {
+        console.error('Error fetching latest photos:', error);
+      }
+    };
+
+    fetchLatestPhotos();
+  }, [storage]);
+
+  // Mock data for upload count and game stats
+  useEffect(() => {
+    setUploadCount(24); // Mock upload count
+    setGameStats({ wins: 3, losses: 2, totalGames: 5 }); // Mock game stats
+  }, []);
 
   const features = [
     {
@@ -16,21 +49,24 @@ const HomePage = () => {
       title: 'Photo Gallery',
       description: 'Browse and relive every moment from our Cooperstown journey',
       color: 'bg-hawks-red',
-      link: '/gallery'
+      link: '/gallery',
+      preview: 'photos'
     },
     {
       icon: FaUpload,
       title: 'Share Memories',
       description: 'Upload and share your favorite photos with the team',
       color: 'bg-hawks-navy',
-      link: '/upload'
+      link: '/upload',
+      preview: 'uploads'
     },
     {
       icon: FaCalendar,
       title: 'Game Results',
       description: 'View all our tournament games, scores, and highlights',
       color: 'bg-hawks-red',
-      link: '/results'
+      link: '/results',
+      preview: 'games'
     }
   ];
 
@@ -45,6 +81,65 @@ const HomePage = () => {
     { id: 'messages', label: 'Messages', icon: FaComments }
   ];
 
+  const renderPreview = (previewType) => {
+    switch (previewType) {
+      case 'photos':
+        return (
+          <div className="flex space-x-2 mb-4">
+            {latestPhotos.length > 0 ? (
+              latestPhotos.map((photo, index) => (
+                <div key={photo.id} className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
+                  <img 
+                    src={photo.url} 
+                    alt={`Preview ${index + 1}`}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="flex space-x-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="w-12 h-12 rounded-lg bg-gray-200 flex items-center justify-center">
+                    <FaImages className="text-gray-400 w-4 h-4" />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      
+      case 'uploads':
+        return (
+          <div className="flex items-center justify-center mb-4">
+            <div className="bg-white/20 rounded-full p-3">
+              <FaUpload className="text-white w-6 h-6" />
+            </div>
+            <div className="ml-3 text-left">
+              <div className="text-2xl font-bold text-white">{uploadCount}</div>
+              <div className="text-white/80 text-xs">uploads</div>
+            </div>
+          </div>
+        );
+      
+      case 'games':
+        return (
+          <div className="flex items-center justify-center mb-4">
+            <div className="bg-white/20 rounded-full p-3">
+              <FaTrophy className="text-white w-6 h-6" />
+            </div>
+            <div className="ml-3 text-left">
+              <div className="text-2xl font-bold text-white">{gameStats.wins}-{gameStats.losses}</div>
+              <div className="text-white/80 text-xs">record</div>
+            </div>
+          </div>
+        );
+      
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-hawks-navy via-hawks-navy-dark to-hawks-red">
       {/* Background pattern */}
@@ -54,39 +149,58 @@ const HomePage = () => {
 
       <div className="relative z-10">
         {/* Hero Section with Quick Actions */}
-        <section className="py-6 px-4 scroll-mt-20" id="hero">
-          <div className="container mx-auto">
+        <section className="relative min-h-screen flex items-center justify-center px-4 scroll-mt-20" id="hero">
+          {/* Background Image */}
+          <div className="absolute inset-0 z-0 bg-hawks-navy">
+            <img 
+              src="/players/TEAMPHOTO-2025-JULY 30-TEAM-40931-20251004-HAWKS BASEBALL-13.jpeg" 
+              alt="Hawks Baseball Team - Cooperstown Dreams Park 2025" 
+              className="w-full h-full object-contain object-center"
+              loading="eager"
+            />
+            {/* Semi-transparent overlay */}
+            <div className="absolute inset-0 bg-black/50"></div>
+          </div>
+
+          {/* Content */}
+          <div className="relative z-10 container mx-auto text-center">
             {/* Welcome Message */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-white mb-6 text-center">
-              <div className="flex items-center justify-center mb-3">
+            <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 sm:p-12 text-white mb-12 border border-white/20 shadow-2xl max-w-4xl mx-auto">
+              <div className="flex items-center justify-center mb-6">
                 <img 
                   src="/hawks-logo.jpg" 
                   alt="Hawks Baseball Logo" 
-                  className="w-12 h-12 rounded-lg shadow-lg border-2 border-white/20 mr-3"
+                  className="w-20 h-20 rounded-xl shadow-lg border-2 border-white/30 mr-6"
                   loading="lazy"
                 />
-                <h1 className="text-2xl sm:text-3xl font-bold">Welcome to Hawks Baseball</h1>
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-shadow">Welcome to Hawks Baseball</h1>
               </div>
-              <p className="text-white/90 text-sm sm:text-base">Cooperstown Dreams Park 2025 - Relive every moment of our incredible journey</p>
+              <p className="text-white/95 text-xl sm:text-2xl max-w-3xl mx-auto leading-relaxed text-shadow">
+                Cooperstown Dreams Park 2025 - Relive every moment of our incredible journey
+              </p>
             </div>
 
             {/* Quick Actions Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {features.map((feature, index) => {
                 const Icon = feature.icon;
                 return (
                   <Link
                     key={index}
                     to={feature.link}
-                    className="group bg-white/10 backdrop-blur-sm rounded-xl p-4 text-white hover:bg-white/20 transition-all duration-200 transform hover:scale-105 hover:-translate-y-1 border border-white/20"
+                    className="group bg-white/15 backdrop-blur-md rounded-2xl p-6 text-white hover:bg-white/25 transition-all duration-300 transform hover:scale-105 hover:-translate-y-2 border border-white/20 shadow-xl hover:shadow-2xl block"
                   >
-                    <div className={`w-10 h-10 ${feature.color} rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-200`}>
-                      <Icon className="text-white text-lg" />
+                    {/* Preview Element */}
+                    {renderPreview(feature.preview)}
+                    
+                    {/* Icon and Title */}
+                    <div className={`w-16 h-16 ${feature.color} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                      <Icon className="text-white text-2xl" />
                     </div>
-                    <h3 className="text-sm font-semibold mb-1">
+                    <h3 className="text-lg font-bold mb-2">
                       {feature.title}
                     </h3>
-                    <p className="text-white/80 text-xs">
+                    <p className="text-white/80 text-sm leading-relaxed">
                       {feature.description}
                     </p>
                   </Link>
@@ -97,16 +211,16 @@ const HomePage = () => {
         </section>
 
         {/* Compact Team Section */}
-        <section className="py-6 px-4 bg-white/5 scroll-mt-20" id="team">
+        <section className="py-12 px-4 bg-white/10 scroll-mt-20" id="team">
           <div className="container mx-auto">
-            <div className="text-center mb-4">
-              <h2 className="text-xl font-bold text-white mb-1">Meet the Team</h2>
-              <p className="text-white/80 text-xs">Tap any player to view their photos</p>
+            <div className="text-center mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">Meet the Team</h2>
+              <p className="text-white/80 text-base">Tap any player to view their photos</p>
             </div>
 
             {/* Coaches Row */}
-            <div className="flex justify-center mb-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md">
+            <div className="flex justify-center mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-lg">
                 <PlayerCard
                   player={teamRoster[0]} // Head Coach
                   onPlayerClick={handlePlayerClick}
@@ -119,12 +233,12 @@ const HomePage = () => {
             </div>
 
             {/* Players Grid - Responsive */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 max-w-4xl mx-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 max-w-6xl mx-auto">
               {teamRoster.slice(2).map((player, index) => (
                 <div 
                   key={player.id} 
                   className="animate-slide-up"
-                  style={{ animationDelay: `${index * 30}ms` }}
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <PlayerCard
                     player={player}
@@ -137,49 +251,49 @@ const HomePage = () => {
         </section>
 
         {/* Memory Vault Preview */}
-        <section className="py-6 px-4 bg-gray-50 scroll-mt-20" id="memories">
+        <section className="py-12 px-4 bg-gray-50 scroll-mt-20" id="memories">
           <div className="container mx-auto">
-            <div className="text-center mb-4">
-              <h2 className="text-xl font-bold text-hawks-navy mb-1">Recent Memories</h2>
-              <p className="text-gray-600 text-xs">Latest photos and messages from our journey</p>
+            <div className="text-center mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-hawks-navy mb-3">Recent Memories</h2>
+              <p className="text-gray-600 text-base">Latest photos and messages from our journey</p>
             </div>
 
             {/* Tab Navigation */}
-            <div className="flex justify-center mb-4">
+            <div className="flex justify-center mb-8">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center space-x-2 px-3 py-2 rounded-lg font-medium transition-all duration-200 mx-1 ${
+                    className={`flex items-center space-x-3 px-6 py-4 rounded-xl font-semibold transition-all duration-300 mx-2 ${
                       activeTab === tab.id
-                        ? 'bg-hawks-red text-white shadow-lg'
-                        : 'bg-white text-hawks-navy hover:bg-gray-50 border border-gray-200'
+                        ? 'bg-gradient-to-r from-hawks-red to-red-600 text-white shadow-lg transform scale-105'
+                        : 'bg-white text-hawks-navy hover:bg-gray-50 border-2 border-gray-200 hover:border-gray-300 shadow-md'
                     }`}
                   >
-                    <Icon className="w-3 h-3" />
-                    <span className="text-xs">{tab.label}</span>
+                    <Icon className="w-5 h-5" />
+                    <span className="text-base">{tab.label}</span>
                   </button>
                 );
               })}
             </div>
 
             {/* Compact Tab Content */}
-            <div className="min-h-[200px]">
+            <div className="min-h-[300px]">
               {activeTab === 'memories' && (
-                <div className="text-center py-8">
-                  <div className="bg-white rounded-xl shadow-lg p-6 max-w-sm mx-auto">
-                    <FaCamera className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Memory Vault</h3>
-                    <p className="text-gray-500 text-xs mb-3">
+                <div className="text-center py-12">
+                  <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md mx-auto border border-gray-100">
+                    <FaCamera className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-700 mb-3">Memory Vault</h3>
+                    <p className="text-gray-500 text-base mb-6 leading-relaxed">
                       View and share photos from our Cooperstown journey
                     </p>
                     <Link
                       to="/gallery"
-                      className="inline-flex items-center space-x-2 bg-hawks-red text-white px-3 py-2 rounded-lg font-medium hover:bg-hawks-red-dark transition-colors text-sm"
+                      className="inline-flex items-center space-x-3 bg-gradient-to-r from-hawks-red to-red-600 text-white px-6 py-4 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                     >
-                      <FaImages className="w-3 h-3" />
+                      <FaImages className="w-5 h-5" />
                       <span>View Gallery</span>
                     </Link>
                   </div>

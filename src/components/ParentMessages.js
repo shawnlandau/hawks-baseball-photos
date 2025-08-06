@@ -153,25 +153,25 @@ const ParentMessages = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
+      <div className="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100">
         <div className="text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-hawks-navy mb-2">
+          <h2 className="text-3xl sm:text-4xl font-bold text-hawks-navy mb-4">
             Messages from Parents
           </h2>
-          <p className="text-gray-600 text-sm sm:text-base">
+          <p className="text-gray-600 text-lg sm:text-xl leading-relaxed">
             Share your thoughts, memories, and messages with the team and families
           </p>
         </div>
       </div>
 
       {/* Message Form */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h3 className="text-lg font-semibold text-hawks-navy mb-4">
+      <div className="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100">
+        <h3 className="text-2xl font-semibold text-hawks-navy mb-6">
           Share Your Message
         </h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="parentName" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="parentName" className="block text-base font-semibold text-gray-700 mb-3">
               Your Name
             </label>
             <input
@@ -180,13 +180,13 @@ const ParentMessages = () => {
               value={formData.parentName}
               onChange={(e) => setFormData(prev => ({ ...prev, parentName: e.target.value }))}
               placeholder="Enter your name"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hawks-red focus:border-transparent min-h-[48px]"
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-hawks-red focus:border-transparent min-h-[56px] text-base transition-all duration-200 hover:border-gray-400"
               required
             />
           </div>
           
           <div>
-            <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="message" className="block text-base font-semibold text-gray-700 mb-3">
               Your Message
             </label>
             <textarea
@@ -194,8 +194,8 @@ const ParentMessages = () => {
               value={formData.message}
               onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
               placeholder="Share a memory, thought, or message for the team..."
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hawks-red focus:border-transparent resize-none min-h-[80px]"
-              rows="3"
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-hawks-red focus:border-transparent resize-none min-h-[120px] text-base transition-all duration-200 hover:border-gray-400"
+              rows="4"
               required
             />
           </div>
@@ -203,16 +203,16 @@ const ParentMessages = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-hawks-red text-white py-3 px-4 rounded-lg font-semibold hover:bg-hawks-red-dark transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 min-h-[48px]"
+            className="w-full bg-gradient-to-r from-hawks-red to-red-600 text-white py-4 px-6 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-3 min-h-[56px] shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
             {submitting ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                 <span>Submitting...</span>
               </>
             ) : (
               <>
-                <FaPaperPlane className="w-4 h-4" />
+                <FaPaperPlane className="w-5 h-5" />
                 <span>Share Message</span>
               </>
             )}
@@ -221,72 +221,72 @@ const ParentMessages = () => {
       </div>
 
       {/* Messages Wall */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-hawks-navy mb-4">
+      <div className="space-y-6">
+        <h3 className="text-2xl font-semibold text-hawks-navy mb-6">
           Recent Messages ({messages.length})
         </h3>
         
         {messages.length === 0 ? (
-          <div className="text-center py-8">
-            <div className="bg-white rounded-xl shadow-lg p-6 max-w-md mx-auto">
-              <FaComment className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h4 className="text-lg font-semibold text-gray-700 mb-2">No Messages Yet</h4>
-              <p className="text-gray-500 text-sm">
+          <div className="text-center py-12">
+            <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-lg mx-auto border border-gray-100">
+              <FaComment className="w-16 h-16 text-gray-400 mx-auto mb-6" />
+              <h4 className="text-2xl font-semibold text-gray-700 mb-4">No Messages Yet</h4>
+              <p className="text-gray-500 text-lg leading-relaxed">
                 Be the first to share a message with the team!
               </p>
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {messages.map((message) => (
-              <div key={message.id} className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center space-x-2">
-                    <FaUser className="w-4 h-4 text-hawks-red" />
-                    <span className="font-semibold text-gray-800">
+              <div key={message.id} className="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <FaUser className="w-5 h-5 text-hawks-red" />
+                    <span className="font-semibold text-gray-800 text-lg">
                       {message.parentName}
                     </span>
                   </div>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-500 font-medium">
                     {formatDate(message.timestamp)}
                   </span>
                 </div>
                 
-                <p className="text-gray-700 text-base mb-4 leading-relaxed">
+                <p className="text-gray-700 text-lg mb-6 leading-relaxed">
                   {message.message}
                 </p>
                 
                 {/* Reactions */}
-                <div className="flex items-center space-x-4">
-                  <div className="flex space-x-2">
+                <div className="flex items-center space-x-6">
+                  <div className="flex space-x-3">
                     <button
                       onClick={() => addReaction(message.id, '❤️')}
-                      className="p-2 hover:bg-gray-100 rounded-full transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
+                      className="p-3 hover:bg-gray-100 rounded-full transition-all duration-200 min-h-[48px] min-w-[48px] flex items-center justify-center shadow-md hover:shadow-lg"
                       aria-label="Add heart reaction"
                     >
-                      <FaHeart className="w-4 h-4 text-red-500" />
+                      <FaHeart className="w-5 h-5 text-red-500" />
                     </button>
                     <button
                       onClick={() => addReaction(message.id, '😊')}
-                      className="p-2 hover:bg-gray-100 rounded-full transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
+                      className="p-3 hover:bg-gray-100 rounded-full transition-all duration-200 min-h-[48px] min-w-[48px] flex items-center justify-center shadow-md hover:shadow-lg"
                       aria-label="Add smile reaction"
                     >
-                      <FaSmile className="w-4 h-4 text-yellow-500" />
+                      <FaSmile className="w-5 h-5 text-yellow-500" />
                     </button>
                     <button
                       onClick={() => addReaction(message.id, '👍')}
-                      className="p-2 hover:bg-gray-100 rounded-full transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
+                      className="p-3 hover:bg-gray-100 rounded-full transition-all duration-200 min-h-[48px] min-w-[48px] flex items-center justify-center shadow-md hover:shadow-lg"
                       aria-label="Add thumbs up reaction"
                     >
-                      <FaThumbsUp className="w-4 h-4 text-blue-500" />
+                      <FaThumbsUp className="w-5 h-5 text-blue-500" />
                     </button>
                   </div>
 
                   {/* Display Reactions */}
                   {message.reactions && message.reactions.length > 0 && (
-                    <div className="flex space-x-1">
+                    <div className="flex space-x-2">
                       {message.reactions.map((reaction, index) => (
-                        <span key={index} className="text-lg">
+                        <span key={index} className="text-2xl">
                           {reaction}
                         </span>
                       ))}

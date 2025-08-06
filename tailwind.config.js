@@ -17,6 +17,7 @@ module.exports = {
           gold: '#fbbf24',
           'navy-dark': '#1e40af',
           'red-dark': '#b91c1c',
+          'gold-dark': '#f59e0b',
         },
         cooperstown: {
           blue: '#1e40af',

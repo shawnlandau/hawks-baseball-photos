@@ -32,13 +32,13 @@ const UploadPage = () => {
 
       <div className="relative z-10">
         {/* Header */}
-        <div className="bg-white/95 backdrop-blur-sm border-b border-white/20 shadow-lg">
-          <div className="container mx-auto px-4 py-6">
+        <div className="bg-white/95 backdrop-blur-md border-b border-white/20 shadow-2xl">
+          <div className="container mx-auto px-4 py-8 sm:py-12">
             <div className="text-center">
-              <h1 className="text-3xl md:text-4xl font-bold text-hawks-navy mb-2">
+              <h1 className="text-4xl md:text-5xl font-bold text-hawks-navy mb-4">
                 Share Your Memories
               </h1>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
                 Upload photos and videos from our Cooperstown Dreams Park journey. 
                 Tag players, add captions, and organize by albums.
               </p>
@@ -47,24 +47,24 @@ const UploadPage = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-wrap justify-center mb-8">
+        <div className="container mx-auto px-4 py-12">
+          <div className="flex flex-wrap justify-center mb-12">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-3 px-8 py-4 rounded-xl font-semibold transition-all duration-200 mx-2 mb-4 min-h-[64px] ${
+                  className={`flex items-center space-x-4 px-10 py-6 rounded-2xl font-bold transition-all duration-300 mx-3 mb-6 min-h-[80px] ${
                     activeTab === tab.id
-                      ? `${tab.color} text-white shadow-lg transform scale-105`
-                      : 'bg-white/25 text-hawks-navy hover:bg-white/35 hover:shadow-md border border-gray-200'
+                      ? `${tab.color} text-white shadow-2xl transform scale-105`
+                      : 'bg-white/25 text-hawks-navy hover:bg-white/35 hover:shadow-xl border-2 border-gray-200'
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-7 h-7" />
                   <div className="text-left">
-                    <div className="font-semibold">{tab.label}</div>
-                    <div className="text-xs opacity-75">{tab.description}</div>
+                    <div className="text-lg font-bold">{tab.label}</div>
+                    <div className="text-sm opacity-75">{tab.description}</div>
                   </div>
                 </button>
               );
@@ -72,7 +72,7 @@ const UploadPage = () => {
           </div>
 
           {/* Tab Content */}
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             {activeTab === 'photos' && (
               <div className="animate-fade-in">
                 <PhotoUpload onUploadSuccess={() => {}} />

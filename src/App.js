@@ -126,35 +126,22 @@ const App = () => {
             font-family: 'Inter', sans-serif;
           }
           .photo-card {
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           }
           .photo-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
           }
           .tag-badge {
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           }
           .tag-badge:hover {
-            transform: scale(1.05);
+            transform: scale(1.1);
           }
           .animate-fade-in {
-            animation: fadeIn 0.5s ease-in-out;
+            animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
           }
           @keyframes fadeIn {
-            from {
-              opacity: 0;
-              transform: translateY(10px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-          .animate-slide-up {
-            animation: slideUp 0.6s ease-out;
-          }
-          @keyframes slideUp {
             from {
               opacity: 0;
               transform: translateY(20px);
@@ -163,6 +150,86 @@ const App = () => {
               opacity: 1;
               transform: translateY(0);
             }
+          }
+          .animate-slide-up {
+            animation: slideUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+          @keyframes slideUp {
+            from {
+              opacity: 0;
+              transform: translateY(30px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          .animate-bounce-gentle {
+            animation: bounceGentle 3s ease-in-out infinite;
+          }
+          @keyframes bounceGentle {
+            0%, 100% {
+              transform: translateY(0);
+            }
+            50% {
+              transform: translateY(-10px);
+            }
+          }
+          .animate-pulse-slow {
+            animation: pulseSlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          }
+          @keyframes pulseSlow {
+            0%, 100% {
+              opacity: 1;
+            }
+            50% {
+              opacity: 0.8;
+            }
+          }
+          .backdrop-blur-md {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+          }
+          .shadow-2xl {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+          }
+          .shadow-3xl {
+            box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.3);
+          }
+          .gradient-text {
+            background: linear-gradient(135deg, #1e3a8a 0%, #dc2626 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+          }
+          .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+          }
+          .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+          .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+          }
+          .focus-ring {
+            transition: all 0.2s ease-in-out;
+          }
+          .focus-ring:focus {
+            outline: none;
+            ring: 4px;
+            ring-color: #dc2626;
+            ring-offset: 2px;
+          }
+          .text-shadow {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          }
+          .border-gradient {
+            border: 2px solid;
+            border-image: linear-gradient(135deg, #1e3a8a 0%, #dc2626 100%) 1;
           }
           `}
         </style>
@@ -244,19 +311,7 @@ const App = () => {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
 
-        {/* Footer */}
-        {userId && (
-          <footer className="bg-hawks-navy text-white py-6 mt-12">
-            <div className="container mx-auto px-4 text-center">
-              <p className="text-sm font-semibold mb-2">
-                &copy; {new Date().getFullYear()} Hawks Baseball. All rights reserved.
-              </p>
-              <p className="text-xs text-white/70">
-                Cooperstown Dreams Park 2025 - Capturing memories, building character
-              </p>
-            </div>
-          </footer>
-        )}
+        {/* Footer - REMOVED */}
       </div>
     </Router>
   );
