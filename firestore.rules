@@ -11,6 +11,16 @@ service cloud.firestore {
       );
     }
     
+    // Videos collection
+    match /videos/{videoId} {
+      allow read: if true; // Anyone can read videos
+      allow create: if request.auth != null; // Only authenticated users can create
+      allow update, delete: if request.auth != null && (
+        resource.data.uploadedBy == request.auth.uid || // Owner can update/delete
+        request.auth.token.email == 'shawnjl@outlook.com' // Admin can update/delete any video
+      );
+    }
+    
     // Parent Messages collection
     match /parentMessages/{messageId} {
       allow read: if true; // Anyone can read messages
