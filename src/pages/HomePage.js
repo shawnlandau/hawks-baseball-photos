@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaImages, FaUpload, FaCalendar, FaComments, FaCamera, FaTrophy, FaHeart, FaUser, FaSearch, FaUserTie } from 'react-icons/fa';
-import PlayerCard from '../components/PlayerCard';
+import { FaImages, FaUpload, FaCalendar, FaComments, FaCamera, FaTrophy, FaUser, FaSearch, FaUserTie } from 'react-icons/fa';
 import ParentMessages from '../components/ParentMessages';
 import { teamRoster } from '../data/teamRoster';
 import { useFirebase } from '../hooks/useFirebase';
 
 const HomePage = () => {
   const [activeTab, setActiveTab] = useState('memories');
-  const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [latestPhotos, setLatestPhotos] = useState([]);
   const [uploadCount, setUploadCount] = useState(0);
   const [gameStats, setGameStats] = useState({ wins: 0, losses: 0, totalGames: 0 });
@@ -72,7 +70,6 @@ const HomePage = () => {
   ];
 
   const handlePlayerClick = (player) => {
-    setSelectedPlayer(player);
     // Navigate to gallery with player filter
     window.location.href = `/#/gallery?player=${player.id}`;
   };
