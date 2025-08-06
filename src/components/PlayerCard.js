@@ -28,7 +28,7 @@ const PlayerCard = ({ player, onPlayerClick, isSelected = false }) => {
         <div className="flex flex-col items-center text-center space-y-2">
           {/* Circular Profile Photo */}
           <div className="relative flex-shrink-0">
-            <div className={`w-16 h-16 rounded-full overflow-hidden border-2 aspect-square ${
+            <div className={`${isCoach ? 'w-20 h-20' : 'w-16 h-16'} rounded-full overflow-hidden border-2 aspect-square ${
               isCoach 
                 ? 'border-slate-300 bg-gradient-to-br from-slate-600 to-slate-700' 
                 : 'border-hawks-red bg-gradient-to-br from-hawks-red to-hawks-red-dark'
@@ -37,7 +37,9 @@ const PlayerCard = ({ player, onPlayerClick, isSelected = false }) => {
                 <img
                   src={player.photo}
                   alt={`${player.name} - ${isCoach ? (isHeadCoach ? 'Head Coach' : 'Assistant Coach') : `Player #${player.jerseyNumber}`}`}
-                  className="w-full h-full object-cover rounded-full"
+                  className={`w-full h-full rounded-full ${
+                    isCoach ? 'object-contain' : 'object-cover'
+                  }`}
                   onError={(e) => {
                     e.target.style.display = 'none';
                     e.target.nextSibling.style.display = 'flex';
@@ -59,7 +61,7 @@ const PlayerCard = ({ player, onPlayerClick, isSelected = false }) => {
             
             {/* Coach Badge */}
             {isCoach && (
-              <div className="absolute -top-1 -right-1 bg-slate-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-md">
+              <div className="absolute -top-2 -right-2 bg-slate-600 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center shadow-md">
                 {isHeadCoach ? 'HC' : 'AC'}
               </div>
             )}
