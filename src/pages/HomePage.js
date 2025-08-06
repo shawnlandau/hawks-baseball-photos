@@ -111,14 +111,14 @@ const HomePage = () => {
         </div>
 
         {/* Team Photo Section */}
-        <section className="py-8 px-4">
+        <section className="py-8 px-2">
           <div className="container mx-auto text-center">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-6xl mx-auto">
               <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                 <img 
                   src="/players/team-photo.JPG" 
                   alt="Hawks Baseball Team - Cooperstown Dreams Park 2025" 
-                  className="w-full h-auto max-h-[500px] object-contain"
+                  className="w-full h-auto max-h-[500px] object-cover"
                   onError={(e) => {
                     e.target.style.display = 'none';
                     e.target.nextSibling.style.display = 'flex';
