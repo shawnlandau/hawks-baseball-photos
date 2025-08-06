@@ -488,9 +488,21 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
             Capture the Hawks' Cooperstown memories
           </p>
           <div className="flex justify-center space-x-4 text-xs text-gray-400">
-            <a href="#" className="hover:text-gray-600 transition-colors">Privacy Policy</a>
+            <button 
+              type="button" 
+              className="hover:text-gray-600 transition-colors"
+              onClick={() => window.open('/privacy-policy', '_blank')}
+            >
+              Privacy Policy
+            </button>
             <span>•</span>
-            <a href="#" className="hover:text-gray-600 transition-colors">Terms of Service</a>
+            <button 
+              type="button" 
+              className="hover:text-gray-600 transition-colors"
+              onClick={() => window.open('/terms-of-service', '_blank')}
+            >
+              Terms of Service
+            </button>
           </div>
         </div>
       </div>
