@@ -148,20 +148,19 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
   const passwordStrength = getPasswordStrength(formData.password);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-hawks-navy via-hawks-navy-dark to-hawks-red flex items-center justify-center p-4 sm:p-6">
-      {/* Background pattern - hidden on small screens */}
-      <div className="absolute inset-0 opacity-5 hidden sm:block">
-        <div className="absolute inset-0" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.1\'%3E%3Cpath d=\'M30 0L60 30L30 60L0 30Z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}></div>
-      </div>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 sm:p-6">
+      {/* Subtle gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-blue-50 opacity-30"></div>
 
       <div className="w-full max-w-md relative z-10">
         {/* Logo and Header */}
-        <div className="text-center mb-6 sm:mb-8">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full flex items-center justify-center shadow-2xl border-4 border-hawks-red mx-auto mb-4 sm:mb-6 overflow-hidden">
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full flex items-center justify-center shadow-lg mx-auto mb-6 overflow-hidden">
             <img 
               src="/hawks-logo.jpg" 
-              alt="Hawks Baseball Team Logo" 
+              alt="Hawks Baseball Team Logo - Cooperstown Dreams Park 2025" 
               className="w-full h-full object-contain p-2"
+              loading="lazy"
               onError={(e) => {
                 console.log('Hawks logo failed to load, using fallback');
                 e.target.style.display = 'none';
@@ -173,19 +172,19 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
               <div className="text-hawks-red font-bold leading-tight mb-1">BASEBALL</div>
             </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
             Hawks Baseball
           </h1>
-          <p className="text-hawks-gold font-medium text-sm sm:text-base">
+          <p className="text-gray-600 font-medium text-sm sm:text-base">
             Cooperstown Dreams Park 2025
           </p>
-          <p className="text-white/80 text-xs sm:text-sm mt-2 px-4">
-            {isSignUp ? 'Create your account to share memories' : 'Sign in to view and share photos'}
+          <p className="text-gray-500 text-sm mt-3">
+            Capture and share your team's Cooperstown memories
           </p>
         </div>
 
         {/* Auth Form */}
-        <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 border-2 border-hawks-red">
+        <div className="bg-white rounded-2xl shadow-lg p-8">
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {/* Email Field */}
             <div>
@@ -202,7 +201,8 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
                   onChange={handleInputChange}
                   autoComplete={isSignUp ? "email" : "email"}
                   aria-describedby={validationErrors.email ? "email-error" : undefined}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-hawks-red focus:border-transparent transition-colors text-base ${
+                  aria-invalid={validationErrors.email ? "true" : "false"}
+                  className={`w-full pl-10 pr-4 h-12 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:border-red-500 transition-colors text-base ${
                     validationErrors.email ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder="Enter your email address"
@@ -232,7 +232,8 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
                   onChange={handleInputChange}
                   autoComplete={isSignUp ? "new-password" : "current-password"}
                   aria-describedby={validationErrors.password ? "password-error" : undefined}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-hawks-red focus:border-transparent transition-colors text-base ${
+                  aria-invalid={validationErrors.password ? "true" : "false"}
+                  className={`w-full pl-10 pr-12 h-12 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:border-red-500 transition-colors text-base ${
                     validationErrors.password ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder="Enter your password"
@@ -293,7 +294,8 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
                     onChange={handleInputChange}
                     autoComplete="new-password"
                     aria-describedby={validationErrors.confirmPassword ? "confirm-password-error" : undefined}
-                    className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-hawks-red focus:border-transparent transition-colors text-base ${
+                    aria-invalid={validationErrors.confirmPassword ? "true" : "false"}
+                    className={`w-full pl-10 pr-12 h-12 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:border-red-500 transition-colors text-base ${
                       validationErrors.confirmPassword ? 'border-red-500' : 'border-gray-300'
                     }`}
                     placeholder="Confirm your password"
@@ -319,11 +321,11 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
 
             {/* Forgot Password Link (Sign In Only) */}
             {!isSignUp && (
-              <div className="text-right">
+              <div className="text-right mt-2">
                 <button
                   type="button"
                   onClick={handleForgotPassword}
-                  className="text-sm text-hawks-red hover:text-hawks-red-dark font-medium transition-colors"
+                  className="text-sm text-red-600 hover:text-red-700 font-medium transition-colors"
                 >
                   Forgot password?
                 </button>
@@ -341,7 +343,7 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-hawks-red text-white py-3 px-4 rounded-lg font-semibold hover:bg-hawks-red-dark transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 text-base"
+              className="w-full bg-red-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-red-700 focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 text-base h-12"
             >
               {isLoading ? (
                 <>
@@ -361,7 +363,8 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
               type="button"
               onClick={handleGoogleAuth}
               disabled={isLoading}
-              className="w-full bg-white border-2 border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 text-base"
+              className="w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 text-base h-12"
+              aria-label="Sign in with Google"
             >
               <FaGoogle className="w-4 h-4 text-red-500" aria-hidden="true" />
               <span>Continue with Google</span>
@@ -369,8 +372,8 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
           </form>
 
           {/* Toggle Sign Up/Sign In */}
-          <div className="mt-6 text-center">
-            <p className="text-gray-600 text-sm">
+          <div className="mt-8 text-center">
+            <p className="text-gray-600 text-base">
               {isSignUp ? 'Already have an account?' : "Don't have an account?"}
               <button
                 type="button"
@@ -381,7 +384,7 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
                   setShowPassword(false);
                   setShowConfirmPassword(false);
                 }}
-                className="ml-1 text-hawks-red font-semibold hover:underline transition-colors"
+                className="ml-1 text-red-600 font-semibold hover:text-red-700 hover:underline transition-colors"
               >
                 {isSignUp ? 'Sign In' : 'Sign Up'}
               </button>
@@ -392,9 +395,9 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
         {/* Forgot Password Modal */}
         {showForgotPassword && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full">
+            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 max-w-md w-full">
               <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-hawks-navy mb-2">Reset Password</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Reset Password</h2>
                 <p className="text-gray-600 text-sm">
                   Enter your email address and we'll send you a link to reset your password.
                 </p>
@@ -410,7 +413,7 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
                   <button
                     type="button"
                     onClick={handleBackToSignIn}
-                    className="w-full bg-hawks-red text-white py-3 px-4 rounded-lg font-semibold hover:bg-hawks-red-dark transition-colors"
+                    className="w-full bg-red-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-red-700 focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors h-12"
                   >
                     Back to Sign In
                   </button>
@@ -428,7 +431,7 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
                         id="forgot-email"
                         value={forgotPasswordEmail}
                         onChange={(e) => setForgotPasswordEmail(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hawks-red focus:border-transparent transition-colors text-base"
+                        className="w-full pl-10 pr-4 h-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:border-red-500 transition-colors text-base"
                         placeholder="Enter your email address"
                         disabled={isForgotPasswordLoading}
                         required
@@ -454,7 +457,7 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
                     <button
                       type="submit"
                       disabled={isForgotPasswordLoading}
-                      className="flex-1 bg-hawks-red text-white py-3 px-4 rounded-lg font-semibold hover:bg-hawks-red-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                      className="flex-1 bg-red-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-red-700 focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 h-12"
                     >
                       {isForgotPasswordLoading ? (
                         <>
@@ -473,8 +476,8 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
         )}
 
         {/* Footer */}
-        <div className="text-center mt-6">
-          <p className="text-white/60 text-xs sm:text-sm px-4">
+        <div className="text-center mt-8">
+          <p className="text-gray-500 text-sm">
             Capture the Hawks' Cooperstown memories
           </p>
         </div>
