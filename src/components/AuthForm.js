@@ -15,6 +15,7 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
     password: '',
     confirmPassword: ''
   });
+  const [rememberMe, setRememberMe] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
 
   const handleInputChange = (e) => {
@@ -178,9 +179,6 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
           <p className="text-gray-600 font-medium text-sm sm:text-base">
             Cooperstown Dreams Park 2025
           </p>
-          <p className="text-gray-500 text-sm mt-3">
-            Capture and share your team's Cooperstown memories
-          </p>
         </div>
 
         {/* Auth Form */}
@@ -211,7 +209,7 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
                 />
               </div>
               {validationErrors.email && (
-                <p id="email-error" className="text-red-500 text-sm mt-1" role="alert">
+                <p id="email-error" className="text-red-500 text-sm mt-1 font-medium" role="alert">
                   {validationErrors.email}
                 </p>
               )}
@@ -250,7 +248,7 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
                 </button>
               </div>
               {validationErrors.password && (
-                <p id="password-error" className="text-red-500 text-sm mt-1" role="alert">
+                <p id="password-error" className="text-red-500 text-sm mt-1 font-medium" role="alert">
                   {validationErrors.password}
                 </p>
               )}
@@ -312,16 +310,25 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
                   </button>
                 </div>
                 {validationErrors.confirmPassword && (
-                  <p id="confirm-password-error" className="text-red-500 text-sm mt-1" role="alert">
+                  <p id="confirm-password-error" className="text-red-500 text-sm mt-1 font-medium" role="alert">
                     {validationErrors.confirmPassword}
                   </p>
                 )}
               </div>
             )}
 
-            {/* Forgot Password Link (Sign In Only) */}
+            {/* Remember Me Checkbox (Sign In Only) */}
             {!isSignUp && (
-              <div className="text-right mt-2">
+              <div className="flex items-center justify-between">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="rounded border-gray-300 text-red-600 focus:ring-red-500 h-4 w-4"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">Remember me</span>
+                </label>
                 <button
                   type="button"
                   onClick={handleForgotPassword}
@@ -477,9 +484,14 @@ const AuthForm = ({ onAuth, isLoading, error }) => {
 
         {/* Footer */}
         <div className="text-center mt-8">
-          <p className="text-gray-500 text-sm">
+          <p className="text-gray-500 text-sm mb-4">
             Capture the Hawks' Cooperstown memories
           </p>
+          <div className="flex justify-center space-x-4 text-xs text-gray-400">
+            <a href="#" className="hover:text-gray-600 transition-colors">Privacy Policy</a>
+            <span>•</span>
+            <a href="#" className="hover:text-gray-600 transition-colors">Terms of Service</a>
+          </div>
         </div>
       </div>
     </div>
