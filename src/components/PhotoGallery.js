@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FaDownload, FaHeart, FaTimes, FaChevronLeft, FaChevronRight, FaExpand, FaSpinner, FaFilter, FaPlus, FaCamera, FaVideo } from 'react-icons/fa';
+import { ref, listAll, getDownloadURL, getMetadata } from 'firebase/storage';
 import { useFirebase } from '../hooks/useFirebase';
 import { teamRoster } from '../data/teamRoster';
 import { Link } from 'react-router-dom';
@@ -30,11 +31,11 @@ const PhotoGallery = () => {
     const fetchMedia = async () => {
       try {
         // Fetch photos
-        const photosRef = storage.ref('photos');
-        const photosResult = await photosRef.listAll();
+        const photosRef = ref(storage, 'photos');
+        const photosResult = await listAll(photosRef);
         const photoPromises = photosResult.items.map(async (item) => {
-          const url = await item.getDownloadURL();
-          const metadata = await item.getMetadata();
+          const url = await getDownloadURL(item);
+          const metadata = await getMetadata(item);
           return {
             id: item.name,
             url,
@@ -47,11 +48,11 @@ const PhotoGallery = () => {
         });
         
         // Fetch videos
-        const videosRef = storage.ref('videos');
-        const videosResult = await videosRef.listAll();
+        const videosRef = ref(storage, 'videos');
+        const videosResult = await listAll(videosRef);
         const videoPromises = videosResult.items.map(async (item) => {
-          const url = await item.getDownloadURL();
-          const metadata = await item.getMetadata();
+          const url = await getDownloadURL(item);
+          const metadata = await getMetadata(item);
           return {
             id: item.name,
             url,
