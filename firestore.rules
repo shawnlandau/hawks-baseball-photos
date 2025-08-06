@@ -11,6 +11,20 @@ service cloud.firestore {
       );
     }
     
+    // Parent Messages collection
+    match /parentMessages/{messageId} {
+      allow read: if true; // Anyone can read messages
+      allow create: if request.auth != null; // Only authenticated users can create messages
+      allow update: if request.auth != null && (
+        resource.data.userEmail == request.auth.token.email || // Message author can update
+        request.auth.token.email == 'shawnjl@outlook.com' // Admin can update any message
+      );
+      allow delete: if request.auth != null && (
+        resource.data.userEmail == request.auth.token.email || // Message author can delete
+        request.auth.token.email == 'shawnjl@outlook.com' // Admin can delete any message
+      );
+    }
+    
     // Users collection (for user profiles)
     match /users/{userId} {
       allow read: if request.auth != null;
