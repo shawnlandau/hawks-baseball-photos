@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaImages, FaUpload, FaCalendar, FaComments, FaCamera, FaTrophy, FaHeart, FaUser } from 'react-icons/fa';
+import { FaImages, FaUpload, FaCalendar, FaComments, FaCamera, FaTrophy, FaHeart, FaUser, FaSearch, FaUserTie } from 'react-icons/fa';
 import PlayerCard from '../components/PlayerCard';
 import ParentMessages from '../components/ParentMessages';
 import { teamRoster } from '../data/teamRoster';
@@ -12,6 +12,7 @@ const HomePage = () => {
   const [latestPhotos, setLatestPhotos] = useState([]);
   const [uploadCount, setUploadCount] = useState(0);
   const [gameStats, setGameStats] = useState({ wins: 0, losses: 0, totalGames: 0 });
+  const [searchTerm, setSearchTerm] = useState('');
   const { storage } = useFirebase();
 
   // Fetch latest photos for gallery preview
@@ -75,6 +76,23 @@ const HomePage = () => {
     // Navigate to gallery with player filter
     window.location.href = `/#/gallery?player=${player.id}`;
   };
+
+  const handlePlayerKeyDown = (e, player) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handlePlayerClick(player);
+    }
+  };
+
+  // Filter players based on search term
+  const filteredPlayers = teamRoster.filter(player => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      player.name.toLowerCase().includes(searchLower) ||
+      player.jerseyNumber.toString().includes(searchLower) ||
+      player.position.toLowerCase().includes(searchLower)
+    );
+  });
 
   const tabs = [
     { id: 'memories', label: 'Memory Vault', icon: FaCamera },
@@ -218,35 +236,141 @@ const HomePage = () => {
               <p className="text-white/80 text-base">Tap any player to view their photos</p>
             </div>
 
+            {/* Search/Filter Bar */}
+            <div className="max-w-md mx-auto mb-8">
+              <div className="relative">
+                <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search players by name, number, or position..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 bg-white/15 backdrop-blur-md border border-white/20 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
+                />
+              </div>
+              {searchTerm && (
+                <p className="text-white/80 text-sm mt-2">
+                  Showing {filteredPlayers.length} of {teamRoster.length} players
+                </p>
+              )}
+            </div>
+
             {/* Coaches Row */}
             <div className="flex justify-center mb-8">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-lg">
-                <PlayerCard
-                  player={teamRoster[0]} // Head Coach
-                  onPlayerClick={handlePlayerClick}
-                />
-                <PlayerCard
-                  player={teamRoster[1]} // Assistant Coach
-                  onPlayerClick={handlePlayerClick}
-                />
+                {filteredPlayers.filter(player => player.jerseyNumber === 'HC' || player.jerseyNumber === 'AC').map((player) => (
+                  <div 
+                    key={player.id}
+                    tabIndex={0}
+                    onClick={() => handlePlayerClick(player)}
+                    onKeyDown={(e) => handlePlayerKeyDown(e, player)}
+                    className="group relative transition-all duration-300 cursor-pointer transform hover:-translate-y-2 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 bg-white rounded-2xl shadow-lg hover:shadow-2xl ring-1 ring-slate-300 hover:ring-slate-400"
+                    role="button"
+                    aria-label={`View photos for ${player.name} - ${player.jerseyNumber === 'HC' ? 'Head Coach' : 'Assistant Coach'}`}
+                  >
+                    <div className="p-4">
+                      <div className="flex flex-col items-center text-center space-y-3">
+                        <div className="relative flex-shrink-0">
+                          <div className="w-24 h-24 rounded-full overflow-hidden border-4 aspect-square border-slate-300 bg-gradient-to-br from-slate-600 to-slate-700 shadow-lg flex items-center justify-center group-hover:shadow-xl transition-all duration-300">
+                            {player.photo ? (
+                              <img
+                                src={player.photo}
+                                alt={`${player.name} headshot`}
+                                className="w-full h-full rounded-full object-contain group-hover:scale-110 transition-transform duration-300"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.nextSibling.style.display = 'flex';
+                                }}
+                              />
+                            ) : null}
+                            <div className="w-full h-full flex items-center justify-center rounded-full bg-gradient-to-br from-slate-600 to-slate-700 hidden">
+                              <FaUserTie className="text-white/80 text-xl" />
+                            </div>
+                          </div>
+                          <div className="absolute -top-2 -right-2 bg-slate-600 text-white text-xs font-bold w-7 h-7 rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+                            {player.jerseyNumber}
+                          </div>
+                        </div>
+                        <div className="w-full">
+                          <h3 className="text-sm font-bold leading-tight break-words text-slate-700">
+                            {player.name}
+                          </h3>
+                          <p className="text-xs font-medium text-slate-500">
+                            {player.jerseyNumber === 'HC' ? 'Head Coach' : 'Assistant Coach'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="absolute inset-0 transition-opacity duration-300 rounded-2xl pointer-events-none bg-hawks-red/10 opacity-0 group-hover:opacity-100" />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Players Grid - Responsive */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 max-w-6xl mx-auto">
-              {teamRoster.slice(2).map((player, index) => (
+              {filteredPlayers.filter(player => player.jerseyNumber !== 'HC' && player.jerseyNumber !== 'AC').map((player, index) => (
                 <div 
                   key={player.id} 
                   className="animate-slide-up"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <PlayerCard
-                    player={player}
-                    onPlayerClick={handlePlayerClick}
-                  />
+                  <div 
+                    tabIndex={0}
+                    onClick={() => handlePlayerClick(player)}
+                    onKeyDown={(e) => handlePlayerKeyDown(e, player)}
+                    className="group relative transition-all duration-300 cursor-pointer transform hover:-translate-y-2 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 bg-gradient-to-br from-hawks-navy to-hawks-navy-dark rounded-2xl shadow-lg hover:shadow-2xl text-white"
+                    role="button"
+                    aria-label={`View photos for ${player.name} - Player #${player.jerseyNumber}`}
+                  >
+                    <div className="p-4">
+                      <div className="flex flex-col items-center text-center space-y-3">
+                        <div className="relative flex-shrink-0">
+                          <div className="w-20 h-20 rounded-full overflow-hidden border-4 aspect-square border-hawks-red bg-gradient-to-br from-hawks-red to-hawks-red-dark shadow-lg flex items-center justify-center group-hover:shadow-xl transition-all duration-300">
+                            {player.photo ? (
+                              <img
+                                src={player.photo}
+                                alt={`${player.name} headshot`}
+                                className="w-full h-full rounded-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.nextSibling.style.display = 'flex';
+                                }}
+                              />
+                            ) : null}
+                            <div className="w-full h-full flex items-center justify-center rounded-full bg-gradient-to-br from-hawks-red to-hawks-red-dark hidden">
+                              <FaUser className="text-white/80 text-xl" />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="w-full">
+                          <h3 className="text-sm font-bold leading-tight break-words text-white">
+                            {player.name}
+                          </h3>
+                          <p className="text-xs font-medium text-hawks-gold">
+                            #{player.jerseyNumber}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="absolute inset-0 transition-opacity duration-300 rounded-2xl pointer-events-none bg-white/15 opacity-0 group-hover:opacity-100" />
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
+
+            {/* No Results Message */}
+            {filteredPlayers.length === 0 && searchTerm && (
+              <div className="text-center py-8">
+                <p className="text-white/80 text-lg">No players found matching "{searchTerm}"</p>
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="mt-4 text-white/90 hover:text-white underline"
+                >
+                  Clear search
+                </button>
+              </div>
+            )}
           </div>
         </section>
 
