@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { FaDownload, FaHeart, FaTimes, FaChevronLeft, FaChevronRight, FaExpand, FaSpinner, FaFilter, FaPlus, FaCamera, FaVideo, FaTrash } from 'react-icons/fa';
-import { ref, listAll, getDownloadURL, getMetadata, deleteObject } from 'firebase/storage';
-import { doc, deleteDoc } from 'firebase/firestore';
+import { FaDownload, FaHeart, FaTimes, FaChevronLeft, FaChevronRight, FaExpand, FaSpinner, FaFilter, FaPlus, FaCamera, FaVideo, FaTrash, FaTag } from 'react-icons/fa';
+import { ref, deleteObject } from 'firebase/storage';
+import { doc, deleteDoc, collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { useFirebase } from '../hooks/useFirebase';
 import { teamRoster } from '../data/teamRoster';
 import { Link } from 'react-router-dom';
@@ -37,45 +37,59 @@ const PhotoGallery = () => {
   useEffect(() => {
     const fetchMedia = async () => {
       try {
-        // Fetch photos
-        const photosRef = ref(storage, 'photos');
-        const photosResult = await listAll(photosRef);
-        const photoPromises = photosResult.items.map(async (item) => {
-          const url = await getDownloadURL(item);
-          const metadata = await getMetadata(item);
+        // Fetch photos from Firestore to get metadata including tags
+        const photosQuery = query(collection(db, 'photos'), orderBy('timestamp', 'desc'));
+        const photosSnapshot = await getDocs(photosQuery);
+        const photoList = photosSnapshot.docs.map(doc => {
+          const data = doc.data();
           return {
-            id: item.name,
-            url,
-            name: item.name,
-            size: metadata.size,
-            uploadedAt: metadata.timeCreated,
-            contentType: metadata.contentType,
-            type: 'photo'
+            id: doc.id,
+            url: data.url,
+            name: data.originalName || data.fileName || 'Unknown',
+            size: data.fileSize || 0,
+            uploadedAt: data.timestamp?.toDate?.() || new Date(),
+            contentType: 'image/jpeg',
+            type: 'photo',
+            tags: data.tags || [],
+            caption: data.caption || '',
+            album: data.album || '',
+            uploadedBy: data.uploadedBy || '',
+            userEmail: data.userEmail || '',
+            storagePath: data.storagePath || `photos/${data.fileName}`
           };
         });
         
-        // Fetch videos
-        const videosRef = ref(storage, 'videos');
-        const videosResult = await listAll(videosRef);
-        const videoPromises = videosResult.items.map(async (item) => {
-          const url = await getDownloadURL(item);
-          const metadata = await getMetadata(item);
-          return {
-            id: item.name,
-            url,
-            name: item.name,
-            size: metadata.size,
-            uploadedAt: metadata.timeCreated,
-            contentType: metadata.contentType,
-            type: 'video'
-          };
-        });
+        // Fetch videos from Firestore (if videos collection exists)
+        let videoList = [];
+        try {
+          const videosQuery = query(collection(db, 'videos'), orderBy('timestamp', 'desc'));
+          const videosSnapshot = await getDocs(videosQuery);
+          videoList = videosSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              url: data.url,
+              name: data.originalName || data.fileName || 'Unknown',
+              size: data.fileSize || 0,
+              uploadedAt: data.timestamp?.toDate?.() || new Date(),
+              contentType: 'video/mp4',
+              type: 'video',
+              tags: data.tags || [],
+              caption: data.caption || '',
+              album: data.album || '',
+              uploadedBy: data.uploadedBy || '',
+              userEmail: data.userEmail || '',
+              storagePath: data.storagePath || `videos/${data.fileName}`
+            };
+          });
+        } catch (videoError) {
+          console.log('No videos collection found or error fetching videos:', videoError);
+        }
         
-        const photoList = await Promise.all(photoPromises);
-        const videoList = await Promise.all(videoPromises);
-        
-        setPhotos(photoList.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt)));
-        setVideos(videoList.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt)));
+        console.log('Fetched photos:', photoList);
+        console.log('Fetched videos:', videoList);
+        setPhotos(photoList);
+        setVideos(videoList);
       } catch (error) {
         console.error('Error fetching media:', error);
       } finally {
@@ -83,10 +97,10 @@ const PhotoGallery = () => {
       }
     };
 
-    if (storage) {
+    if (db && storage) {
       fetchMedia();
     }
-  }, [storage]);
+  }, [db, storage]);
 
   const getAllMedia = useCallback(() => {
     const allMedia = [...photos, ...videos];
@@ -103,7 +117,30 @@ const PhotoGallery = () => {
     }
     
     if (selectedPlayer) {
-      media = media.filter(item => item.tags && item.tags.includes(selectedPlayer.name));
+      console.log('Filtering by player:', selectedPlayer.name);
+      console.log('Total media items:', media.length);
+      console.log('Media with tags:', media.filter(item => item.tags && item.tags.length > 0).length);
+      console.log('Available media with tags:', media.filter(item => item.tags && item.tags.length > 0).map(item => ({
+        name: item.name,
+        tags: item.tags
+      })));
+      
+      // Check for exact matches and partial matches
+      const exactMatches = media.filter(item => item.tags && item.tags.includes(selectedPlayer.name));
+      const partialMatches = media.filter(item => item.tags && item.tags.some(tag => tag.includes(selectedPlayer.name) || selectedPlayer.name.includes(tag)));
+      
+      console.log('Exact matches:', exactMatches.length);
+      console.log('Partial matches:', partialMatches.length);
+      
+      // If no exact matches, try partial matches
+      if (exactMatches.length === 0 && partialMatches.length > 0) {
+        console.log('No exact matches found, using partial matches');
+        media = partialMatches;
+      } else {
+        media = exactMatches;
+      }
+      
+      console.log('Final filtered media count:', media.length);
     }
     
     return media;
@@ -341,25 +378,17 @@ const PhotoGallery = () => {
     setDeletingPhotos(prev => new Set([...prev, media.id]));
     
     try {
-      // Delete from Firebase Storage
-      const storageRef = ref(storage, `${media.type}s/${media.name}`);
-      await deleteObject(storageRef);
+      // Delete from Firebase Storage using the storagePath
+      if (media.storagePath) {
+        const storageRef = ref(storage, media.storagePath);
+        await deleteObject(storageRef);
+      }
       
-      // Delete from Firestore if metadata exists
+      // Delete from Firestore
       if (db) {
-        try {
-          // Try to delete from photos collection
-          const photoDocRef = doc(db, 'photos', media.id);
-          await deleteDoc(photoDocRef);
-        } catch (error) {
-          // If not found in photos, try videos collection
-          try {
-            const videoDocRef = doc(db, 'videos', media.id);
-            await deleteDoc(videoDocRef);
-          } catch (videoError) {
-            console.log('No Firestore metadata found for deletion');
-          }
-        }
+        const collectionName = media.type === 'photo' ? 'photos' : 'videos';
+        const docRef = doc(db, collectionName, media.id);
+        await deleteDoc(docRef);
       }
       
       // Remove from local state
@@ -457,6 +486,18 @@ const PhotoGallery = () => {
                   : `${getAllMedia().length} items • Capture the Hawks' Cooperstown memories`
                 }
               </p>
+              
+              {/* Debug Info - Remove this after testing */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="mt-4 p-3 bg-black/20 rounded-lg text-xs text-white/80">
+                  <div>Photos: {photos.length} | Videos: {videos.length}</div>
+                  <div>Photos with tags: {photos.filter(p => p.tags && p.tags.length > 0).length}</div>
+                  <div>Videos with tags: {videos.filter(v => v.tags && v.tags.length > 0).length}</div>
+                  {selectedPlayer && (
+                    <div>Filtering by: {selectedPlayer.name}</div>
+                  )}
+                </div>
+              )}
             </div>
             
             {/* Controls */}
@@ -620,9 +661,14 @@ const PhotoGallery = () => {
               <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <FaHeart className="w-10 h-10 text-white/60" />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-4">No Media Yet</h3>
+              <h3 className="text-2xl font-bold text-white mb-4">
+                {selectedPlayer ? `No Media for ${selectedPlayer.name}` : 'No Media Yet'}
+              </h3>
               <p className="text-white/80 text-lg mb-8 leading-relaxed">
-                Be the first to share photos and videos from the Hawks' Cooperstown journey!
+                {selectedPlayer 
+                  ? `No photos or videos tagged with ${selectedPlayer.name} yet. Upload some media and tag them!`
+                  : 'Be the first to share photos and videos from the Hawks\' Cooperstown journey!'
+                }
               </p>
               <Link
                 to="/upload"
@@ -669,7 +715,7 @@ const PhotoGallery = () => {
                   {/* Overlay */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300">
                     {/* Media Type Badge */}
-                    <div className="absolute top-4 left-4">
+                    <div className="absolute top-4 left-4 flex flex-col space-y-2">
                       {media.type === 'video' ? (
                         <div className="bg-gradient-to-r from-hawks-red to-red-600 text-white text-xs font-bold px-3 py-2 rounded-full shadow-lg flex items-center space-x-2">
                           <FaVideo className="w-3 h-3" />
@@ -679,6 +725,14 @@ const PhotoGallery = () => {
                         <div className="bg-white/95 text-hawks-navy text-xs font-bold px-3 py-2 rounded-full shadow-lg flex items-center space-x-2">
                           <FaCamera className="w-3 h-3" />
                           <span>PHOTO</span>
+                        </div>
+                      )}
+                      
+                      {/* Tags Indicator */}
+                      {media.tags && media.tags.length > 0 && (
+                        <div className="bg-hawks-navy/90 text-white text-xs font-bold px-3 py-2 rounded-full shadow-lg flex items-center space-x-2">
+                          <FaTag className="w-3 h-3" />
+                          <span>{media.tags.length} TAG{media.tags.length !== 1 ? 'S' : ''}</span>
                         </div>
                       )}
                     </div>

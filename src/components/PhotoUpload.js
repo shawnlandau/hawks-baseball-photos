@@ -23,12 +23,12 @@ const PhotoUpload = ({ onUploadSuccess }) => {
   // Hawks team roster for tagging
   const hawksPlayers = [
     // Players
-    'Asher Joslin-White', 'Ashton McCarthy', 'Brian Aguliar', 'Cole Thomas',
+    'Asher Joslin-White', 'Ashton McCarthy', 'Brian Aguilar', 'Cole Thomas',
     'Dylan Johnson', 'Ethan Heiss', 'Hudson Brunton', 'Jared Landau',
-    'Matthew Covington', 'Maxwell Millay', 'Michael Woodruff', 'Reed Kleamovich',
+    'Matthew Covington', 'Maxwell Millay', 'Reed Kleamovich',
     'Thad Clark',
-    // Coach
-    'Mike Woodruff'
+    // Coaches
+    'Mike Woodruff', 'Brian McCarthy'
   ];
 
   const albums = [
