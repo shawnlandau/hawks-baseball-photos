@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { FaCloudUploadAlt, FaTimes, FaCheck, FaExclamationTriangle, FaTag, FaSpinner, FaImage } from 'react-icons/fa';
+import { FaCloudUploadAlt, FaTimes, FaCheck, FaExclamationTriangle, FaTag, FaSpinner } from 'react-icons/fa';
 import { useFirebase } from '../hooks/useFirebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -244,30 +244,7 @@ const PhotoUpload = ({ onUploadSuccess }) => {
           Select Photos
         </h3>
         
-        {/* Large Upload Buttons */}
-        <div className="flex justify-center mb-6">
-          {/* File Selection */}
-          <button
-            onClick={handleFileSelect}
-            className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-hawks-navy to-hawks-navy-dark text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 min-h-[120px] w-full sm:w-auto"
-          >
-            <FaImage className="w-8 h-8 mb-3" />
-            <span className="text-lg font-semibold">Choose Files</span>
-            <span className="text-sm opacity-90">From gallery</span>
-          </button>
-        </div>
-
-        {/* Hidden file inputs */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileInputChange}
-          className="hidden"
-          multiple
-        />
-
-        {/* Drag & Drop Area */}
+        {/* Drag & Drop Area with single CTA (consistent with VideoUpload) */}
         <div
           {...getRootProps()}
           className={`border-2 border-dashed rounded-lg p-6 sm:p-8 text-center transition-all duration-200 ${
@@ -299,6 +276,16 @@ const PhotoUpload = ({ onUploadSuccess }) => {
             <span>Browse Files</span>
           </button>
         </div>
+
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileInputChange}
+          className="hidden"
+          multiple
+        />
       </div>
 
       {/* Selected Files */}
