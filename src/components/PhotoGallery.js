@@ -117,16 +117,79 @@ const PhotoGallery = () => {
     }
     
     if (selectedPlayer) {
-      const normalize = (val) => (val || '').toString().trim().toLowerCase();
-      const selectedName = normalize(selectedPlayer.name);
-
-      const matchesPlayer = (item) => {
-        const tags = Array.isArray(item.tags) ? item.tags : [];
-        const normalizedTags = tags.map(normalize);
-        return normalizedTags.some((tag) => tag === selectedName || tag.includes(selectedName) || selectedName.includes(tag));
+      const normalizeWhitespaceAndCase = (val) => (val || '').toString().toLowerCase().replace(/\s+/g, ' ').trim();
+      const stripPunctuation = (val) => normalizeWhitespaceAndCase(val).replace(/[^a-z0-9 ]+/g, '');
+      const tokenize = (val) => stripPunctuation(val).split(' ').filter(Boolean);
+      const lastNameOf = (val) => {
+        const tokens = tokenize(val);
+        return tokens.length ? tokens[tokens.length - 1] : '';
+      };
+      const firstInitialOf = (val) => {
+        const tokens = tokenize(val);
+        return tokens.length ? tokens[0][0] : '';
+      };
+      const oneEditAway = (a, b) => {
+        // Return true if strings are identical or can be made identical by at most one insert/delete/replace
+        a = stripPunctuation(a);
+        b = stripPunctuation(b);
+        if (a === b) return true;
+        const lenA = a.length, lenB = b.length;
+        if (Math.abs(lenA - lenB) > 1) return false;
+        let i = 0, j = 0, edits = 0;
+        while (i < lenA && j < lenB) {
+          if (a[i] === b[j]) { i++; j++; continue; }
+          edits++;
+          if (edits > 1) return false;
+          if (lenA > lenB) { i++; } // deletion in a
+          else if (lenB > lenA) { j++; } // insertion in a
+          else { i++; j++; } // replacement
+        }
+        // Account for trailing char
+        if (i < lenA || j < lenB) edits++;
+        return edits <= 1;
       };
 
-      media = media.filter(matchesPlayer);
+      const selectedName = normalizeWhitespaceAndCase(selectedPlayer.name);
+      const selectedLast = lastNameOf(selectedName);
+      const selectedInitial = firstInitialOf(selectedName);
+      const playerJersey = (selectedPlayer.jerseyNumber || '').toString();
+
+      const tagMatchesPlayer = (rawTag) => {
+        const tag = normalizeWhitespaceAndCase(rawTag);
+        const tagStripped = stripPunctuation(tag);
+        const tagTokens = tokenize(tag);
+        const tagLast = tagTokens.length ? tagTokens[tagTokens.length - 1] : '';
+        const tagInitial = tagTokens.length ? tagTokens[0][0] : '';
+
+        // Strong matches
+        if (tagStripped === stripPunctuation(selectedName)) return true; // full match ignoring punctuation
+        if (tag.includes(selectedName) || selectedName.includes(tag)) return true; // substring either way
+
+        // Last-name based matches (handles Mike vs Michael, hyphens, etc.)
+        if (tagLast && selectedLast && (tagLast === selectedLast || oneEditAway(tagLast, selectedLast))) {
+          // If both include first names, prefer initial match when available
+          if (tagInitial && selectedInitial) {
+            if (tagInitial === selectedInitial) return true;
+          }
+          // Otherwise accept last-name match
+          return true;
+        }
+
+        // Jersey number tagged (e.g., "#7" or "7")
+        if (playerJersey) {
+          const jerseyPatterns = [playerJersey, `#${playerJersey}`];
+          if (jerseyPatterns.some((p) => tagTokens.includes(p.replace('#','')) || tag.includes(p))) {
+            return true;
+          }
+        }
+
+        return false;
+      };
+
+      media = media.filter((item) => {
+        const tags = Array.isArray(item.tags) ? item.tags : [];
+        return tags.some(tagMatchesPlayer);
+      });
     }
     
     return media;
