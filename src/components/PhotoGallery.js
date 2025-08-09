@@ -117,30 +117,16 @@ const PhotoGallery = () => {
     }
     
     if (selectedPlayer) {
-      console.log('Filtering by player:', selectedPlayer.name);
-      console.log('Total media items:', media.length);
-      console.log('Media with tags:', media.filter(item => item.tags && item.tags.length > 0).length);
-      console.log('Available media with tags:', media.filter(item => item.tags && item.tags.length > 0).map(item => ({
-        name: item.name,
-        tags: item.tags
-      })));
-      
-      // Check for exact matches and partial matches
-      const exactMatches = media.filter(item => item.tags && item.tags.includes(selectedPlayer.name));
-      const partialMatches = media.filter(item => item.tags && item.tags.some(tag => tag.includes(selectedPlayer.name) || selectedPlayer.name.includes(tag)));
-      
-      console.log('Exact matches:', exactMatches.length);
-      console.log('Partial matches:', partialMatches.length);
-      
-      // If no exact matches, try partial matches
-      if (exactMatches.length === 0 && partialMatches.length > 0) {
-        console.log('No exact matches found, using partial matches');
-        media = partialMatches;
-      } else {
-        media = exactMatches;
-      }
-      
-      console.log('Final filtered media count:', media.length);
+      const normalize = (val) => (val || '').toString().trim().toLowerCase();
+      const selectedName = normalize(selectedPlayer.name);
+
+      const matchesPlayer = (item) => {
+        const tags = Array.isArray(item.tags) ? item.tags : [];
+        const normalizedTags = tags.map(normalize);
+        return normalizedTags.some((tag) => tag === selectedName || tag.includes(selectedName) || selectedName.includes(tag));
+      };
+
+      media = media.filter(matchesPlayer);
     }
     
     return media;
@@ -378,17 +364,30 @@ const PhotoGallery = () => {
     setDeletingPhotos(prev => new Set([...prev, media.id]));
     
     try {
-      // Delete from Firebase Storage using the storagePath
+      // Delete from Firebase Storage using the storagePath (best-effort)
+      let storageDeleteError = null;
       if (media.storagePath) {
-        const storageRef = ref(storage, media.storagePath);
-        await deleteObject(storageRef);
+        try {
+          const storageRef = ref(storage, media.storagePath);
+          await deleteObject(storageRef);
+        } catch (err) {
+          storageDeleteError = err;
+          console.warn('Storage delete failed, proceeding to delete Firestore doc:', err);
+        }
+      } else {
+        console.warn('No storagePath on media; skipping storage delete and proceeding to Firestore doc delete.');
       }
-      
-      // Delete from Firestore
+
+      // Always attempt to delete Firestore doc, even if storage delete failed
       if (db) {
         const collectionName = media.type === 'photo' ? 'photos' : 'videos';
         const docRef = doc(db, collectionName, media.id);
-        await deleteDoc(docRef);
+        try {
+          await deleteDoc(docRef);
+        } catch (firestoreErr) {
+          // If Firestore delete fails, surface this to user, as this is the source of truth for the UI
+          throw firestoreErr;
+        }
       }
       
       // Remove from local state
@@ -403,7 +402,11 @@ const PhotoGallery = () => {
         closeLightbox();
       }
       
-      alert('Media deleted successfully!');
+      if (storageDeleteError) {
+        alert('Media removed from gallery. The file could not be removed from storage automatically and may require manual cleanup.');
+      } else {
+        alert('Media deleted successfully!');
+      }
     } catch (error) {
       console.error('Error deleting media:', error);
       alert('Failed to delete media. Please try again.');
@@ -800,7 +803,14 @@ const PhotoGallery = () => {
                 {/* Media Info */}
                 <div className="p-4 bg-white">
                   <p className="text-sm text-gray-700 truncate font-medium" title={media.name}>
-                    {media.name}
+                    {(() => {
+                      // Prefer caption, else a cleaned-up name without uid/timestamp prefixes
+                      const label = (media.caption || '').trim();
+                      if (label) return label;
+                      const raw = (media.name || '').toString();
+                      const cleaned = raw.replace(/^[^_]+_\d{10,14}_\d+_/,'');
+                      return cleaned || 'Untitled';
+                    })()}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
                     {(media.size / 1024 / 1024).toFixed(1)} MB
